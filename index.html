@@ -3,293 +3,868 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>not-book · 基于 Django 的任务管理应用</title>
-  <meta name="description" content="not-book 是一个基于 Django 6.0 构建的任务管理应用。" />
+  <title>not-book · 任务管理系统</title>
+  <meta name="description" content="not-book 是一个基于 Vue 3 + Django 构建的任务管理应用。" />
+  <link rel="stylesheet" href="https://unpkg.com/element-plus/dist/index.css" />
+  <link rel="stylesheet" href="https://unpkg.com/@fortawesome/fontawesome-free@6.2.0/css/all.min.css" />
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <script src="https://unpkg.com/element-plus"></script>
+  <script src="https://unpkg.com/@element-plus/icons-vue"></script>
   <style>
-    :root {
-      --bg: #0f1115;
-      --bg-soft: #161a22;
-      --card: #1b212c;
-      --border: #262d3a;
-      --text: #e6e9ef;
-      --muted: #9aa4b2;
-      --accent: #4f8cff;
-      --accent-2: #8b5cff;
-      --green: #34d399;
-    }
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    html { scroll-behavior: smooth; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
-        "Hiragino Sans GB", "Microsoft YaHei", Roboto, Helvetica, Arial, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      line-height: 1.6;
-      -webkit-font-smoothing: antialiased;
-    }
-    a { color: inherit; text-decoration: none; }
-
+    html, body, #app { height: 100%; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; }
+    body { background: #f5f7fa; color: #1f2329; }
+    
     /* Nav */
-    nav {
+    .navbar {
       position: sticky;
       top: 0;
-      z-index: 10;
+      z-index: 100;
+      background: rgba(255,255,255,0.85);
       backdrop-filter: blur(12px);
-      background: rgba(15, 17, 21, 0.7);
-      border-bottom: 1px solid var(--border);
+      border-bottom: 1px solid #eaeaea;
     }
     .nav-inner {
-      max-width: 1080px;
+      max-width: 1200px;
       margin: 0 auto;
-      padding: 16px 24px;
+      padding: 0 24px;
+      height: 60px;
       display: flex;
       align-items: center;
       justify-content: space-between;
     }
     .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
       font-weight: 700;
       font-size: 18px;
+      color: #303133;
+      cursor: pointer;
+    }
+    .logo-dot {
+      width: 28px; height: 28px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #4f8cff, #8b5cff);
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-size: 14px;
+    }
+    .nav-right { display: flex; align-items: center; gap: 16px; }
+    .nav-link {
+      color: #606266;
+      font-size: 14px;
+      cursor: pointer;
+      transition: color .2s;
+    }
+    .nav-link:hover { color: #4f8cff; }
+    .user-info {
       display: flex;
       align-items: center;
       gap: 8px;
+      cursor: pointer;
     }
-    .logo-dot {
-      width: 22px; height: 22px;
-      border-radius: 7px;
-      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    .user-avatar {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #4f8cff, #8b5cff);
+      color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 600;
     }
-    .nav-links { display: flex; gap: 28px; }
-    .nav-links a { color: var(--muted); font-size: 14px; transition: color .2s; }
-    .nav-links a:hover { color: var(--text); }
-
+    
     /* Hero */
-    header {
-      max-width: 1080px;
-      margin: 0 auto;
-      padding: 96px 24px 64px;
+    .hero {
+      background: linear-gradient(180deg, #e8f0ff 0%, #f5f7fa 100%);
+      padding: 80px 24px 60px;
       text-align: center;
     }
-    .badge {
+    .hero-inner { max-width: 800px; margin: 0 auto; }
+    .hero-badge {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      padding: 6px 14px;
-      border: 1px solid var(--border);
+      padding: 6px 16px;
+      border: 1px solid #d4e0ff;
       border-radius: 999px;
       font-size: 13px;
-      color: var(--muted);
-      margin-bottom: 28px;
-      background: var(--bg-soft);
+      color: #4f8cff;
+      background: #fff;
+      margin-bottom: 24px;
     }
-    .badge .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); }
-    h1 {
-      font-size: clamp(36px, 6vw, 64px);
+    .hero-badge .dot { width: 6px; height: 6px; border-radius: 50%; background: #67c23a; }
+    .hero h1 {
+      font-size: clamp(32px, 5vw, 52px);
       font-weight: 800;
-      letter-spacing: -0.02em;
-      line-height: 1.1;
-      margin-bottom: 20px;
+      line-height: 1.2;
+      margin-bottom: 16px;
+      color: #1f2329;
     }
-    .gradient {
-      background: linear-gradient(120deg, var(--accent), var(--accent-2));
+    .hero h1 .gradient {
+      background: linear-gradient(120deg, #4f8cff, #8b5cff);
       -webkit-background-clip: text;
-      background-clip: text;
       -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
-    .lead {
-      font-size: clamp(16px, 2vw, 20px);
-      color: var(--muted);
-      max-width: 620px;
-      margin: 0 auto 36px;
+    .hero p {
+      font-size: 17px;
+      color: #606266;
+      margin-bottom: 32px;
+      line-height: 1.7;
     }
-    .cta { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 12px 22px;
-      border-radius: 10px;
-      font-weight: 600;
-      font-size: 15px;
-      transition: transform .15s, box-shadow .2s;
-      border: 1px solid transparent;
-    }
-    .btn-primary {
-      background: linear-gradient(120deg, var(--accent), var(--accent-2));
-      color: #fff;
-      box-shadow: 0 8px 24px rgba(79, 140, 255, 0.3);
-    }
-    .btn-primary:hover { transform: translateY(-2px); }
-    .btn-ghost {
-      background: var(--bg-soft);
-      border-color: var(--border);
-      color: var(--text);
-    }
-    .btn-ghost:hover { border-color: var(--accent); }
-
+    .hero-btns { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+    
     /* Sections */
-    section { max-width: 1080px; margin: 0 auto; padding: 64px 24px; }
+    .section {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 60px 24px;
+    }
     .section-title {
       text-align: center;
-      margin-bottom: 48px;
+      margin-bottom: 40px;
     }
     .section-title h2 {
-      font-size: clamp(26px, 4vw, 36px);
+      font-size: 28px;
       font-weight: 700;
-      letter-spacing: -0.01em;
+      color: #303133;
+      margin-bottom: 10px;
     }
-    .section-title p { color: var(--muted); margin-top: 10px; }
-
-    .grid {
+    .section-title p { color: #909399; font-size: 15px; }
+    
+    .feat-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
       gap: 20px;
     }
-    .card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 26px;
-      transition: border-color .2s, transform .2s;
+    .feat-card {
+      background: #fff;
+      border: 1px solid #ebeef5;
+      border-radius: 12px;
+      padding: 28px;
+      transition: all .25s;
     }
-    .card:hover { border-color: var(--accent); transform: translateY(-3px); }
-    .card .icon {
-      width: 42px; height: 42px;
-      border-radius: 10px;
+    .feat-card:hover {
+      border-color: #4f8cff;
+      box-shadow: 0 8px 24px rgba(79,140,255,0.12);
+      transform: translateY(-3px);
+    }
+    .feat-icon {
+      width: 48px; height: 48px;
+      border-radius: 12px;
       display: flex; align-items: center; justify-content: center;
-      font-size: 20px;
-      background: rgba(79, 140, 255, 0.12);
+      font-size: 22px;
       margin-bottom: 16px;
     }
-    .card h3 { font-size: 17px; margin-bottom: 8px; }
-    .card p { color: var(--muted); font-size: 14px; }
-
-    /* Stack */
-    .stack {
+    .feat-icon.blue { background: #e8f3ff; color: #165dff; }
+    .feat-icon.purple { background: #f0e8ff; color: #722ed1; }
+    .feat-icon.green { background: #e8f7ee; color: #00b42a; }
+    .feat-icon.orange { background: #fff7e8; color: #ff7d00; }
+    .feat-icon.red { background: #ffece8; color: #f53f3f; }
+    .feat-icon.cyan { background: #e8fffb; color: #0fc6c2; }
+    .feat-card h3 { font-size: 17px; margin-bottom: 8px; color: #303133; }
+    .feat-card p { color: #909399; font-size: 14px; line-height: 1.6; }
+    
+    /* Tech Stack */
+    .stack-wrap {
       display: flex;
       flex-wrap: wrap;
       gap: 12px;
       justify-content: center;
     }
-    .chip {
-      padding: 10px 18px;
-      border: 1px solid var(--border);
+    .stack-chip {
+      padding: 10px 20px;
+      background: #fff;
+      border: 1px solid #ebeef5;
       border-radius: 999px;
-      background: var(--bg-soft);
       font-size: 14px;
-      color: var(--text);
+      color: #606266;
+      transition: all .2s;
     }
-
+    .stack-chip:hover {
+      border-color: #4f8cff;
+      color: #4f8cff;
+    }
+    
+    /* Task Center */
+    .task-center {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+    .task-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .task-stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    .stat-card {
+      background: #fff;
+      border-radius: 10px;
+      padding: 20px;
+      border: 1px solid #ebeef5;
+    }
+    .stat-label { font-size: 14px; color: #909399; margin-bottom: 8px; }
+    .stat-value { font-size: 28px; font-weight: 700; color: #303133; }
+    .stat-value.todo { color: #e6a23c; }
+    .stat-value.progress { color: #4f8cff; }
+    .stat-value.done { color: #67c23a; }
+    
+    .page-card {
+      background: #fff;
+      border-radius: 10px;
+      padding: 20px;
+      border: 1px solid #ebeef5;
+    }
+    
+    /* Login Modal */
+    .login-page {
+      min-height: calc(100% - 60px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+      background: linear-gradient(180deg, #e8f0ff 0%, #f5f7fa 100%);
+    }
+    .login-box {
+      width: 400px;
+      background: #fff;
+      border-radius: 16px;
+      padding: 40px 36px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+    }
+    .login-logo {
+      width: 56px; height: 56px;
+      margin: 0 auto 16px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #4f8cff, #8b5cff);
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-size: 24px;
+    }
+    .login-title {
+      font-size: 22px;
+      font-weight: 700;
+      text-align: center;
+      color: #303133;
+      margin-bottom: 6px;
+    }
+    .login-subtitle {
+      text-align: center;
+      color: #909399;
+      font-size: 14px;
+      margin-bottom: 28px;
+    }
+    .form-tip {
+      margin-top: 14px;
+      text-align: center;
+      font-size: 13px;
+      color: #c0c4cc;
+    }
+    .form-tip a { color: #4f8cff; cursor: pointer; }
+    
     /* Footer */
-    footer {
-      border-top: 1px solid var(--border);
+    .footer {
+      border-top: 1px solid #eaeaea;
+      background: #fff;
       margin-top: 40px;
     }
     .footer-inner {
-      max-width: 1080px;
+      max-width: 1200px;
       margin: 0 auto;
-      padding: 32px 24px;
+      padding: 28px 24px;
       display: flex;
       justify-content: space-between;
       align-items: center;
       flex-wrap: wrap;
       gap: 12px;
-      color: var(--muted);
+      color: #909399;
       font-size: 14px;
     }
-    .footer-inner a:hover { color: var(--accent); }
+    .footer a { color: #909399; }
+    .footer a:hover { color: #4f8cff; }
+    
+    /* Bitable */
+    .bitable-wrap {
+      border: 1px solid #eaeaea;
+      border-radius: 6px;
+      overflow-x: auto;
+      overflow-y: hidden;
+      background: #fff;
+    }
+    .bitable {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: auto;
+      min-width: 600px;
+      font-size: 14px;
+    }
+    .bitable thead th {
+      background: #f7f8fa;
+      color: #646a73;
+      font-weight: 500;
+      text-align: left;
+      padding: 10px 14px;
+      border-bottom: 1px solid #eaeaea;
+      border-right: 1px solid #eaeaea;
+      white-space: nowrap;
+      font-size: 13px;
+    }
+    .bitable thead th:last-child { border-right: none; }
+    .bitable tbody td {
+      padding: 10px 14px;
+      border-bottom: 1px solid #f0f0f0;
+      border-right: 1px solid #f5f5f5;
+      color: #1f2329;
+      vertical-align: middle;
+      white-space: nowrap;
+    }
+    .bitable tbody td:last-child { border-right: none; }
+    .bitable tbody tr:hover { background: #f5f9ff; }
+    .bitable tbody tr:last-child td { border-bottom: none; }
+    .bitag {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 4px;
+      font-size: 12px;
+      line-height: 1.6;
+    }
+    .bitag-success { background: #e8f7ee; color: #00b42a; }
+    .bitag-warning { background: #fff7e8; color: #ff7d00; }
+    .bitag-info { background: #e8f3ff; color: #165dff; }
+    .priority-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
+    .priority-high { background: #f56c6c; }
+    .priority-medium { background: #e6a23c; }
+    .priority-low { background: #909399; }
+    .empty-wrap { text-align: center; padding: 60px 0; color: #909399; }
+    .filter-bar {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    .filter-bar .el-input { width: 240px; }
+    .filter-bar .el-select { width: 140px; }
+    
+    @media (max-width: 640px) {
+      .task-stats { grid-template-columns: repeat(2, 1fr); }
+      .hero { padding: 50px 20px 40px; }
+      .section { padding: 40px 20px; }
+    }
   </style>
 </head>
 <body>
-  <nav>
-    <div class="nav-inner">
-      <div class="logo"><span class="logo-dot"></span> not-book</div>
-      <div class="nav-links">
-        <a href="#features">功能</a>
-        <a href="#stack">技术栈</a>
-        <a href="admin/index.html">管理后台</a>
-        <a href="https://github.com/hxhming/not-book" target="_blank" rel="noopener">GitHub</a>
+  <div id="app">
+    <div class="navbar">
+      <div class="nav-inner">
+        <div class="logo" @click="goHome">
+          <div class="logo-dot"><i class="fas fa-tasks"></i></div>
+          <span>not-book</span>
+        </div>
+        <div class="nav-right">
+          <template v-if="isLoggedIn">
+            <span class="nav-link" @click="currentPage='tasks'">我的任务</span>
+            <el-dropdown @command="handleCommand">
+              <div class="user-info">
+                <div class="user-avatar">{{ username.charAt(0).toUpperCase() }}</div>
+                <span style="font-size:14px;color:#606266;">{{ username }}<i class="fas fa-caret-down" style="margin-left:4px;font-size:12px;"></i></span>
+              </div>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item command="tasks">我的任务</el-dropdown-item>
+                  <el-dropdown-item command="logout" divided>退出登录</el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
+          </template>
+          <template v-else>
+            <span class="nav-link" @click="currentPage='login'">登录</span>
+            <el-button type="primary" size="small" @click="currentPage='login'">立即体验</el-button>
+          </template>
+        </div>
       </div>
     </div>
-  </nav>
-
-  <header>
-    <div class="badge"><span class="dot"></span> Django 6.0 · Python 3</div>
-    <h1>用 <span class="gradient">not-book</span><br/>管理你的任务</h1>
-    <p class="lead">
-      not-book 是一个基于 Django 构建的任务管理应用，结构清晰、易于扩展，
-      帮助你高效地组织与追踪待办事项。
-    </p>
-    <div class="cta">
-      <a class="btn btn-primary" href="admin/index.html">
-        进入管理后台 →
-      </a>
-      <a class="btn btn-ghost" href="https://github.com/hxhming/not-book" target="_blank" rel="noopener">
-        查看源码
-      </a>
-    </div>
-  </header>
-
-  <section id="features">
-    <div class="section-title">
-      <h2>核心特性</h2>
-      <p>简洁的项目结构，开箱即用</p>
-    </div>
-    <div class="grid">
-      <div class="card">
-        <div class="icon">📋</div>
-        <h3>任务应用</h3>
-        <p>内置 task 应用，提供模型、视图与管理后台的标准化骨架，便于快速迭代。</p>
+    
+    <!-- Home Page -->
+    <div v-if="currentPage==='home'">
+      <div class="hero">
+        <div class="hero-inner">
+          <div class="hero-badge"><span class="dot"></span> Vue 3 + Django · 全栈架构</div>
+          <h1>用 <span class="gradient">not-book</span><br/>轻松管理你的任务</h1>
+          <p>
+            not-book 是一个前后端分离的任务管理系统，前端基于 Vue 3 + Element Plus，后端基于 Django，
+            支持多角色权限管理，让你的工作更高效、更有序。
+          </p>
+          <div class="hero-btns">
+            <el-button type="primary" size="large" @click="currentPage='login'">
+              <i class="fas fa-rocket" style="margin-right:6px;"></i>开始使用
+            </el-button>
+            <el-button size="large" @click="scrollTo('features')">
+              了解更多
+            </el-button>
+          </div>
+        </div>
       </div>
-      <div class="card">
-        <div class="icon">🛠️</div>
-        <h3>Django Admin</h3>
-        <p>开箱即用的管理后台，方便对数据进行增删改查与运维管理。</p>
+      
+      <div id="features" class="section">
+        <div class="section-title">
+          <h2>核心功能</h2>
+          <p>简洁高效，开箱即用</p>
+        </div>
+        <div class="feat-grid">
+          <div class="feat-card">
+            <div class="feat-icon blue"><i class="fas fa-tasks"></i></div>
+            <h3>任务管理</h3>
+            <p>支持任务的创建、编辑、删除，按状态和优先级分类管理，一目了然。</p>
+          </div>
+          <div class="feat-card">
+            <div class="feat-icon purple"><i class="fas fa-user-shield"></i></div>
+            <h3>角色权限</h3>
+            <p>三级角色体系：超级管理员、管理员、普通用户，精细化权限控制。</p>
+          </div>
+          <div class="feat-card">
+            <div class="feat-icon green"><i class="fas fa-chart-pie"></i></div>
+            <h3>数据统计</h3>
+            <p>直观的仪表盘统计面板，实时掌握任务进度与团队工作状态。</p>
+          </div>
+          <div class="feat-card">
+            <div class="feat-icon orange"><i class="fas fa-mobile-alt"></i></div>
+            <h3>响应式设计</h3>
+            <p>完美适配桌面端和移动端，随时随地管理你的任务。</p>
+          </div>
+          <div class="feat-card">
+            <div class="feat-icon red"><i class="fas fa-plug"></i></div>
+            <h3>API 友好</h3>
+            <p>前后端分离架构，RESTful API 设计，易于扩展和集成。</p>
+          </div>
+          <div class="feat-card">
+            <div class="feat-icon cyan"><i class="fas fa-code"></i></div>
+            <h3>开源免费</h3>
+            <p>项目完全开源，代码结构清晰，便于学习和二次开发。</p>
+          </div>
+        </div>
       </div>
-      <div class="card">
-        <div class="icon">🗄️</div>
-        <h3>SQLite 数据库</h3>
-        <p>默认集成 SQLite，零配置即可运行，也支持切换到 PostgreSQL / MySQL。</p>
+      
+      <div id="stack" class="section" style="background:#fafbfc;">
+        <div class="section-title">
+          <h2>技术栈</h2>
+          <p>前后端分离，成熟稳定的技术选型</p>
+        </div>
+        <div class="stack-wrap">
+          <span class="stack-chip"><i class="fab fa-vuejs" style="color:#42b883;margin-right:6px;"></i>Vue 3</span>
+          <span class="stack-chip"><i class="fas fa-cubes" style="color:#409eff;margin-right:6px;"></i>Element Plus</span>
+          <span class="stack-chip"><i class="fab fa-python" style="color:#3776ab;margin-right:6px;"></i>Django 6.0</span>
+          <span class="stack-chip"><i class="fas fa-plug" style="color:#a30000;margin-right:6px;"></i>DRF</span>
+          <span class="stack-chip"><i class="fas fa-database" style="color:#00758f;margin-right:6px;"></i>SQLite / MySQL</span>
+          <span class="stack-chip"><i class="fas fa-key" style="color:#ff7d00;margin-right:6px;"></i>JWT</span>
+          <span class="stack-chip"><i class="fab fa-github" style="color:#333;margin-right:6px;"></i>GitHub Pages</span>
+        </div>
       </div>
-      <div class="card">
-        <div class="icon">⚙️</div>
-        <h3>ASGI / WSGI</h3>
-        <p>同时提供 ASGI 与 WSGI 入口，支持同步与异步部署场景。</p>
-      </div>
-      <div class="card">
-        <div class="icon">🔒</div>
-        <h3>安全中间件</h3>
-        <p>内置 CSRF、点击劫持防护、会话与认证等安全中间件链。</p>
-      </div>
-      <div class="card">
-        <div class="icon">🌱</div>
-        <h3>易于扩展</h3>
-        <p>清晰的应用分层与迁移机制，方便持续添加新功能与数据模型。</p>
+      
+      <div class="footer">
+        <div class="footer-inner">
+          <span>© {{ currentYear }} not-book · 任务管理系统</span>
+          <a href="https://github.com/hxhming/not-book" target="_blank" rel="noopener">
+            <i class="fab fa-github" style="margin-right:6px;"></i>github.com/hxhming/not-book
+          </a>
+        </div>
       </div>
     </div>
-  </section>
-
-  <section id="stack">
-    <div class="section-title">
-      <h2>技术栈</h2>
-      <p>基于成熟稳定的 Python 生态</p>
+    
+    <!-- Login Page -->
+    <div v-if="currentPage==='login'" class="login-page">
+      <div class="login-box">
+        <div class="login-logo"><i class="fas fa-tasks"></i></div>
+        <div class="login-title">欢迎回来</div>
+        <div class="login-subtitle">登录 not-book 管理你的任务</div>
+        <el-form :model="loginForm" label-width="0" @submit.prevent="handleLogin">
+          <el-form-item>
+            <el-input v-model="loginForm.username" placeholder="请输入用户名" size="large" :prefix-icon="User" />
+          </el-form-item>
+          <el-form-item>
+            <el-input v-model="loginForm.password" type="password" placeholder="请输入密码" size="large" :prefix-icon="Lock" show-password @keyup.enter="handleLogin" />
+          </el-form-item>
+          <el-form-item>
+            <el-button type="primary" size="large" style="width:100%;" @click="handleLogin" :loading="loggingIn">
+              登 录
+            </el-button>
+          </el-form-item>
+        </el-form>
+        <div class="form-tip">
+          管理员请前往 <a @click="goAdmin">管理后台</a> 登录
+        </div>
+      </div>
     </div>
-    <div class="stack">
-      <span class="chip">Python 3</span>
-      <span class="chip">Django 6.0</span>
-      <span class="chip">SQLite</span>
-      <span class="chip">ASGI / WSGI</span>
-      <span class="chip">Django Admin</span>
-      <span class="chip">Django ORM</span>
+    
+    <!-- Task Center -->
+    <div v-if="currentPage==='tasks' && isLoggedIn">
+      <div class="task-center">
+        <div class="task-stats">
+          <div class="stat-card">
+            <div class="stat-label">全部任务</div>
+            <div class="stat-value">{{ myTasks.length }}</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">待办</div>
+            <div class="stat-value todo">{{ stats.todo }}</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">进行中</div>
+            <div class="stat-value progress">{{ stats.progress }}</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">已完成</div>
+            <div class="stat-value done">{{ stats.done }}</div>
+          </div>
+        </div>
+        
+        <div class="page-card">
+          <div class="task-header">
+            <h2 style="font-size:18px;font-weight:600;">我的任务</h2>
+            <el-button type="primary" @click="openAddDialog">
+              <i class="fas fa-plus" style="margin-right:6px;"></i>新建任务
+            </el-button>
+          </div>
+          <div class="filter-bar">
+            <el-input v-model="searchQuery" placeholder="搜索标题或描述..." clearable>
+              <template #prefix><i class="fas fa-search" style="color:#c0c4cc;"></i></template>
+            </el-input>
+            <el-select v-model="filterStatus" placeholder="全部状态" clearable>
+              <el-option label="待办" value="todo" />
+              <el-option label="进行中" value="in_progress" />
+              <el-option label="已完成" value="done" />
+            </el-select>
+            <el-select v-model="filterPriority" placeholder="全部优先级" clearable>
+              <el-option label="高" value="high" />
+              <el-option label="中" value="medium" />
+              <el-option label="低" value="low" />
+            </el-select>
+          </div>
+          <div v-if="filteredTasks.length === 0" class="empty-wrap">
+            <i class="fas fa-inbox" style="font-size:48px;margin-bottom:12px;color:#dcdfe6;"></i>
+            <div>暂无任务数据</div>
+          </div>
+          <div v-else class="bitable-wrap">
+            <table class="bitable">
+              <thead>
+                <tr>
+                  <th style="width:60px;">ID</th>
+                  <th style="min-width:200px;">标题</th>
+                  <th style="min-width:280px;">描述</th>
+                  <th style="width:90px;">状态</th>
+                  <th style="width:90px;">优先级</th>
+                  <th style="width:170px;">创建时间</th>
+                  <th style="width:120px;" style="text-align:center;">操作</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="row in filteredTasks" :key="row.id">
+                  <td>{{ row.id }}</td>
+                  <td>{{ row.title }}</td>
+                  <td :title="row.description">{{ row.description }}</td>
+                  <td>
+                    <span class="bitag" :class="{ todo: 'bitag-warning', in_progress: 'bitag-info', done: 'bitag-success' }[row.status]">
+                      {{ row.statusText }}
+                    </span>
+                  </td>
+                  <td>
+                    <span class="priority-dot" :class="'priority-'+row.priority"></span>{{ row.priorityText }}
+                  </td>
+                  <td>{{ row.createdAt }}</td>
+                  <td style="text-align:center;">
+                    <el-button size="small" type="primary" link @click="openEditDialog(row)">编辑</el-button>
+                    <el-button size="small" type="danger" link @click="deleteTask(row)">删除</el-button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
     </div>
-  </section>
-
-  <footer>
-    <div class="footer-inner">
-      <span>© <span id="year"></span> not-book</span>
-      <a href="https://github.com/hxhming/not-book" target="_blank" rel="noopener">github.com/hxhming/not-book</a>
-    </div>
-  </footer>
-
-  <script>document.getElementById("year").textContent = new Date().getFullYear();</script>
+    
+    <!-- Task Dialog -->
+    <el-dialog v-model="dialogVisible" :title="dialogTitle" width="520px">
+      <el-form :model="form" label-width="80px">
+        <el-form-item label="标题">
+          <el-input v-model="form.title" placeholder="请输入任务标题" />
+        </el-form-item>
+        <el-form-item label="描述">
+          <el-input v-model="form.description" type="textarea" :rows="4" placeholder="请输入任务描述" />
+        </el-form-item>
+        <el-form-item label="状态">
+          <el-select v-model="form.status" style="width: 100%;">
+            <el-option label="待办" value="todo" />
+            <el-option label="进行中" value="in_progress" />
+            <el-option label="已完成" value="done" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="优先级">
+          <el-select v-model="form.priority" style="width: 100%;">
+            <el-option label="高" value="high" />
+            <el-option label="中" value="medium" />
+            <el-option label="低" value="low" />
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="dialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="saveTask">确定</el-button>
+      </template>
+    </el-dialog>
+  </div>
+  
+  <script>
+    const { createApp, ref, computed, reactive, onMounted } = Vue;
+    const { User, Lock } = ElementPlusIconsVue;
+    
+    const app = createApp({
+      setup() {
+        const currentPage = ref('home');
+        const currentYear = ref(new Date().getFullYear());
+        const username = ref('');
+        const isLoggedIn = ref(false);
+        const loggingIn = ref(false);
+        const loginForm = reactive({ username: '', password: '' });
+        
+        const searchQuery = ref('');
+        const filterStatus = ref('');
+        const filterPriority = ref('');
+        const dialogVisible = ref(false);
+        const isEdit = ref(false);
+        const form = reactive({ id: null, title: '', description: '', status: 'todo', priority: 'medium' });
+        
+        const statusMap = { todo: '待办', in_progress: '进行中', done: '已完成' };
+        const priorityMap = { high: '高', medium: '中', low: '低' };
+        
+        const tasks = ref([]);
+        
+        function loadTasks() {
+          const data = localStorage.getItem('tasks');
+          if (!data) {
+            const seed = [
+              { id: 1, title: '完成项目需求分析', description: '梳理 not-book 项目的核心功能需求', status: 'done', priority: 'high', createdAt: '2026-07-10 09:30:00' },
+              { id: 2, title: '搭建 Django 项目框架', description: '初始化 Django 6.0 项目，配置 simpleui 后台', status: 'done', priority: 'high', createdAt: '2026-07-11 14:20:00' },
+              { id: 3, title: '开发任务管理模块', description: '实现任务的增删改查功能', status: 'in_progress', priority: 'high', createdAt: '2026-07-12 10:15:00' },
+              { id: 4, title: '编写单元测试', description: '为 task 应用编写测试用例', status: 'todo', priority: 'medium', createdAt: '2026-07-13 16:45:00' },
+              { id: 5, title: '部署到生产环境', description: '将项目部署到线上服务器', status: 'todo', priority: 'medium', createdAt: '2026-07-14 11:00:00' },
+            ];
+            localStorage.setItem('tasks', JSON.stringify(seed));
+            return seed;
+          }
+          return JSON.parse(data);
+        }
+        
+        function saveTasks() {
+          localStorage.setItem('tasks', JSON.stringify(tasks.value));
+        }
+        
+        function loadUsers() {
+          try {
+            const data = localStorage.getItem('users');
+            if (data) return JSON.parse(data);
+          } catch(e) {}
+          return [
+            { id: 1, username: 'hxhming', password: 'hxhming', role: 'superadmin', status: 'active' },
+            { id: 2, username: 'zhangsan', password: 'zs123456', role: 'admin', status: 'active' },
+            { id: 3, username: 'lisi', password: 'ls123456', role: 'admin', status: 'active' },
+            { id: 4, username: 'wangwu', password: 'ww123456', role: 'user', status: 'disabled' },
+            { id: 5, username: 'zhaoliu', password: 'zl123456', role: 'user', status: 'active' },
+          ];
+        }
+        
+        const myTasks = computed(() => tasks.value);
+        
+        function enrich(task) {
+          return { ...task, statusText: statusMap[task.status], priorityText: priorityMap[task.priority] };
+        }
+        
+        const enrichedTasks = computed(() => tasks.value.map(enrich));
+        
+        const filteredTasks = computed(() => {
+          return enrichedTasks.value.filter(t => {
+            if (searchQuery.value) {
+              const q = searchQuery.value.toLowerCase();
+              if (!t.title.toLowerCase().includes(q) && !t.description.toLowerCase().includes(q)) return false;
+            }
+            if (filterStatus.value && t.status !== filterStatus.value) return false;
+            if (filterPriority.value && t.priority !== filterPriority.value) return false;
+            return true;
+          });
+        });
+        
+        const stats = computed(() => ({
+          todo: tasks.value.filter(t => t.status === 'todo').length,
+          progress: tasks.value.filter(t => t.status === 'in_progress').length,
+          done: tasks.value.filter(t => t.status === 'done').length,
+        }));
+        
+        const dialogTitle = computed(() => isEdit.value ? '编辑任务' : '新建任务');
+        
+        function goHome() {
+          currentPage.value = 'home';
+        }
+        
+        function goAdmin() {
+          window.location.href = 'admin/login.html';
+        }
+        
+        function scrollTo(id) {
+          const el = document.getElementById(id);
+          if (el) el.scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function handleLogin() {
+          if (!loginForm.username.trim()) {
+            ElementPlus.ElMessage.warning('请输入用户名');
+            return;
+          }
+          if (!loginForm.password) {
+            ElementPlus.ElMessage.warning('请输入密码');
+            return;
+          }
+          loggingIn.value = true;
+          setTimeout(() => {
+            const users = loadUsers();
+            const matched = users.find(u => u.username === loginForm.username && u.password === loginForm.password);
+            if (matched) {
+              if (matched.status === 'disabled') {
+                ElementPlus.ElMessage.error('账号已被禁用');
+                loggingIn.value = false;
+                return;
+              }
+              if (matched.role === 'superadmin' || matched.role === 'admin') {
+                localStorage.setItem('isLoggedIn', '1');
+                localStorage.setItem('username', matched.username);
+                window.location.href = 'admin/index.html';
+                return;
+              }
+              isLoggedIn.value = true;
+              username.value = matched.username;
+              localStorage.setItem('userLoggedIn', '1');
+              localStorage.setItem('userUsername', matched.username);
+              currentPage.value = 'tasks';
+              ElementPlus.ElMessage.success('登录成功');
+            } else {
+              ElementPlus.ElMessage.error('用户名或密码错误');
+            }
+            loggingIn.value = false;
+          }, 500);
+        }
+        
+        function handleCommand(cmd) {
+          if (cmd === 'tasks') {
+            currentPage.value = 'tasks';
+          } else if (cmd === 'logout') {
+            ElementPlus.ElMessageBox.confirm('确定要退出登录吗？', '提示', {
+              type: 'info',
+              confirmButtonText: '确定',
+              cancelButtonText: '取消',
+            }).then(() => {
+              isLoggedIn.value = false;
+              username.value = '';
+              localStorage.removeItem('userLoggedIn');
+              localStorage.removeItem('userUsername');
+              currentPage.value = 'home';
+              ElementPlus.ElMessage.success('已退出登录');
+            }).catch(() => {});
+          }
+        }
+        
+        function openAddDialog() {
+          isEdit.value = false;
+          form.id = null;
+          form.title = '';
+          form.description = '';
+          form.status = 'todo';
+          form.priority = 'medium';
+          dialogVisible.value = true;
+        }
+        
+        function openEditDialog(row) {
+          isEdit.value = true;
+          form.id = row.id;
+          form.title = row.title;
+          form.description = row.description;
+          form.status = row.status;
+          form.priority = row.priority;
+          dialogVisible.value = true;
+        }
+        
+        function saveTask() {
+          if (!form.title.trim()) {
+            ElementPlus.ElMessage.warning('请输入任务标题');
+            return;
+          }
+          const now = new Date();
+          const ts = now.getFullYear() + '-' +
+            String(now.getMonth()+1).padStart(2,'0') + '-' +
+            String(now.getDate()).padStart(2,'0') + ' ' +
+            String(now.getHours()).padStart(2,'0') + ':' +
+            String(now.getMinutes()).padStart(2,'0') + ':' +
+            String(now.getSeconds()).padStart(2,'0');
+          if (isEdit.value) {
+            const idx = tasks.value.findIndex(t => t.id === form.id);
+            if (idx >= 0) {
+              tasks.value[idx] = { ...tasks.value[idx], title: form.title, description: form.description, status: form.status, priority: form.priority };
+            }
+            ElementPlus.ElMessage.success('修改成功');
+          } else {
+            const maxId = tasks.value.length ? Math.max(...tasks.value.map(t => t.id)) : 0;
+            tasks.value.unshift({
+              id: maxId + 1,
+              title: form.title,
+              description: form.description,
+              status: form.status,
+              priority: form.priority,
+              createdAt: ts,
+            });
+            ElementPlus.ElMessage.success('创建成功');
+          }
+          saveTasks();
+          dialogVisible.value = false;
+        }
+        
+        function deleteTask(row) {
+          ElementPlus.ElMessageBox.confirm('确定要删除任务 "' + row.title + '" 吗？', '提示', {
+            type: 'warning',
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+          }).then(() => {
+            tasks.value = tasks.value.filter(t => t.id !== row.id);
+            saveTasks();
+            ElementPlus.ElMessage.success('删除成功');
+          }).catch(() => {});
+        }
+        
+        onMounted(() => {
+          tasks.value = loadTasks();
+          if (localStorage.getItem('userLoggedIn') === '1') {
+            isLoggedIn.value = true;
+            username.value = localStorage.getItem('userUsername') || '';
+          }
+        });
+        
+        return {
+          currentPage, currentYear, username, isLoggedIn, loggingIn, loginForm,
+          searchQuery, filterStatus, filterPriority,
+          dialogVisible, isEdit, form, dialogTitle,
+          myTasks, filteredTasks, stats,
+          User, Lock,
+          goHome, goAdmin, scrollTo, handleLogin, handleCommand,
+          openAddDialog, openEditDialog, saveTask, deleteTask,
+        };
+      }
+    });
+    app.use(ElementPlus);
+    for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
+      app.component(key, component);
+    }
+    app.mount('#app');
+  </script>
 </body>
 </html>
