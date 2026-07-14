@@ -11,23 +11,86 @@
   <script src="https://unpkg.com/element-plus"></script>
   <script src="https://unpkg.com/@element-plus/icons-vue"></script>
   <style>
+    :root {
+      --primary: #8b5cf6;
+      --primary-light: #c4b5fd;
+      --primary-dark: #6366f1;
+      --primary-gradient: linear-gradient(135deg, #8b5cf6, #6366f1);
+      --bg-primary: #0a0a12;
+      --bg-secondary: #12121f;
+      --bg-tertiary: rgba(18, 18, 31, 0.7);
+      --bg-card: rgba(18, 18, 31, 0.7);
+      --bg-input: rgba(10, 10, 18, 0.6);
+      --bg-hover: rgba(139, 92, 246, 0.08);
+      --bg-active: rgba(139, 92, 246, 0.15);
+      --text-primary: #e4e4ec;
+      --text-secondary: #a0a0b8;
+      --text-tertiary: #6b6b85;
+      --text-muted: #4a4a6a;
+      --border-color: #1e1e30;
+      --border-light: rgba(139, 92, 246, 0.2);
+      --border-active: rgba(139, 92, 246, 0.4);
+    }
+    
+    [data-theme="light"] {
+      --primary: #8b5cf6;
+      --primary-light: #7c3aed;
+      --primary-dark: #6d28d9;
+      --primary-gradient: linear-gradient(135deg, #8b5cf6, #6366f1);
+      --bg-primary: #ffffff;
+      --bg-secondary: #f8f9fa;
+      --bg-tertiary: #ffffff;
+      --bg-card: #ffffff;
+      --bg-input: #ffffff;
+      --bg-hover: rgba(139, 92, 246, 0.06);
+      --bg-active: rgba(139, 92, 246, 0.1);
+      --text-primary: #1f2329;
+      --text-secondary: #4b5563;
+      --text-tertiary: #6b7280;
+      --text-muted: #9ca3af;
+      --border-color: #e5e7eb;
+      --border-light: rgba(139, 92, 246, 0.2);
+      --border-active: rgba(139, 92, 246, 0.4);
+    }
+    
+    [data-theme="pure-black"] {
+      --primary: #8b5cf6;
+      --primary-light: #c4b5fd;
+      --primary-dark: #6366f1;
+      --primary-gradient: linear-gradient(135deg, #8b5cf6, #6366f1);
+      --bg-primary: #000000;
+      --bg-secondary: #0a0a0a;
+      --bg-tertiary: rgba(10, 10, 10, 0.9);
+      --bg-card: rgba(10, 10, 10, 0.9);
+      --bg-input: rgba(0, 0, 0, 0.8);
+      --bg-hover: rgba(139, 92, 246, 0.08);
+      --bg-active: rgba(139, 92, 246, 0.15);
+      --text-primary: #e4e4ec;
+      --text-secondary: #a0a0b8;
+      --text-tertiary: #6b6b85;
+      --text-muted: #3a3a4a;
+      --border-color: #1a1a1a;
+      --border-light: rgba(139, 92, 246, 0.2);
+      --border-active: rgba(139, 92, 246, 0.4);
+    }
+    
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html, body, #app { height: 100%; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; }
-    body { color: #1f2329; }
+    body { color: var(--text-primary); background: var(--bg-primary); }
     
     /* ========== Home Page (Landing) ========== */
     .home-wrap {
       min-height: 100%;
-      background: #0a0a12;
-      color: #e4e4ec;
+      background: var(--bg-primary);
+      color: var(--text-primary);
     }
     .home-nav {
       position: sticky;
       top: 0;
       z-index: 100;
       backdrop-filter: blur(12px);
-      background: rgba(10, 10, 18, 0.8);
-      border-bottom: 1px solid #1e1e30;
+      background: var(--bg-tertiary);
+      border-bottom: 1px solid var(--border-color);
     }
     .home-nav-inner {
       max-width: 1200px;
@@ -1096,6 +1159,438 @@
       color: #c4b5fd;
     }
     
+    /* Character Detail Panel */
+    .char-detail-panel {
+      margin-top: 20px;
+      background: rgba(18,18,31,0.7);
+      border: 1px solid #1e1e30;
+      border-radius: 12px;
+      padding: 24px;
+    }
+    .char-detail-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #1e1e30;
+    }
+    .char-detail-title {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .char-avatar-lg {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 28px;
+      font-weight: 600;
+    }
+    .char-detail-name {
+      font-size: 20px;
+      font-weight: 700;
+      color: #e4e4ec;
+      margin-bottom: 4px;
+    }
+    .char-detail-role {
+      font-size: 13px;
+      color: #6b6b85;
+    }
+    .char-tabs :deep(.el-tabs__item) {
+      color: #6b6b85;
+    }
+    .char-tabs :deep(.el-tabs__item.is-active) {
+      color: #c4b5fd;
+    }
+    .char-tabs :deep(.el-tabs__active-bar) {
+      background: #8b5cf6;
+    }
+    .char-tabs :deep(.el-tabs__nav-wrap::after) {
+      background: #1e1e30;
+    }
+    
+    .char-section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 16px 0;
+      font-size: 14px;
+      font-weight: 600;
+      color: #e4e4ec;
+    }
+    
+    /* Relation List */
+    .relation-list { display: flex; flex-direction: column; gap: 10px; }
+    .relation-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 14px;
+      background: rgba(10,10,18,0.5);
+      border: 1px solid #1e1e30;
+      border-radius: 8px;
+    }
+    .relation-info { flex: 1; }
+    .relation-target {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 6px;
+    }
+    .relation-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: #e4e4ec;
+    }
+    .relation-type {
+      font-size: 11px;
+      padding: 2px 8px;
+      background: rgba(139,92,246,0.15);
+      color: #c4b5fd;
+      border-radius: 4px;
+    }
+    .relation-desc {
+      font-size: 13px;
+      color: #a0a0b8;
+      line-height: 1.5;
+      margin-bottom: 8px;
+    }
+    .relation-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .relation-time {
+      font-size: 11px;
+      color: #4a4a6a;
+    }
+    .source-badge {
+      font-size: 11px;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+    .source-badge.manual {
+      background: rgba(59,130,246,0.15);
+      color: #60a5fa;
+    }
+    .source-badge.ai {
+      background: rgba(139,92,246,0.15);
+      color: #c4b5fd;
+    }
+    .vol-tag {
+      font-size: 11px;
+      padding: 2px 6px;
+      background: rgba(34,197,94,0.15);
+      color: #4ade80;
+      border-radius: 4px;
+    }
+    
+    /* Arc List */
+    .arc-list { display: flex; flex-direction: column; gap: 12px; }
+    .arc-item {
+      display: flex;
+      gap: 12px;
+      padding: 14px;
+      background: rgba(10,10,18,0.5);
+      border: 1px solid #1e1e30;
+      border-radius: 8px;
+    }
+    .arc-stage {
+      flex-shrink: 0;
+      width: 60px;
+      padding: 4px 0;
+      text-align: center;
+      background: linear-gradient(135deg, #8b5cf6, #6366f1);
+      color: #fff;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      height: fit-content;
+    }
+    .arc-content { flex: 1; }
+    .arc-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #e4e4ec;
+      margin-bottom: 6px;
+    }
+    .arc-desc {
+      font-size: 13px;
+      color: #a0a0b8;
+      line-height: 1.5;
+      margin-bottom: 8px;
+    }
+    
+    /* Timeline */
+    .timeline-list { padding-left: 20px; position: relative; }
+    .timeline-list::before {
+      content: '';
+      position: absolute;
+      left: 5px;
+      top: 6px;
+      bottom: 6px;
+      width: 2px;
+      background: #1e1e30;
+    }
+    .timeline-item {
+      position: relative;
+      margin-bottom: 16px;
+      padding: 14px;
+      background: rgba(10,10,18,0.5);
+      border: 1px solid #1e1e30;
+      border-radius: 8px;
+    }
+    .timeline-dot {
+      position: absolute;
+      left: -19px;
+      top: 18px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #8b5cf6;
+      border: 2px solid #12121f;
+    }
+    .timeline-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #e4e4ec;
+      margin-bottom: 6px;
+    }
+    .timeline-desc {
+      font-size: 13px;
+      color: #a0a0b8;
+      line-height: 1.5;
+      margin-bottom: 8px;
+    }
+    
+    /* Memory */
+    .memory-filter { margin-bottom: 12px; }
+    .memory-list { display: flex; flex-direction: column; gap: 10px; }
+    .memory-item {
+      padding: 14px;
+      background: rgba(10,10,18,0.5);
+      border: 1px solid #1e1e30;
+      border-radius: 8px;
+    }
+    .memory-vol {
+      font-size: 12px;
+      color: #4ade80;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .memory-content {
+      font-size: 13px;
+      color: #e4e4ec;
+      line-height: 1.6;
+      margin-bottom: 10px;
+    }
+    
+    /* Attributes */
+    .attr-list { display: flex; flex-direction: column; gap: 12px; }
+    .attr-item {
+      padding: 14px;
+      background: rgba(10,10,18,0.5);
+      border: 1px solid #1e1e30;
+      border-radius: 8px;
+    }
+    .attr-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: #c4b5fd;
+      margin-bottom: 8px;
+    }
+    
+    /* Synopsis */
+    .synopsis-sub-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 16px 0 12px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #e4e4ec;
+    }
+    .vol-chapter-count {
+      font-size: 11px;
+      color: #4a4a6a;
+      margin-top: 2px;
+    }
+    
+    /* Chapter Outline List */
+    .chapter-outline-list {
+      max-height: 320px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+    .chapter-outline-item {
+      display: flex;
+      gap: 12px;
+      padding: 12px;
+      background: rgba(10,10,18,0.5);
+      border: 1px solid #1e1e30;
+      border-radius: 8px;
+      margin-bottom: 8px;
+    }
+    .chapter-num {
+      flex-shrink: 0;
+      width: 56px;
+      font-size: 12px;
+      color: #c4b5fd;
+      font-weight: 600;
+      padding-top: 6px;
+    }
+    .chapter-outline-content {
+      flex: 1;
+    }
+    .chapter-outline-actions {
+      flex-shrink: 0;
+      padding-top: 4px;
+    }
+    
+    /* Foreshadow */
+    .foreshadow-filter {
+      margin-bottom: 14px;
+    }
+    .foreshadow-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .foreshadow-item {
+      display: flex;
+      gap: 12px;
+      padding: 14px;
+      background: rgba(10,10,18,0.5);
+      border: 1px solid #1e1e30;
+      border-radius: 8px;
+    }
+    .foreshadow-item.resolved {
+      opacity: 0.6;
+    }
+    .foreshadow-status {
+      flex-shrink: 0;
+      padding-top: 2px;
+      cursor: pointer;
+      color: #c4b5fd;
+      font-size: 16px;
+    }
+    .foreshadow-item.resolved .foreshadow-status {
+      color: #4ade80;
+    }
+    .foreshadow-info {
+      flex: 1;
+    }
+    .foreshadow-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #e4e4ec;
+      margin-bottom: 6px;
+    }
+    .foreshadow-item.resolved .foreshadow-title {
+      text-decoration: line-through;
+    }
+    .foreshadow-desc {
+      font-size: 13px;
+      color: #a0a0b8;
+      line-height: 1.5;
+      margin-bottom: 8px;
+    }
+    
+    /* Plotline */
+    .plotline-tabs {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+    .plotline-tab {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      background: rgba(18,18,31,0.7);
+      border: 1px solid #1e1e30;
+      border-radius: 8px;
+      font-size: 13px;
+      color: #a0a0b8;
+      cursor: pointer;
+      transition: all .2s;
+    }
+    .plotline-tab:hover {
+      border-color: rgba(139, 92, 246, 0.4);
+    }
+    .plotline-tab.active {
+      background: rgba(139, 92, 246, 0.15);
+      border-color: rgba(139, 92, 246, 0.4);
+      color: #c4b5fd;
+    }
+    .plotline-tab.add {
+      border-style: dashed;
+      color: #c4b5fd;
+    }
+    .plotline-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+    .plotline-nodes {
+      padding-left: 10px;
+      position: relative;
+    }
+    .plotline-node {
+      display: flex;
+      gap: 12px;
+      position: relative;
+      padding-bottom: 16px;
+    }
+    .plotline-node-left {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 16px;
+      flex-shrink: 0;
+    }
+    .plotline-node-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      border: 3px solid #12121f;
+      z-index: 1;
+    }
+    .plotline-node-line {
+      width: 2px;
+      flex: 1;
+      min-height: 20px;
+      margin-top: 4px;
+      opacity: 0.3;
+    }
+    .plotline-node-content {
+      flex: 1;
+      padding: 12px;
+      background: rgba(10,10,18,0.5);
+      border: 1px solid #1e1e30;
+      border-radius: 8px;
+    }
+    .plotline-node-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #e4e4ec;
+      margin-bottom: 6px;
+    }
+    .plotline-node-desc {
+      font-size: 13px;
+      color: #a0a0b8;
+      line-height: 1.5;
+      margin-bottom: 8px;
+    }
+    
     /* World Settings */
     .world-categories {
       display: flex;
@@ -1631,14 +2126,33 @@
                   </el-form-item>
                   <el-form-item label="作品分类">
                     <el-select v-model="novelInfoForm.category" style="width:100%;">
-                      <el-option label="古代言情" value="古代言情" />
-                      <el-option label="现代言情" value="现代言情" />
-                      <el-option label="玄幻奇幻" value="玄幻奇幻" />
-                      <el-option label="都市异能" value="都市异能" />
-                      <el-option label="武侠仙侠" value="武侠仙侠" />
-                      <el-option label="科幻末世" value="科幻末世" />
-                      <el-option label="悬疑推理" value="悬疑推理" />
-                      <el-option label="历史军事" value="历史军事" />
+                      <el-option-group label="女频">
+                        <el-option label="古代言情" value="古代言情" />
+                        <el-option label="现代言情" value="现代言情" />
+                        <el-option label="幻想言情" value="幻想言情" />
+                        <el-option label="青春校园" value="青春校园" />
+                        <el-option label="仙侠奇缘" value="仙侠奇缘" />
+                        <el-option label="悬疑推理" value="悬疑推理" />
+                        <el-option label="玄幻言情" value="玄幻言情" />
+                        <el-option label="浪漫青春" value="浪漫青春" />
+                      </el-option-group>
+                      <el-option-group label="男频">
+                        <el-option label="玄幻奇幻" value="玄幻奇幻" />
+                        <el-option label="武侠仙侠" value="武侠仙侠" />
+                        <el-option label="都市异能" value="都市异能" />
+                        <el-option label="历史军事" value="历史军事" />
+                        <el-option label="科幻末世" value="科幻末世" />
+                        <el-option label="游戏竞技" value="游戏竞技" />
+                        <el-option label="悬疑侦探" value="悬疑侦探" />
+                        <el-option label="灵异鬼怪" value="灵异鬼怪" />
+                      </el-option-group>
+                      <el-option-group label="其他">
+                        <el-option label="二次元" value="二次元" />
+                        <el-option label="轻小说" value="轻小说" />
+                        <el-option label="同人衍生" value="同人衍生" />
+                        <el-option label="现实题材" value="现实题材" />
+                        <el-option label="儿童文学" value="儿童文学" />
+                      </el-option-group>
                     </el-select>
                   </el-form-item>
                   <el-form-item label="一句话简介">
@@ -1661,6 +2175,15 @@
                   </el-form-item>
                 </el-form>
               </div>
+              
+              <div style="margin-top:20px;display:flex;gap:12px;">
+                <el-button type="primary" size="large" @click="editorSection='editor'">
+                  <i class="fas fa-pen-fancy" style="margin-right:8px;"></i>开始写正文
+                </el-button>
+                <el-button size="large" @click="editorSection='synopsis'">
+                  <i class="fas fa-scroll" style="margin-right:8px;"></i>完善大纲
+                </el-button>
+              </div>
             </div>
             
             <!-- 故事大纲 -->
@@ -1674,55 +2197,140 @@
                   <i class="fas fa-wand-magic-sparkles" style="margin-right:6px;"></i>AI 生成大纲
                 </el-button>
               </div>
-              <div class="synopsis-layout">
-                <div class="synopsis-volumes">
-                  <div 
-                    v-for="(vol, idx) in synopsisVolumes" 
-                    :key="idx"
-                    class="synopsis-volume-item"
-                    :class="{active: activeSynopsisVol === idx}"
-                    @click="activeSynopsisVol = idx"
-                  >
-                    <div class="vol-num">第{{ idx + 1 }}卷</div>
-                    <div class="vol-title">{{ vol.title || '未命名' }}</div>
+              <el-tabs v-model="synopsisTab" class="char-tabs">
+                <el-tab-pane label="卷章大纲" name="volumes">
+                  <div class="synopsis-layout">
+                    <div class="synopsis-volumes">
+                      <div 
+                        v-for="(vol, idx) in synopsisVolumes" 
+                        :key="idx"
+                        class="synopsis-volume-item"
+                        :class="{active: activeSynopsisVol === idx}"
+                        @click="activeSynopsisVol = idx"
+                      >
+                        <div class="vol-num">第{{ idx + 1 }}卷</div>
+                        <div class="vol-title">{{ vol.title || '未命名' }}</div>
+                        <div class="vol-chapter-count">{{ (vol.chapters || []).length }} 章</div>
+                      </div>
+                      <div class="synopsis-volume-add" @click="addSynopsisVolume()">
+                        <i class="fas fa-plus"></i> 新增卷
+                      </div>
+                    </div>
+                    <div class="synopsis-detail">
+                      <div v-if="synopsisVolumes[activeSynopsisVol]">
+                        <el-input 
+                          v-model="synopsisVolumes[activeSynopsisVol].title" 
+                          placeholder="卷名，如：孤身赴边"
+                          size="large"
+                          style="margin-bottom:12px;"
+                        />
+                        <el-input 
+                          v-model="synopsisVolumes[activeSynopsisVol].summary" 
+                          type="textarea" 
+                          :rows="4"
+                          placeholder="本卷主要内容概述..."
+                          style="margin-bottom:16px;"
+                        />
+                        
+                        <div class="synopsis-sub-header">
+                          <span>章节列表</span>
+                          <div>
+                            <el-button size="small" @click="aiGenChapters()">
+                              <i class="fas fa-robot" style="margin-right:4px;"></i>AI 生成章节
+                            </el-button>
+                            <el-button size="small" type="primary" @click="addChapterNode()">
+                              <i class="fas fa-plus" style="margin-right:4px;"></i>新增章节
+                            </el-button>
+                          </div>
+                        </div>
+                        
+                        <div class="chapter-outline-list">
+                          <div 
+                            v-for="(ch, cidx) in (synopsisVolumes[activeSynopsisVol].chapters || [])" 
+                            :key="cidx"
+                            class="chapter-outline-item"
+                          >
+                            <div class="chapter-num">第{{ cidx + 1 }}章</div>
+                            <div class="chapter-outline-content">
+                              <el-input v-model="ch.title" placeholder="章节标题" size="small" style="margin-bottom:6px;" />
+                              <el-input v-model="ch.summary" type="textarea" :rows="2" placeholder="本章内容摘要..." size="small" />
+                            </div>
+                            <div class="chapter-outline-actions">
+                              <el-button size="small" type="danger" link @click="removeChapterNode(cidx)">
+                                <i class="fas fa-trash"></i>
+                              </el-button>
+                            </div>
+                          </div>
+                          <div v-if="!(synopsisVolumes[activeSynopsisVol].chapters || []).length" class="empty-state" style="padding:30px 20px;">
+                            <i class="fas fa-file-alt" style="font-size:32px;margin-bottom:8px;"></i>
+                            <div class="text">暂无章节</div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                  <div class="synopsis-volume-add" @click="addSynopsisVolume()">
-                    <i class="fas fa-plus"></i> 新增卷
-                  </div>
-                </div>
-                <div class="synopsis-detail">
-                  <div v-if="synopsisVolumes[activeSynopsisVol]">
-                    <el-input 
-                      v-model="synopsisVolumes[activeSynopsisVol].title" 
-                      placeholder="卷名，如：孤身赴边"
-                      size="large"
-                      style="margin-bottom:16px;"
-                    />
-                    <el-input 
-                      v-model="synopsisVolumes[activeSynopsisVol].summary" 
-                      type="textarea" 
-                      :rows="6"
-                      placeholder="本卷主要内容概述..."
-                      style="margin-bottom:16px;"
-                    />
-                    <div style="font-size:13px;color:#6b6b85;margin-bottom:8px;">关键情节节点</div>
-                    <div 
-                      v-for="(plot, pidx) in synopsisVolumes[activeSynopsisVol].plots" 
-                      :key="pidx"
-                      class="plot-node"
-                    >
-                      <div class="plot-dot"></div>
-                      <el-input v-model="plot.content" placeholder="情节节点描述..." size="small" />
-                      <el-button size="small" type="danger" link @click="removePlotNode(pidx)">
-                        <i class="fas fa-times"></i>
+                </el-tab-pane>
+                
+                <el-tab-pane label="伏笔管理" name="foreshadows">
+                  <div class="synopsis-sub-header" style="margin-bottom:12px;">
+                    <span>伏笔（承诺台账）</span>
+                    <div>
+                      <el-button size="small" @click="aiGenForeshadows()">
+                        <i class="fas fa-robot" style="margin-right:4px;"></i>AI 分析提取
+                      </el-button>
+                      <el-button size="small" type="primary" @click="openAddForeshadow()">
+                        <i class="fas fa-plus" style="margin-right:4px;"></i>手动添加
                       </el-button>
                     </div>
-                    <el-button size="small" @click="addPlotNode()" style="margin-top:8px;">
-                      <i class="fas fa-plus" style="margin-right:4px;"></i>添加情节节点
-                    </el-button>
                   </div>
-                </div>
-              </div>
+                  
+                  <div class="foreshadow-filter">
+                    <el-radio-group v-model="foreshadowFilter" size="small">
+                      <el-radio-button value="all">全部</el-radio-button>
+                      <el-radio-button value="unresolved">未回收</el-radio-button>
+                      <el-radio-button value="resolved">已回收</el-radio-button>
+                    </el-radio-group>
+                  </div>
+                  
+                  <div class="foreshadow-list">
+                    <div 
+                      v-for="(f, idx) in filteredForeshadows" 
+                      :key="idx"
+                      class="foreshadow-item"
+                      :class="{resolved: f.status === 'resolved'}"
+                    >
+                      <div class="foreshadow-status" @click="toggleForeshadowStatus(idx)">
+                        <i :class="f.status === 'resolved' ? 'fas fa-check-circle' : 'far fa-circle'"></i>
+                      </div>
+                      <div class="foreshadow-info">
+                        <div class="foreshadow-title">{{ f.title }}</div>
+                        <div class="foreshadow-desc">{{ f.description }}</div>
+                        <div class="relation-meta">
+                          <span :class="['source-badge', f.source === 'ai' ? 'ai' : 'manual']">
+                            {{ f.source === 'ai' ? 'AI生成' : '手动添加' }}
+                          </span>
+                          <span class="relation-time">{{ f.createdAt }}</span>
+                          <span v-if="f.setupVolume" class="vol-tag">
+                            埋设：第{{ f.setupVolume }}卷{{ f.setupChapter ? ' 第' + f.setupChapter + '章' : '' }}
+                          </span>
+                          <span v-if="f.payoffVolume" class="vol-tag" style="background:rgba(249,115,22,0.15);color:#fb923c;">
+                            回收：第{{ f.payoffVolume }}卷{{ f.payoffChapter ? ' 第' + f.payoffChapter + '章' : '' }}
+                          </span>
+                          <el-tag v-if="f.importance === 'high'" size="small" type="danger" style="margin-left:8px;">重要伏笔</el-tag>
+                        </div>
+                      </div>
+                      <el-button size="small" type="danger" link @click="removeForeshadow(idx)">
+                        <i class="fas fa-trash"></i>
+                      </el-button>
+                    </div>
+                    <div v-if="filteredForeshadows.length === 0" class="empty-state" style="padding:40px 20px;">
+                      <i class="fas fa-flag" style="font-size:36px;margin-bottom:10px;"></i>
+                      <div class="text">暂无伏笔记录</div>
+                      <div style="font-size:12px;color:#4a4a6a;margin-top:4px;">记录你埋下的伏笔，确保每一个 Chekhov's gun 都能按时打响</div>
+                    </div>
+                  </div>
+                </el-tab-pane>
+              </el-tabs>
             </div>
             
             <!-- 上帝视角图 -->
@@ -1769,33 +2377,233 @@
                   <div class="add-text">添加人物</div>
                 </div>
               </div>
-              <div v-if="activeChar" style="margin-top:20px;background:rgba(18,18,31,0.7);border:1px solid #1e1e30;border-radius:12px;padding:24px;">
-                <div style="font-size:16px;font-weight:600;color:#e4e4ec;margin-bottom:16px;">
-                  {{ activeChar.name }} · 人物档案
+              
+              <div v-if="activeChar" class="char-detail-panel">
+                <div class="char-detail-header">
+                  <div class="char-detail-title">
+                    <div class="char-avatar-lg" :style="{background: activeChar.color}">
+                      {{ activeChar.name.charAt(0) }}
+                    </div>
+                    <div>
+                      <div class="char-detail-name">{{ activeChar.name }}</div>
+                      <div class="char-detail-role">{{ activeChar.role }}</div>
+                    </div>
+                  </div>
+                  <el-button size="small" @click="aiGenCharProfile()">
+                    <i class="fas fa-wand-magic-sparkles" style="margin-right:4px;"></i>AI 完善设定
+                  </el-button>
                 </div>
-                <el-form :model="activeChar" label-width="100px">
-                  <el-form-item label="姓名">
-                    <el-input v-model="activeChar.name" />
-                  </el-form-item>
-                  <el-form-item label="身份">
-                    <el-input v-model="activeChar.role" />
-                  </el-form-item>
-                  <el-form-item label="年龄">
-                    <el-input v-model="activeChar.age" />
-                  </el-form-item>
-                  <el-form-item label="性格">
-                    <el-input v-model="activeChar.personality" type="textarea" :rows="2" />
-                  </el-form-item>
-                  <el-form-item label="外貌">
-                    <el-input v-model="activeChar.appearance" type="textarea" :rows="2" />
-                  </el-form-item>
-                  <el-form-item label="背景">
-                    <el-input v-model="activeChar.background" type="textarea" :rows="3" />
-                  </el-form-item>
-                  <el-form-item label="人物弧光">
-                    <el-input v-model="activeChar.arc" type="textarea" :rows="3" placeholder="人物在故事中的成长和变化..." />
-                  </el-form-item>
-                </el-form>
+                
+                <el-tabs v-model="charTab" class="char-tabs">
+                  <el-tab-pane label="基本信息" name="basic">
+                    <el-form :model="activeChar" label-width="100px" style="max-width:600px;">
+                      <el-form-item label="姓名">
+                        <el-input v-model="activeChar.name" />
+                      </el-form-item>
+                      <el-form-item label="身份">
+                        <el-input v-model="activeChar.role" />
+                      </el-form-item>
+                      <el-form-item label="年龄">
+                        <el-input v-model="activeChar.age" />
+                      </el-form-item>
+                      <el-form-item label="性别">
+                        <el-radio-group v-model="activeChar.gender">
+                          <el-radio value="male">男</el-radio>
+                          <el-radio value="female">女</el-radio>
+                          <el-radio value="other">其他</el-radio>
+                        </el-radio-group>
+                      </el-form-item>
+                      <el-form-item label="性格">
+                        <el-input v-model="activeChar.personality" type="textarea" :rows="2" />
+                      </el-form-item>
+                      <el-form-item label="外貌">
+                        <el-input v-model="activeChar.appearance" type="textarea" :rows="2" />
+                      </el-form-item>
+                      <el-form-item label="背景">
+                        <el-input v-model="activeChar.background" type="textarea" :rows="3" />
+                      </el-form-item>
+                      <el-form-item label="口头禅">
+                        <el-input v-model="activeChar.catchphrase" />
+                      </el-form-item>
+                      <el-form-item label="爱好">
+                        <el-input v-model="activeChar.hobbies" />
+                      </el-form-item>
+                      <el-form-item label="弱点">
+                        <el-input v-model="activeChar.weakness" type="textarea" :rows="2" />
+                      </el-form-item>
+                    </el-form>
+                  </el-tab-pane>
+                  
+                  <el-tab-pane label="角色关系" name="relations">
+                    <div class="char-section-header">
+                      <span>角色关系</span>
+                      <div>
+                        <el-button size="small" @click="openAddRelation()">
+                          <i class="fas fa-plus" style="margin-right:4px;"></i>手动添加
+                        </el-button>
+                        <el-button size="small" type="primary" @click="aiGenRelations()">
+                          <i class="fas fa-robot" style="margin-right:4px;"></i>AI 生成
+                        </el-button>
+                      </div>
+                    </div>
+                    <div v-if="activeChar.relations && activeChar.relations.length > 0" class="relation-list">
+                      <div v-for="(rel, idx) in activeChar.relations" :key="idx" class="relation-item">
+                        <div class="relation-info">
+                          <div class="relation-target">
+                            <span class="relation-name">{{ rel.targetName }}</span>
+                            <span class="relation-type">{{ rel.relationType }}</span>
+                          </div>
+                          <div class="relation-desc">{{ rel.description }}</div>
+                          <div class="relation-meta">
+                            <span :class="['source-badge', rel.source === 'ai' ? 'ai' : 'manual']">
+                              {{ rel.source === 'ai' ? 'AI生成' : '手动添加' }}
+                            </span>
+                            <span class="relation-time">{{ rel.createdAt }}</span>
+                          </div>
+                        </div>
+                        <el-button size="small" type="danger" link @click="removeRelation(idx)">
+                          <i class="fas fa-trash"></i>
+                        </el-button>
+                      </div>
+                    </div>
+                    <div v-else class="empty-state" style="padding:30px 20px;">
+                      <i class="fas fa-user-friends" style="font-size:32px;margin-bottom:8px;"></i>
+                      <div class="text">暂无角色关系</div>
+                    </div>
+                  </el-tab-pane>
+                  
+                  <el-tab-pane label="角色弧光" name="arc">
+                    <div class="char-section-header">
+                      <span>角色弧光（成长变化）</span>
+                      <div>
+                        <el-button size="small" @click="openAddArc()">
+                          <i class="fas fa-plus" style="margin-right:4px;"></i>手动添加
+                        </el-button>
+                        <el-button size="small" type="primary" @click="aiGenArc()">
+                          <i class="fas fa-robot" style="margin-right:4px;"></i>AI 生成
+                        </el-button>
+                      </div>
+                    </div>
+                    <div v-if="activeChar.arcs && activeChar.arcs.length > 0" class="arc-list">
+                      <div v-for="(arc, idx) in activeChar.arcs" :key="idx" class="arc-item">
+                        <div class="arc-stage">{{ arc.stage }}</div>
+                        <div class="arc-content">
+                          <div class="arc-title">{{ arc.title }}</div>
+                          <div class="arc-desc">{{ arc.description }}</div>
+                          <div class="relation-meta">
+                            <span :class="['source-badge', arc.source === 'ai' ? 'ai' : 'manual']">
+                              {{ arc.source === 'ai' ? 'AI生成' : '手动添加' }}
+                            </span>
+                            <span class="relation-time">{{ arc.createdAt }}</span>
+                            <span v-if="arc.volume" class="vol-tag">第{{ arc.volume }}卷{{ arc.chapter ? ' 第' + arc.chapter + '章' : '' }}</span>
+                          </div>
+                        </div>
+                        <el-button size="small" type="danger" link @click="removeArc(idx)">
+                          <i class="fas fa-trash"></i>
+                        </el-button>
+                      </div>
+                    </div>
+                    <div v-else class="empty-state" style="padding:30px 20px;">
+                      <i class="fas fa-chart-line" style="font-size:32px;margin-bottom:8px;"></i>
+                      <div class="text">暂无角色弧光记录</div>
+                    </div>
+                  </el-tab-pane>
+                  
+                  <el-tab-pane label="角色经历" name="experiences">
+                    <div class="char-section-header">
+                      <span>角色经历</span>
+                      <div>
+                        <el-button size="small" @click="openAddExperience()">
+                          <i class="fas fa-plus" style="margin-right:4px;"></i>手动添加
+                        </el-button>
+                        <el-button size="small" type="primary" @click="aiGenExperiences()">
+                          <i class="fas fa-robot" style="margin-right:4px;"></i>AI 生成
+                        </el-button>
+                      </div>
+                    </div>
+                    <div v-if="activeChar.experiences && activeChar.experiences.length > 0" class="timeline-list">
+                      <div v-for="(exp, idx) in activeChar.experiences" :key="idx" class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                          <div class="timeline-title">{{ exp.title }}</div>
+                          <div class="timeline-desc">{{ exp.description }}</div>
+                          <div class="relation-meta">
+                            <span :class="['source-badge', exp.source === 'ai' ? 'ai' : 'manual']">
+                              {{ exp.source === 'ai' ? 'AI生成' : '手动添加' }}
+                            </span>
+                            <span class="relation-time">{{ exp.createdAt }}</span>
+                            <span v-if="exp.volume" class="vol-tag">第{{ exp.volume }}卷{{ exp.chapter ? ' 第' + exp.chapter + '章' : '' }}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div v-else class="empty-state" style="padding:30px 20px;">
+                      <i class="fas fa-history" style="font-size:32px;margin-bottom:8px;"></i>
+                      <div class="text">暂无角色经历</div>
+                    </div>
+                  </el-tab-pane>
+                  
+                  <el-tab-pane label="角色记忆" name="memories">
+                    <div class="char-section-header">
+                      <span>角色记忆（按卷章）</span>
+                      <div>
+                        <el-button size="small" @click="openAddMemory()">
+                          <i class="fas fa-plus" style="margin-right:4px;"></i>手动添加
+                        </el-button>
+                        <el-button size="small" type="primary" @click="aiGenMemories()">
+                          <i class="fas fa-robot" style="margin-right:4px;"></i>AI 生成
+                        </el-button>
+                      </div>
+                    </div>
+                    <div class="memory-filter">
+                      <el-select v-model="memoryFilterVolume" placeholder="全部卷" clearable size="small" style="width:120px;">
+                        <el-option v-for="(vol, vidx) in synopsisVolumes" :key="vidx" :label="'第' + (vidx+1) + '卷 ' + vol.title" :value="vidx+1" />
+                      </el-select>
+                    </div>
+                    <div v-if="filteredMemories.length > 0" class="memory-list">
+                      <div v-for="(mem, idx) in filteredMemories" :key="idx" class="memory-item">
+                        <div class="memory-vol">第{{ mem.volume }}卷{{ mem.chapter ? ' 第' + mem.chapter + '章' : '' }}</div>
+                        <div class="memory-content">{{ mem.content }}</div>
+                        <div class="relation-meta">
+                          <span :class="['source-badge', mem.source === 'ai' ? 'ai' : 'manual']">
+                            {{ mem.source === 'ai' ? 'AI生成' : '手动添加' }}
+                          </span>
+                          <span class="relation-time">{{ mem.createdAt }}</span>
+                          <el-tag size="small" :type="mem.importance === 'high' ? 'danger' : mem.importance === 'medium' ? 'warning' : 'info'" style="margin-left:8px;">
+                            {{ mem.importance === 'high' ? '重要' : mem.importance === 'medium' ? '一般' : '次要' }}
+                          </el-tag>
+                        </div>
+                      </div>
+                    </div>
+                    <div v-else class="empty-state" style="padding:30px 20px;">
+                      <i class="fas fa-brain" style="font-size:32px;margin-bottom:8px;"></i>
+                      <div class="text">暂无角色记忆</div>
+                    </div>
+                  </el-tab-pane>
+                  
+                  <el-tab-pane label="角色属性" name="attributes">
+                    <div class="char-section-header">
+                      <span>自定义属性（补充设定）</span>
+                      <el-button size="small" type="primary" @click="openAddAttribute()">
+                        <i class="fas fa-plus" style="margin-right:4px;"></i>新增属性
+                      </el-button>
+                    </div>
+                    <div v-if="activeChar.attributes && activeChar.attributes.length > 0" class="attr-list">
+                      <div v-for="(attr, idx) in activeChar.attributes" :key="idx" class="attr-item">
+                        <div class="attr-name">{{ attr.name }}</div>
+                        <el-input v-model="attr.value" type="textarea" :rows="2" placeholder="属性内容..." />
+                        <el-button size="small" type="danger" link @click="removeAttribute(idx)">
+                          <i class="fas fa-trash"></i>
+                        </el-button>
+                      </div>
+                    </div>
+                    <div v-else class="empty-state" style="padding:30px 20px;">
+                      <i class="fas fa-sliders-h" style="font-size:32px;margin-bottom:8px;"></i>
+                      <div class="text">暂无自定义属性</div>
+                      <div style="font-size:12px;color:#4a4a6a;margin-top:4px;">点击上方按钮添加补充设定，如：年龄、身高、血型等</div>
+                    </div>
+                  </el-tab-pane>
+                </el-tabs>
               </div>
             </div>
             
@@ -1838,29 +2646,93 @@
             <div v-if="editorSection === 'plotlines'">
               <div class="ws-section-header">
                 <div class="ws-section-title"><i class="fas fa-project-diagram" style="margin-right:8px;color:#c4b5fd;"></i>剧情线</div>
-                <el-button size="small" type="primary">
-                  <i class="fas fa-plus" style="margin-right:6px;"></i>新增剧情线
-                </el-button>
+                <div>
+                  <el-select v-model="plotlineFilter" size="small" style="width:120px;margin-right:8px;">
+                    <el-option label="全部剧情线" value="all" />
+                    <el-option v-for="(pl, idx) in plotlines" :key="idx" :label="pl.name" :value="pl.id" />
+                  </el-select>
+                  <el-button size="small" type="primary" @click="openAddPlotline()">
+                    <i class="fas fa-plus" style="margin-right:6px;"></i>新增剧情线
+                  </el-button>
+                </div>
               </div>
-              <div class="empty-state">
-                <i class="fas fa-project-diagram"></i>
-                <div class="text" style="margin-bottom:6px;">暂无剧情线</div>
-                <div style="font-size:12px;color:#4a4a6a;">剧情线用于管理故事中的主线、支线、感情线等多条线索</div>
+              
+              <div class="plotline-tabs">
+                <div 
+                  v-for="(pl, idx) in plotlines" 
+                  :key="idx"
+                  class="plotline-tab"
+                  :class="{active: activePlotline === pl.id}"
+                  @click="activePlotline = pl.id"
+                >
+                  <span class="plotline-dot" :style="{background: pl.color}"></span>
+                  <span class="plotline-name">{{ pl.name }}</span>
+                </div>
+                <div class="plotline-tab add" @click="openAddPlotline()">
+                  <i class="fas fa-plus"></i> 新建
+                </div>
+              </div>
+              
+              <div v-if="activePlotlineObj" style="margin-top:16px;">
+                <div class="synopsis-sub-header">
+                  <span>{{ activePlotlineObj.name }} · 剧情节点</span>
+                  <div>
+                    <el-button size="small" @click="aiGenPlotlineNodes()">
+                      <i class="fas fa-robot" style="margin-right:4px;"></i>AI 生成
+                    </el-button>
+                    <el-button size="small" type="primary" @click="openAddPlotNode()">
+                      <i class="fas fa-plus" style="margin-right:4px;"></i>添加节点
+                    </el-button>
+                  </div>
+                </div>
+                
+                <div class="plotline-nodes">
+                  <div 
+                    v-for="(node, idx) in sortedPlotlineNodes" 
+                    :key="idx"
+                    class="plotline-node"
+                  >
+                    <div class="plotline-node-left">
+                      <div class="plotline-node-dot" :style="{background: activePlotlineObj.color}"></div>
+                      <div v-if="idx < sortedPlotlineNodes.length - 1" class="plotline-node-line" :style="{background: activePlotlineObj.color}"></div>
+                    </div>
+                    <div class="plotline-node-content">
+                      <div class="plotline-node-title">{{ node.title }}</div>
+                      <div class="plotline-node-desc">{{ node.description }}</div>
+                      <div class="relation-meta">
+                        <span :class="['source-badge', node.source === 'ai' ? 'ai' : 'manual']">
+                          {{ node.source === 'ai' ? 'AI生成' : '手动添加' }}
+                        </span>
+                        <span class="relation-time">{{ node.createdAt }}</span>
+                        <span v-if="node.volume" class="vol-tag">
+                          第{{ node.volume }}卷{{ node.chapter ? ' 第' + node.chapter + '章' : '' }}
+                        </span>
+                      </div>
+                    </div>
+                    <el-button size="small" type="danger" link @click="removePlotlineNode(idx)">
+                      <i class="fas fa-trash"></i>
+                    </el-button>
+                  </div>
+                  <div v-if="sortedPlotlineNodes.length === 0" class="empty-state" style="padding:30px 20px;">
+                    <i class="fas fa-stream" style="font-size:32px;margin-bottom:8px;"></i>
+                    <div class="text">暂无剧情节点</div>
+                  </div>
+                </div>
               </div>
             </div>
             
-            <!-- 承诺台账 -->
+            <!-- 承诺台账（已合并到伏笔，这里保留入口但跳转到伏笔） -->
             <div v-if="editorSection === 'promises'">
               <div class="ws-section-header">
                 <div class="ws-section-title"><i class="fas fa-clipboard-check" style="margin-right:8px;color:#c4b5fd;"></i>承诺台账</div>
-                <el-button size="small" type="primary">
-                  <i class="fas fa-plus" style="margin-right:6px;"></i>添加承诺
+                <el-button size="small" type="primary" @click="editorSection='synopsis'; synopsisTab='foreshadows'">
+                  <i class="fas fa-arrow-right" style="margin-right:6px;"></i>前往伏笔管理
                 </el-button>
               </div>
-              <div class="empty-state">
+              <div class="empty-state" style="margin-top:40px;">
                 <i class="fas fa-clipboard-check"></i>
-                <div class="text" style="margin-bottom:6px;">暂无承诺记录</div>
-                <div style="font-size:12px;color:#4a4a6a;">记录你在故事中埋下的伏笔和对读者的承诺，确保一一兑现</div>
+                <div class="text" style="margin-bottom:6px;">承诺台账已整合至「故事大纲-伏笔管理」</div>
+                <div style="font-size:12px;color:#4a4a6a;">点击上方按钮跳转到伏笔管理页面</div>
               </div>
             </div>
             
@@ -2045,6 +2917,9 @@
                 <div class="settings-menu-item" :class="{active: settingsTab==='ai'}" @click="settingsTab='ai'">
                   <i class="fas fa-plug"></i>AI 接入设置
                 </div>
+                <div class="settings-menu-item" :class="{active: settingsTab==='tools'}" @click="settingsTab='tools'">
+                  <i class="fas fa-tools"></i>工具调用
+                </div>
               </div>
               <div class="settings-content">
                 <!-- Profile -->
@@ -2076,10 +2951,10 @@
                   <div class="settings-subtitle">自定义编辑器和界面显示</div>
                   <el-form :model="prefsForm" label-width="100px" style="max-width:460px;">
                     <el-form-item label="主题">
-                      <el-select v-model="prefsForm.theme" style="width:100%;">
-                        <el-option label="深邃紫（默认）" value="purple" />
-                        <el-option label="暗夜蓝" value="blue" />
-                        <el-option label="暗黑绿" value="green" />
+                      <el-select v-model="prefsForm.theme" style="width:100%;" @change="onThemeChange">
+                        <el-option label="深邃紫（默认深色）" value="dark" />
+                        <el-option label="纯白（浅色主题）" value="light" />
+                        <el-option label="纯黑（OLED 深色）" value="pure-black" />
                       </el-select>
                     </el-form-item>
                     <el-form-item label="编辑器字号">
@@ -2146,6 +3021,64 @@
                     <div style="font-size:12px;color:#4a4a6a;">点击上方「添加 API 接入」开始配置</div>
                   </div>
                 </div>
+                
+                <!-- Tool Calling -->
+                <div v-if="settingsTab==='tools'">
+                  <div class="settings-title">工具调用 (Function Calling)</div>
+                  <div class="settings-subtitle">
+                    这些工具会以结构化格式提供给 AI 模型调用，让 AI 可以读取角色设定、世界观、伏笔等数据。
+                    <br><span style="color:#8b5cf6;">格式遵循 OpenAI Function Calling 标准，供 AI 模型自动识别使用。</span>
+                  </div>
+                  
+                  <div style="margin:16px 0;display:flex;gap:8px;flex-wrap:wrap;">
+                    <el-tag v-for="tool in toolDefinitions" :key="tool.function.name" type="info" size="large"
+                      style="cursor:pointer;" @click="selectedTool = tool.function.name">
+                      {{ tool.function.name }}
+                    </el-tag>
+                  </div>
+                  
+                  <div v-if="selectedTool" style="margin-top:16px;">
+                    <div style="background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.2);border-radius:10px;padding:16px;">
+                      <div style="font-weight:600;color:#c4b5fd;margin-bottom:8px;">
+                        <i class="fas fa-code" style="margin-right:6px;"></i>{{ selectedTool }}
+                      </div>
+                      <pre style="background:#0a0a12;border-radius:8px;padding:12px;overflow-x:auto;font-size:12px;color:#a5f3fc;margin:0;">{{ JSON.stringify(getToolDef(selectedTool), null, 2) }}</pre>
+                    </div>
+                  </div>
+                  
+                  <div style="margin-top:20px;">
+                    <div style="font-size:14px;font-weight:600;color:#e4e4ec;margin-bottom:12px;">
+                      <i class="fas fa-list" style="margin-right:6px;color:#c4b5fd;"></i>已注册工具列表
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr;gap:10px;">
+                      <div v-for="tool in toolDefinitions" :key="tool.function.name" 
+                        style="background:rgba(18,18,31,0.7);border:1px solid #1e1e30;border-radius:10px;padding:14px;">
+                        <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+                          <div style="width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,#8b5cf6,#6366f1);display:flex;align-items:center;justify-content:center;color:#fff;">
+                            <i :class="getToolIcon(tool.function.name)"></i>
+                          </div>
+                          <div>
+                            <div style="font-weight:600;color:#e4e4ec;">{{ tool.function.name }}</div>
+                            <div style="font-size:12px;color:#6b6b85;">{{ tool.function.description.slice(0, 50) }}...</div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div style="margin-top:20px;background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.2);border-radius:10px;padding:16px;">
+                    <div style="font-weight:600;color:#6ee7b7;margin-bottom:8px;">
+                      <i class="fas fa-lightbulb" style="margin-right:6px;"></i>使用说明
+                    </div>
+                    <div style="font-size:13px;color:#a7f3d0;line-height:1.7;">
+                      1. 这些工具定义会在调用 AI 时自动附加到请求中<br>
+                      2. AI 模型会根据对话内容自动决定是否调用某个工具<br>
+                      3. 工具返回结果会被注入对话上下文，供 AI 继续生成回复<br>
+                      4. 支持读取类（get_*）和写入类（add_*）操作<br>
+                      5. 写入操作会标记 source 为 'ai'，与手动添加区分
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -2190,14 +3123,33 @@
         </el-form-item>
         <el-form-item label="分类">
           <el-select v-model="novelForm.category" style="width:100%;">
-            <el-option label="古代言情" value="古代言情" />
-            <el-option label="现代言情" value="现代言情" />
-            <el-option label="玄幻奇幻" value="玄幻奇幻" />
-            <el-option label="都市异能" value="都市异能" />
-            <el-option label="武侠仙侠" value="武侠仙侠" />
-            <el-option label="科幻末世" value="科幻末世" />
-            <el-option label="悬疑推理" value="悬疑推理" />
-            <el-option label="历史军事" value="历史军事" />
+            <el-option-group label="女频">
+              <el-option label="古代言情" value="古代言情" />
+              <el-option label="现代言情" value="现代言情" />
+              <el-option label="幻想言情" value="幻想言情" />
+              <el-option label="青春校园" value="青春校园" />
+              <el-option label="仙侠奇缘" value="仙侠奇缘" />
+              <el-option label="悬疑推理" value="悬疑推理" />
+              <el-option label="玄幻言情" value="玄幻言情" />
+              <el-option label="浪漫青春" value="浪漫青春" />
+            </el-option-group>
+            <el-option-group label="男频">
+              <el-option label="玄幻奇幻" value="玄幻奇幻" />
+              <el-option label="武侠仙侠" value="武侠仙侠" />
+              <el-option label="都市异能" value="都市异能" />
+              <el-option label="历史军事" value="历史军事" />
+              <el-option label="科幻末世" value="科幻末世" />
+              <el-option label="游戏竞技" value="游戏竞技" />
+              <el-option label="悬疑侦探" value="悬疑侦探" />
+              <el-option label="灵异鬼怪" value="灵异鬼怪" />
+            </el-option-group>
+            <el-option-group label="其他">
+              <el-option label="二次元" value="二次元" />
+              <el-option label="轻小说" value="轻小说" />
+              <el-option label="同人衍生" value="同人衍生" />
+              <el-option label="现实题材" value="现实题材" />
+              <el-option label="儿童文学" value="儿童文学" />
+            </el-option-group>
           </el-select>
         </el-form-item>
         <el-form-item label="一句话简介">
@@ -2286,6 +3238,211 @@
       </template>
     </el-dialog>
     
+    <!-- Add Relation Dialog -->
+    <el-dialog v-model="addRelationVisible" title="添加角色关系" width="480px">
+      <el-form :model="relationForm" label-width="100px">
+        <el-form-item label="对方角色">
+          <el-select v-model="relationForm.targetId" filterable allow-create @change="onRelationTargetChange" style="width:100%;">
+            <el-option v-for="c in characters.filter(c => c.id !== activeCharacter)" :key="c.id" :label="c.name" :value="c.id" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="关系类型">
+          <el-select v-model="relationForm.relationType" filterable allow-create placeholder="如：父女、挚友、情敌" style="width:100%;">
+            <el-option label="亲人" value="亲人" />
+            <el-option label="朋友" value="朋友" />
+            <el-option label="敌人" value="敌人" />
+            <el-option label="恋人" value="恋人" />
+            <el-option label="师徒" value="师徒" />
+            <el-option label="上下级" value="上下级" />
+            <el-option label="亦敌亦友" value="亦敌亦友" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="关系描述">
+          <el-input v-model="relationForm.description" type="textarea" :rows="3" placeholder="描述两人之间的关系..." />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="addRelationVisible = false">取消</el-button>
+        <el-button type="primary" @click="saveRelation()">确定添加</el-button>
+      </template>
+    </el-dialog>
+    
+    <!-- Add Arc Dialog -->
+    <el-dialog v-model="addArcVisible" title="添加角色弧光" width="480px">
+      <el-form :model="arcForm" label-width="100px">
+        <el-form-item label="阶段">
+          <el-select v-model="arcForm.stage" style="width:100%;">
+            <el-option label="前期" value="前期" />
+            <el-option label="中期" value="中期" />
+            <el-option label="后期" value="后期" />
+            <el-option label="结局" value="结局" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="标题">
+          <el-input v-model="arcForm.title" placeholder="弧光阶段标题" />
+        </el-form-item>
+        <el-form-item label="描述">
+          <el-input v-model="arcForm.description" type="textarea" :rows="3" placeholder="描述这个阶段角色的成长变化..." />
+        </el-form-item>
+        <el-form-item label="关联卷章">
+          <el-select v-model="arcForm.volume" placeholder="选择卷" clearable style="width:45%;margin-right:10px;">
+            <el-option v-for="(v, vidx) in synopsisVolumes" :key="vidx" :label="'第' + (vidx+1) + '卷 ' + v.title" :value="vidx+1" />
+          </el-select>
+          <el-input-number v-model="arcForm.chapter" :min="1" :max="200" controls-position="right" placeholder="章" style="width:45%;" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="addArcVisible = false">取消</el-button>
+        <el-button type="primary" @click="saveArc()">确定添加</el-button>
+      </template>
+    </el-dialog>
+    
+    <!-- Add Experience Dialog -->
+    <el-dialog v-model="addExperienceVisible" title="添加角色经历" width="480px">
+      <el-form :model="expForm" label-width="100px">
+        <el-form-item label="标题">
+          <el-input v-model="expForm.title" placeholder="经历标题" />
+        </el-form-item>
+        <el-form-item label="描述">
+          <el-input v-model="expForm.description" type="textarea" :rows="3" placeholder="详细描述这段经历..." />
+        </el-form-item>
+        <el-form-item label="关联卷章">
+          <el-select v-model="expForm.volume" placeholder="选择卷" clearable style="width:45%;margin-right:10px;">
+            <el-option v-for="(v, vidx) in synopsisVolumes" :key="vidx" :label="'第' + (vidx+1) + '卷 ' + v.title" :value="vidx+1" />
+          </el-select>
+          <el-input-number v-model="expForm.chapter" :min="1" :max="200" controls-position="right" placeholder="章" style="width:45%;" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="addExperienceVisible = false">取消</el-button>
+        <el-button type="primary" @click="saveExperience()">确定添加</el-button>
+      </template>
+    </el-dialog>
+    
+    <!-- Add Memory Dialog -->
+    <el-dialog v-model="addMemoryVisible" title="添加角色记忆" width="480px">
+      <el-form :model="memForm" label-width="100px">
+        <el-form-item label="记忆内容">
+          <el-input v-model="memForm.content" type="textarea" :rows="4" placeholder="记忆的具体内容..." />
+        </el-form-item>
+        <el-form-item label="重要程度">
+          <el-radio-group v-model="memForm.importance">
+            <el-radio value="high">重要</el-radio>
+            <el-radio value="medium">一般</el-radio>
+            <el-radio value="low">次要</el-radio>
+          </el-radio-group>
+        </el-form-item>
+        <el-form-item label="关联卷章">
+          <el-select v-model="memForm.volume" placeholder="选择卷" clearable style="width:45%;margin-right:10px;">
+            <el-option v-for="(v, vidx) in synopsisVolumes" :key="vidx" :label="'第' + (vidx+1) + '卷 ' + v.title" :value="vidx+1" />
+          </el-select>
+          <el-input-number v-model="memForm.chapter" :min="1" :max="200" controls-position="right" placeholder="章" style="width:45%;" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="addMemoryVisible = false">取消</el-button>
+        <el-button type="primary" @click="saveMemory()">确定添加</el-button>
+      </template>
+    </el-dialog>
+    
+    <!-- Add Attribute Dialog -->
+    <el-dialog v-model="addAttrVisible" title="新增自定义属性" width="420px">
+      <el-form :model="attrForm" label-width="100px">
+        <el-form-item label="属性名称">
+          <el-input v-model="attrForm.name" placeholder="如：身高、血型、武器..." />
+        </el-form-item>
+        <el-form-item label="属性内容">
+          <el-input v-model="attrForm.value" type="textarea" :rows="3" placeholder="属性的具体内容..." />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="addAttrVisible = false">取消</el-button>
+        <el-button type="primary" @click="saveAttribute()">确定添加</el-button>
+      </template>
+    </el-dialog>
+    
+    <!-- Add Foreshadow Dialog -->
+    <el-dialog v-model="addForeshadowVisible" title="添加伏笔" width="520px">
+      <el-form :model="foreshadowForm" label-width="100px">
+        <el-form-item label="伏笔标题">
+          <el-input v-model="foreshadowForm.title" placeholder="简要描述这个伏笔" />
+        </el-form-item>
+        <el-form-item label="详细描述">
+          <el-input v-model="foreshadowForm.description" type="textarea" :rows="3" placeholder="伏笔的具体内容..." />
+        </el-form-item>
+        <el-form-item label="重要程度">
+          <el-radio-group v-model="foreshadowForm.importance">
+            <el-radio value="high">重要</el-radio>
+            <el-radio value="medium">一般</el-radio>
+            <el-radio value="low">次要</el-radio>
+          </el-radio-group>
+        </el-form-item>
+        <el-form-item label="埋设位置">
+          <el-select v-model="foreshadowForm.setupVolume" placeholder="卷" clearable style="width:35%;margin-right:10px;">
+            <el-option v-for="(v, vidx) in synopsisVolumes" :key="vidx" :label="'第' + (vidx+1) + '卷 ' + v.title" :value="vidx+1" />
+          </el-select>
+          <el-input-number v-model="foreshadowForm.setupChapter" :min="1" :max="200" controls-position="right" placeholder="章" style="width:35%;" />
+        </el-form-item>
+        <el-form-item label="回收位置">
+          <el-select v-model="foreshadowForm.payoffVolume" placeholder="卷" clearable style="width:35%;margin-right:10px;">
+            <el-option v-for="(v, vidx) in synopsisVolumes" :key="vidx" :label="'第' + (vidx+1) + '卷 ' + v.title" :value="vidx+1" />
+          </el-select>
+          <el-input-number v-model="foreshadowForm.payoffChapter" :min="1" :max="200" controls-position="right" placeholder="章" style="width:35%;" />
+        </el-form-item>
+        <el-form-item label="状态">
+          <el-radio-group v-model="foreshadowForm.status">
+            <el-radio value="unresolved">未回收</el-radio>
+            <el-radio value="resolved">已回收</el-radio>
+          </el-radio-group>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="addForeshadowVisible = false">取消</el-button>
+        <el-button type="primary" @click="saveForeshadow()">确定添加</el-button>
+      </template>
+    </el-dialog>
+    
+    <!-- Add Plotline Dialog -->
+    <el-dialog v-model="addPlotlineVisible" title="新建剧情线" width="460px">
+      <el-form :model="plotlineForm" label-width="100px">
+        <el-form-item label="剧情线名称">
+          <el-input v-model="plotlineForm.name" placeholder="如：主线、感情线、复仇线..." />
+        </el-form-item>
+        <el-form-item label="颜色标记">
+          <el-color-picker v-model="plotlineForm.color" />
+        </el-form-item>
+        <el-form-item label="描述">
+          <el-input v-model="plotlineForm.description" type="textarea" :rows="2" placeholder="简要描述这条剧情线..." />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="addPlotlineVisible = false">取消</el-button>
+        <el-button type="primary" @click="savePlotline()">创建</el-button>
+      </template>
+    </el-dialog>
+    
+    <!-- Add Plotline Node Dialog -->
+    <el-dialog v-model="addPlotNodeVisible" title="添加剧情节点" width="480px">
+      <el-form :model="plotNodeForm" label-width="100px">
+        <el-form-item label="节点标题">
+          <el-input v-model="plotNodeForm.title" placeholder="剧情节点标题" />
+        </el-form-item>
+        <el-form-item label="详细描述">
+          <el-input v-model="plotNodeForm.description" type="textarea" :rows="3" placeholder="这个节点发生了什么..." />
+        </el-form-item>
+        <el-form-item label="关联卷章">
+          <el-select v-model="plotNodeForm.volume" placeholder="选择卷" clearable style="width:40%;margin-right:10px;">
+            <el-option v-for="(v, vidx) in synopsisVolumes" :key="vidx" :label="'第' + (vidx+1) + '卷 ' + v.title" :value="vidx+1" />
+          </el-select>
+          <el-input-number v-model="plotNodeForm.chapter" :min="1" :max="200" controls-position="right" placeholder="章" style="width:40%;" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="addPlotNodeVisible = false">取消</el-button>
+        <el-button type="primary" @click="savePlotNode()">确定添加</el-button>
+      </template>
+    </el-dialog>
+    
     <!-- Task Dialog -->
     <el-dialog v-model="taskDialogVisible" :title="taskDialogTitle" width="460px">
       <el-form :model="taskForm" label-width="80px">
@@ -2344,11 +3501,46 @@
           bio: '',
         });
         const prefsForm = reactive({
-          theme: 'purple',
+          theme: 'dark',
           fontSize: '15px',
           autoSave: true,
           showAiAssistant: true,
         });
+        
+        const selectedTool = ref(null);
+        
+        function getToolDef(name) {
+          const t = toolDefinitions.value.find(t => t.function.name === name);
+          return t ? t.function : null;
+        }
+        
+        function getToolIcon(name) {
+          const iconMap = {
+            'list_characters': 'fas fa-users',
+            'get_character_info': 'fas fa-user',
+            'get_world_setting': 'fas fa-globe',
+            'get_synopsis': 'fas fa-scroll',
+            'get_foreshadows': 'fas fa-seedling',
+            'get_plotlines': 'fas fa-project-diagram',
+            'get_chapter_content': 'fas fa-file-alt',
+            'add_character_memory': 'fas fa-plus-circle',
+            'add_foreshadow': 'fas fa-plus',
+          };
+          return iconMap[name] || 'fas fa-cog';
+        }
+        
+        function onThemeChange(val) {
+          applyTheme(val);
+        }
+        
+        function applyTheme(theme) {
+          if (theme === 'dark') {
+            document.documentElement.removeAttribute('data-theme');
+          } else {
+            document.documentElement.setAttribute('data-theme', theme);
+          }
+          localStorage.setItem('nb_theme', theme);
+        }
         
         // Novels
         const novels = ref([]);
@@ -2369,6 +3561,391 @@
         const aiCallCount = ref(0);
         const currentAiModel = ref(null);
         
+        // ==================== Tool Calling System ====================
+        // 工具定义 - 写给AI看的格式，描述每个工具的用途和参数
+        const toolDefinitions = ref([
+          {
+            type: 'function',
+            function: {
+              name: 'get_character_info',
+              description: '获取指定角色的详细信息，包括基本信息、性格、背景、关系、弧光、经历、记忆、属性等所有设定。用于在写作前了解角色，确保人设一致。',
+              parameters: {
+                type: 'object',
+                properties: {
+                  character_id: { type: 'integer', description: '角色ID' },
+                  character_name: { type: 'string', description: '角色名称（可模糊匹配）' },
+                  info_type: {
+                    type: 'string',
+                    enum: ['all', 'basic', 'relations', 'arcs', 'experiences', 'memories', 'attributes'],
+                    default: 'all',
+                    description: '需要获取的信息类型：all全部，basic基本信息，relations关系，arcs弧光，experiences经历，memories记忆，attributes自定义属性'
+                  },
+                  volume: { type: 'integer', description: '过滤：指定卷数（仅对记忆、经历有效）' },
+                  chapter: { type: 'integer', description: '过滤：指定章节（仅对记忆、经历有效）' }
+                },
+                required: []
+              }
+            }
+          },
+          {
+            type: 'function',
+            function: {
+              name: 'list_characters',
+              description: '列出小说中所有角色的简要列表，包括ID、姓名、身份。用于快速了解有哪些角色。',
+              parameters: {
+                type: 'object',
+                properties: {
+                  role_filter: {
+                    type: 'string',
+                    enum: ['all', 'main', 'supporting', 'antagonist'],
+                    default: 'all',
+                    description: '按角色类型过滤'
+                  }
+                }
+              }
+            }
+          },
+          {
+            type: 'function',
+            function: {
+              name: 'get_world_setting',
+              description: '获取世界观设定的内容，包括地理、历史、文化、力量体系、政治、经济、宗教、科技等分类的设定详情。',
+              parameters: {
+                type: 'object',
+                properties: {
+                  category: {
+                    type: 'string',
+                    enum: ['all', 'geography', 'history', 'culture', 'power', 'politics', 'economy', 'religion', 'technology'],
+                    default: 'all',
+                    description: '设定分类：all全部，geography地理环境，history历史背景，culture文化风俗，power力量体系，politics政治势力，economy经济体系，religion宗教信仰，technology科技水平'
+                  }
+                }
+              }
+            }
+          },
+          {
+            type: 'function',
+            function: {
+              name: 'get_synopsis',
+              description: '获取故事大纲，包括分卷概述和章节大纲。用于了解整体故事脉络和当前卷章进度。',
+              parameters: {
+                type: 'object',
+                properties: {
+                  volume: { type: 'integer', description: '指定卷数（从1开始），不传则返回所有卷' },
+                  include_chapters: { type: 'boolean', default: true, description: '是否包含章节详情' }
+                }
+              }
+            }
+          },
+          {
+            type: 'function',
+            function: {
+              name: 'get_foreshadows',
+              description: '获取伏笔/承诺台账列表，包括已埋设未回收的和已回收的伏笔。用于检查伏笔是否遗漏，确保前后呼应。',
+              parameters: {
+                type: 'object',
+                properties: {
+                  status: {
+                    type: 'string',
+                    enum: ['all', 'unresolved', 'resolved'],
+                    default: 'unresolved',
+                    description: '伏笔状态：all全部，unresolved未回收，resolved已回收'
+                  },
+                  importance: {
+                    type: 'string',
+                    enum: ['all', 'high', 'medium', 'low'],
+                    default: 'all',
+                    description: '重要程度过滤'
+                  }
+                }
+              }
+            }
+          },
+          {
+            type: 'function',
+            function: {
+              name: 'get_plotlines',
+              description: '获取剧情线列表及各剧情线的节点，按卷章排序。用于了解多条剧情线的进展情况。',
+              parameters: {
+                type: 'object',
+                properties: {
+                  plotline_id: { type: 'integer', description: '指定剧情线ID，不传则返回所有剧情线' },
+                  up_to_volume: { type: 'integer', description: '只返回到指定卷为止的节点' }
+                }
+              }
+            }
+          },
+          {
+            type: 'function',
+            function: {
+              name: 'get_chapter_content',
+              description: '获取指定章节的正文内容。用于续写前回顾前文，或检查上下文一致性。',
+              parameters: {
+                type: 'object',
+                properties: {
+                  chapter_id: { type: 'integer', description: '章节ID' },
+                  volume: { type: 'integer', description: '卷数（和chapter_num配合使用）' },
+                  chapter_num: { type: 'integer', description: '章节序号（从1开始）' }
+                },
+                required: []
+              }
+            }
+          },
+          {
+            type: 'function',
+            function: {
+              name: 'add_character_memory',
+              description: '为指定角色添加一条记忆记录。当剧情中发生了角色会记住的重要事件时调用。',
+              parameters: {
+                type: 'object',
+                properties: {
+                  character_id: { type: 'integer', description: '角色ID' },
+                  content: { type: 'string', description: '记忆内容描述' },
+                  volume: { type: 'integer', description: '发生在第几卷' },
+                  chapter: { type: 'integer', description: '发生在第几章' },
+                  importance: {
+                    type: 'string',
+                    enum: ['high', 'medium', 'low'],
+                    default: 'medium',
+                    description: '记忆重要程度'
+                  }
+                },
+                required: ['character_id', 'content']
+              }
+            }
+          },
+          {
+            type: 'function',
+            function: {
+              name: 'add_foreshadow',
+              description: '新增一个伏笔/承诺记录。当你在文中埋下了伏笔或对读者做出了承诺时调用，便于后续回收。',
+              parameters: {
+                type: 'object',
+                properties: {
+                  title: { type: 'string', description: '伏笔标题，简要描述' },
+                  description: { type: 'string', description: '伏笔的详细内容' },
+                  setup_volume: { type: 'integer', description: '埋设位置：第几卷' },
+                  setup_chapter: { type: 'integer', description: '埋设位置：第几章' },
+                  importance: {
+                    type: 'string',
+                    enum: ['high', 'medium', 'low'],
+                    default: 'medium',
+                    description: '重要程度'
+                  }
+                },
+                required: ['title', 'description']
+              }
+            }
+          },
+        ]);
+        
+        // 工具执行函数 - 实际执行工具调用
+        function executeTool(name, args) {
+          console.log('[Tool Call]', name, args);
+          
+          switch (name) {
+            case 'list_characters':
+              return {
+                success: true,
+                data: characters.value.map(c => ({
+                  id: c.id,
+                  name: c.name,
+                  role: c.role,
+                  gender: c.gender,
+                }))
+              };
+              
+            case 'get_character_info': {
+              let char = null;
+              if (args.character_id) {
+                char = characters.value.find(c => c.id === args.character_id);
+              } else if (args.character_name) {
+                char = characters.value.find(c => c.name.includes(args.character_name));
+              }
+              if (!char) {
+                return { success: false, error: '未找到该角色' };
+              }
+              
+              const infoType = args.info_type || 'all';
+              const result = {
+                id: char.id,
+                name: char.name,
+                role: char.role,
+              };
+              
+              if (infoType === 'all' || infoType === 'basic') {
+                result.basic = {
+                  age: char.age,
+                  gender: char.gender,
+                  personality: char.personality,
+                  appearance: char.appearance,
+                  background: char.background,
+                  catchphrase: char.catchphrase,
+                  hobbies: char.hobbies,
+                  weakness: char.weakness,
+                  attributes: char.attributes || [],
+                };
+              }
+              if (infoType === 'all' || infoType === 'relations') {
+                result.relations = char.relations || [];
+              }
+              if (infoType === 'all' || infoType === 'arcs') {
+                result.arcs = char.arcs || [];
+              }
+              if (infoType === 'all' || infoType === 'experiences') {
+                let exps = char.experiences || [];
+                if (args.volume) exps = exps.filter(e => e.volume === args.volume);
+                if (args.chapter) exps = exps.filter(e => e.chapter === args.chapter);
+                result.experiences = exps;
+              }
+              if (infoType === 'all' || infoType === 'memories') {
+                let mems = char.memories || [];
+                if (args.volume) mems = mems.filter(m => m.volume === args.volume);
+                if (args.chapter) mems = mems.filter(m => m.chapter === args.chapter);
+                result.memories = mems;
+              }
+              if (infoType === 'all' || infoType === 'attributes') {
+                result.attributes = char.attributes || [];
+              }
+              
+              return { success: true, data: result };
+            }
+            
+            case 'get_world_setting': {
+              const cat = args.category || 'all';
+              const cats = worldCategories.value;
+              let data = {};
+              if (cat === 'all') {
+                cats.forEach(c => { data[c.id] = c.content; });
+              } else {
+                const found = cats.find(c => c.id === cat);
+                data = found ? { [cat]: found.content } : {};
+              }
+              return { success: true, data };
+            }
+            
+            case 'get_synopsis': {
+              const vols = synopsisVolumes.value;
+              const data = {
+                total_volumes: vols.length,
+                volumes: []
+              };
+              vols.forEach((v, i) => {
+                const volNum = i + 1;
+                if (args.volume && volNum !== args.volume) return;
+                const volData = {
+                  volume: volNum,
+                  title: v.title,
+                  summary: v.summary,
+                };
+                if (args.include_chapters !== false) {
+                  volData.chapters = (v.chapters || []).map((ch, ci) => ({
+                    chapter: ci + 1,
+                    title: ch.title,
+                    summary: ch.summary,
+                  }));
+                }
+                data.volumes.push(volData);
+              });
+              return { success: true, data };
+            }
+            
+            case 'get_foreshadows': {
+              let list = foreshadows.value;
+              if (args.status && args.status !== 'all') {
+                list = list.filter(f => f.status === args.status);
+              }
+              if (args.importance && args.importance !== 'all') {
+                list = list.filter(f => f.importance === args.importance);
+              }
+              return { success: true, data: list };
+            }
+            
+            case 'get_plotlines': {
+              let lines = plotlines.value;
+              if (args.plotline_id) {
+                lines = lines.filter(p => p.id === args.plotline_id);
+              }
+              const data = lines.map(pl => {
+                let nodes = pl.nodes || [];
+                if (args.up_to_volume) {
+                  nodes = nodes.filter(n => (n.volume || 0) <= args.up_to_volume);
+                }
+                nodes = [...nodes].sort((a, b) => {
+                  const va = (a.volume || 0) * 1000 + (a.chapter || 0);
+                  const vb = (b.volume || 0) * 1000 + (b.chapter || 0);
+                  return va - vb;
+                });
+                return {
+                  id: pl.id,
+                  name: pl.name,
+                  color: pl.color,
+                  description: pl.description,
+                  nodes,
+                };
+              });
+              return { success: true, data };
+            }
+            
+            case 'get_chapter_content': {
+              let ch = null;
+              if (args.chapter_id) {
+                ch = chapters.value.find(c => c.id === args.chapter_id);
+              }
+              if (!ch && args.volume && args.chapter_num) {
+                const idx = (args.volume - 1) * 10 + (args.chapter_num - 1);
+                ch = chapters.value[idx];
+              }
+              if (!ch) return { success: false, error: '未找到该章节' };
+              return {
+                success: true,
+                data: {
+                  id: ch.id,
+                  title: ch.title,
+                  content: ch.content,
+                  word_count: ch.content ? ch.content.length : 0,
+                }
+              };
+            }
+            
+            case 'add_character_memory': {
+              const char = characters.value.find(c => c.id === args.character_id);
+              if (!char) return { success: false, error: '未找到该角色' };
+              if (!char.memories) char.memories = [];
+              const newMem = {
+                content: args.content,
+                volume: args.volume || null,
+                chapter: args.chapter || null,
+                importance: args.importance || 'medium',
+                source: 'ai',
+                createdAt: nowStr(),
+              };
+              char.memories.push(newMem);
+              return { success: true, data: newMem, message: '已成功添加角色记忆' };
+            }
+            
+            case 'add_foreshadow': {
+              const newF = {
+                title: args.title,
+                description: args.description,
+                setupVolume: args.setup_volume || null,
+                setupChapter: args.setup_chapter || null,
+                payoffVolume: null,
+                payoffChapter: null,
+                importance: args.importance || 'medium',
+                status: 'unresolved',
+                source: 'ai',
+                createdAt: nowStr(),
+              };
+              foreshadows.value.push(newF);
+              return { success: true, data: newF, message: '已成功添加伏笔记录' };
+            }
+            
+            default:
+              return { success: false, error: '未知工具: ' + name };
+          }
+        }
+        
         // Novel Info
         const novelInfoForm = reactive({
           title: '',
@@ -2382,10 +3959,106 @@
         // Synopsis
         const synopsisVolumes = ref([]);
         const activeSynopsisVol = ref(0);
+        const synopsisTab = ref('volumes');
+        const foreshadows = ref([]);
+        const foreshadowFilter = ref('all');
+        const addForeshadowVisible = ref(false);
+        const foreshadowForm = reactive({
+          title: '',
+          description: '',
+          setupVolume: null,
+          setupChapter: null,
+          payoffVolume: null,
+          payoffChapter: null,
+          importance: 'medium',
+          status: 'unresolved',
+        });
+        
+        const filteredForeshadows = computed(() => {
+          if (foreshadowFilter.value === 'all') return foreshadows.value;
+          return foreshadows.value.filter(f => f.status === foreshadowFilter.value);
+        });
+        
+        // Plotlines
+        const plotlines = ref([]);
+        const activePlotline = ref(null);
+        const plotlineFilter = ref('all');
+        const addPlotlineVisible = ref(false);
+        const addPlotNodeVisible = ref(false);
+        const plotlineForm = reactive({
+          name: '',
+          color: '#8b5cf6',
+          description: '',
+        });
+        const plotNodeForm = reactive({
+          title: '',
+          description: '',
+          volume: null,
+          chapter: null,
+        });
+        
+        const activePlotlineObj = computed(() => {
+          return plotlines.value.find(p => p.id === activePlotline.value) || null;
+        });
+        
+        const sortedPlotlineNodes = computed(() => {
+          const pl = activePlotlineObj.value;
+          if (!pl || !pl.nodes) return [];
+          return [...pl.nodes].sort((a, b) => {
+            const va = (a.volume || 0) * 1000 + (a.chapter || 0);
+            const vb = (b.volume || 0) * 1000 + (b.chapter || 0);
+            return va - vb;
+          });
+        });
         
         // Characters
         const characters = ref([]);
         const activeCharacter = ref(null);
+        const charTab = ref('basic');
+        const memoryFilterVolume = ref(null);
+        const addRelationVisible = ref(false);
+        const addArcVisible = ref(false);
+        const addExperienceVisible = ref(false);
+        const addMemoryVisible = ref(false);
+        const addAttrVisible = ref(false);
+        const relationForm = reactive({
+          targetId: null,
+          targetName: '',
+          relationType: '',
+          description: '',
+        });
+        const arcForm = reactive({
+          stage: '',
+          title: '',
+          description: '',
+          volume: null,
+          chapter: null,
+        });
+        const expForm = reactive({
+          title: '',
+          description: '',
+          volume: null,
+          chapter: null,
+        });
+        const memForm = reactive({
+          content: '',
+          volume: null,
+          chapter: null,
+          importance: 'medium',
+        });
+        const attrForm = reactive({
+          name: '',
+          value: '',
+        });
+        
+        const filteredMemories = computed(() => {
+          if (!activeChar.value || !activeChar.value.memories) return [];
+          let mems = activeChar.value.memories || [];
+          if (memoryFilterVolume.value) {
+            mems = mems.filter(m => m.volume === memoryFilterVolume.value);
+          }
+          return mems;
+        });
         
         // World Settings
         const worldCategories = ref([
@@ -2762,17 +4435,75 @@
           
           if (synopsisVolumes.value.length === 0) {
             synopsisVolumes.value = [
-              { title: '孤身赴边', summary: '', plots: [{ content: '女主初到边关' }, { content: '第一战告捷' }] },
-              { title: '身份疑云', summary: '', plots: [{ content: '质子试探' }] },
+              { 
+                title: '孤身赴边', 
+                summary: '', 
+                plots: [{ content: '女主初到边关' }, { content: '第一战告捷' }],
+                chapters: [
+                  { title: '初入边关', summary: '女主沈砚顶替亡兄之名，初到边关戍城' },
+                  { title: '城中风波', summary: '边军内部派系林立，沈砚处境艰难' },
+                ]
+              },
+              { 
+                title: '身份疑云', 
+                summary: '', 
+                plots: [{ content: '质子试探' }],
+                chapters: []
+              },
             ];
           }
           
           if (characters.value.length === 0) {
-            characters.value = [
-              { id: 1, name: '沈砚', role: '女主 / 校尉', age: '17', color: 'linear-gradient(135deg,#8b5cf6,#6366f1)', personality: '外冷内热，坚韧聪慧', appearance: '身形瘦削，眉目清冷', background: '将门嫡女，顶替亡兄之名从军', arc: '从隐忍求生到位高权重，找到自我价值' },
-              { id: 2, name: '萧景琰', role: '男主 / 质子', age: '22', color: 'linear-gradient(135deg,#f97316,#ef4444)', personality: '深沉隐忍，谋略过人', appearance: '俊美如玉，气质高贵', background: '敌国皇子，被派来当质子', arc: '从棋子到棋手，最终夺得天下' },
-            ];
+            const char1 = createEmptyCharacter(1, '沈砚', '女主 / 校尉', 'linear-gradient(135deg,#8b5cf6,#6366f1)');
+            char1.age = '17';
+            char1.gender = 'female';
+            char1.personality = '外冷内热，坚韧聪慧';
+            char1.appearance = '身形瘦削，眉目清冷';
+            char1.background = '将门嫡女，顶替亡兄之名从军';
+            char1.catchphrase = '退无可退，便战。';
+            char1.hobbies = '读书、练剑';
+            char1.weakness = '过于隐忍，不善表达情感';
+            char1.arcs.push({ stage: '前期', title: '蛰伏边关', description: '初到边关，隐藏身份只求存活', volume: 1, chapter: null, source: 'manual', createdAt: nowStr() });
+            char1.memories.push({ content: '亲眼看着兄长战死在面前，立誓要替他守住家国', volume: 1, chapter: 1, importance: 'high', source: 'manual', createdAt: nowStr() });
+            char1.attributes.push({ name: '身高', value: '168cm' });
+            char1.attributes.push({ name: '武器', value: '一柄断剑，是兄长的遗物' });
+            
+            const char2 = createEmptyCharacter(2, '萧景琰', '男主 / 质子', 'linear-gradient(135deg,#f97316,#ef4444)');
+            char2.age = '22';
+            char2.gender = 'male';
+            char2.personality = '深沉隐忍，谋略过人';
+            char2.appearance = '俊美如玉，气质高贵';
+            char2.background = '敌国皇子，被派来当质子';
+            char2.catchphrase = '棋局未定，你我皆为棋子。';
+            char2.hobbies = '下棋、听琴';
+            char2.weakness = '表面无情实则心软';
+            char2.relations.push({ targetId: 1, targetName: '沈砚', relationType: '亦敌亦友', description: '最初互相试探，后逐渐产生信任', source: 'manual', createdAt: nowStr() });
+            
+            characters.value = [char1, char2];
             activeCharacter.value = 1;
+          }
+          
+          if (plotlines.value.length === 0) {
+            plotlines.value = [
+              {
+                id: 1,
+                name: '主线',
+                color: '#8b5cf6',
+                description: '女主从边关小卒成长为一代名将的故事',
+                nodes: [
+                  { title: '初入边关', description: '女主顶替亡兄之名从军', volume: 1, chapter: 1, source: 'manual', createdAt: nowStr() },
+                  { title: '首战告捷', description: '女主在战斗中崭露头角', volume: 1, chapter: 3, source: 'manual', createdAt: nowStr() },
+                ],
+              },
+              {
+                id: 2,
+                name: '感情线',
+                color: '#ec4899',
+                description: '男女主从敌对到相爱',
+                nodes: [],
+              },
+            ];
+            activePlotline.value = 1;
           }
           
           wsPage.value = 'editor';
@@ -2806,8 +4537,192 @@
         }
         
         function addSynopsisVolume() {
-          synopsisVolumes.value.push({ title: '', summary: '', plots: [] });
+          synopsisVolumes.value.push({ title: '', summary: '', plots: [], chapters: [] });
           activeSynopsisVol.value = synopsisVolumes.value.length - 1;
+        }
+        
+        function addChapterNode() {
+          const vol = synopsisVolumes.value[activeSynopsisVol.value];
+          if (!vol) return;
+          if (!vol.chapters) vol.chapters = [];
+          vol.chapters.push({ title: '', summary: '' });
+        }
+        
+        function removeChapterNode(idx) {
+          const vol = synopsisVolumes.value[activeSynopsisVol.value];
+          if (vol && vol.chapters) {
+            vol.chapters.splice(idx, 1);
+          }
+        }
+        
+        function aiGenChapters() {
+          const vol = synopsisVolumes.value[activeSynopsisVol.value];
+          if (!vol) return;
+          ElementPlus.ElMessage.info('AI 正在生成章节...');
+          setTimeout(() => {
+            if (!vol.chapters) vol.chapters = [];
+            vol.chapters.push(
+              { title: '初入边关', summary: '女主初到边关，隐瞒身份加入戍边军' },
+              { title: '第一战', summary: '敌军来袭，女主临危受命，首战告捷' },
+              { title: '身份疑云', summary: '男主（质子）注意到女主的与众不同，开始试探' },
+            );
+            ElementPlus.ElMessage.success('AI 已生成章节大纲');
+          }, 1500);
+        }
+        
+        // Foreshadow functions
+        function openAddForeshadow() {
+          Object.assign(foreshadowForm, {
+            title: '',
+            description: '',
+            setupVolume: null,
+            setupChapter: null,
+            payoffVolume: null,
+            payoffChapter: null,
+            importance: 'medium',
+            status: 'unresolved',
+          });
+          addForeshadowVisible.value = true;
+        }
+        
+        function saveForeshadow() {
+          if (!foreshadowForm.title.trim()) {
+            ElementPlus.ElMessage.warning('请输入伏笔标题');
+            return;
+          }
+          foreshadows.value.push({
+            title: foreshadowForm.title,
+            description: foreshadowForm.description,
+            setupVolume: foreshadowForm.setupVolume,
+            setupChapter: foreshadowForm.setupChapter,
+            payoffVolume: foreshadowForm.payoffVolume,
+            payoffChapter: foreshadowForm.payoffChapter,
+            importance: foreshadowForm.importance,
+            status: foreshadowForm.status,
+            source: 'manual',
+            createdAt: nowStr(),
+          });
+          addForeshadowVisible.value = false;
+          ElementPlus.ElMessage.success('伏笔已添加');
+        }
+        
+        function removeForeshadow(idx) {
+          foreshadows.value.splice(idx, 1);
+        }
+        
+        function toggleForeshadowStatus(idx) {
+          const f = foreshadows.value[idx];
+          if (f) {
+            f.status = f.status === 'resolved' ? 'unresolved' : 'resolved';
+          }
+        }
+        
+        function aiGenForeshadows() {
+          ElementPlus.ElMessage.info('AI 正在分析并提取伏笔...');
+          setTimeout(() => {
+            foreshadows.value.push(
+              {
+                title: '兄长之死',
+                description: '女主兄长的战死真相，似乎另有隐情',
+                setupVolume: 1,
+                setupChapter: 1,
+                payoffVolume: 3,
+                payoffChapter: null,
+                importance: 'high',
+                status: 'unresolved',
+                source: 'ai',
+                createdAt: nowStr(),
+              },
+              {
+                title: '男主身份',
+                description: '质子的真实目的不仅仅是求和',
+                setupVolume: 1,
+                setupChapter: 3,
+                payoffVolume: null,
+                payoffChapter: null,
+                importance: 'high',
+                status: 'unresolved',
+                source: 'ai',
+                createdAt: nowStr(),
+              },
+            );
+            ElementPlus.ElMessage.success('AI 已提取伏笔');
+          }, 1500);
+        }
+        
+        // Plotline functions
+        function openAddPlotline() {
+          plotlineForm.name = '';
+          plotlineForm.color = '#8b5cf6';
+          plotlineForm.description = '';
+          addPlotlineVisible.value = true;
+        }
+        
+        function savePlotline() {
+          if (!plotlineForm.name.trim()) {
+            ElementPlus.ElMessage.warning('请输入剧情线名称');
+            return;
+          }
+          const maxId = plotlines.value.length ? Math.max(...plotlines.value.map(p => p.id)) : 0;
+          const newPl = {
+            id: maxId + 1,
+            name: plotlineForm.name,
+            color: plotlineForm.color,
+            description: plotlineForm.description,
+            nodes: [],
+          };
+          plotlines.value.push(newPl);
+          activePlotline.value = newPl.id;
+          addPlotlineVisible.value = false;
+          ElementPlus.ElMessage.success('剧情线已创建');
+        }
+        
+        function openAddPlotNode() {
+          plotNodeForm.title = '';
+          plotNodeForm.description = '';
+          plotNodeForm.volume = null;
+          plotNodeForm.chapter = null;
+          addPlotNodeVisible.value = true;
+        }
+        
+        function savePlotNode() {
+          const pl = activePlotlineObj.value;
+          if (!pl) return;
+          if (!plotNodeForm.title.trim()) {
+            ElementPlus.ElMessage.warning('请输入节点标题');
+            return;
+          }
+          pl.nodes.push({
+            title: plotNodeForm.title,
+            description: plotNodeForm.description,
+            volume: plotNodeForm.volume,
+            chapter: plotNodeForm.chapter,
+            source: 'manual',
+            createdAt: nowStr(),
+          });
+          addPlotNodeVisible.value = false;
+          ElementPlus.ElMessage.success('剧情节点已添加');
+        }
+        
+        function removePlotlineNode(idx) {
+          const pl = activePlotlineObj.value;
+          if (pl && pl.nodes) {
+            pl.nodes.splice(idx, 1);
+          }
+        }
+        
+        function aiGenPlotlineNodes() {
+          const pl = activePlotlineObj.value;
+          if (!pl) return;
+          ElementPlus.ElMessage.info('AI 正在生成剧情节点...');
+          setTimeout(() => {
+            pl.nodes.push(
+              { title: '开端', description: '故事的开始，人物出场', volume: 1, chapter: 1, source: 'ai', createdAt: nowStr() },
+              { title: '发展', description: '冲突逐步升级', volume: 1, chapter: 5, source: 'ai', createdAt: nowStr() },
+              { title: '高潮', description: '主要矛盾爆发', volume: 2, chapter: 3, source: 'ai', createdAt: nowStr() },
+            );
+            ElementPlus.ElMessage.success('AI 已生成剧情节点');
+          }, 1500);
         }
         
         function addPlotNode() {
@@ -2832,20 +4747,275 @@
             'linear-gradient(135deg,#ec4899,#be185d)',
             'linear-gradient(135deg,#f59e0b,#d97706)',
           ];
-          const newChar = {
-            id: maxId + 1,
-            name: '新人物',
-            role: '配角',
-            age: '',
-            color: colors[maxId % colors.length],
-            personality: '',
-            appearance: '',
-            background: '',
-            arc: '',
-          };
+          const newChar = createEmptyCharacter(maxId + 1, '新人物', '配角', colors[maxId % colors.length]);
           characters.value.push(newChar);
           activeCharacter.value = newChar.id;
           ElementPlus.ElMessage.success('已添加新人物');
+        }
+        
+        function createEmptyCharacter(id, name, role, color) {
+          return {
+            id,
+            name,
+            role,
+            age: '',
+            gender: 'female',
+            color,
+            personality: '',
+            appearance: '',
+            background: '',
+            catchphrase: '',
+            hobbies: '',
+            weakness: '',
+            relations: [],
+            arcs: [],
+            experiences: [],
+            memories: [],
+            attributes: [],
+          };
+        }
+        
+        function nowStr() {
+          const d = new Date();
+          return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0') + ' ' + String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
+        }
+        
+        // Relation functions
+        function openAddRelation() {
+          relationForm.targetId = null;
+          relationForm.targetName = '';
+          relationForm.relationType = '';
+          relationForm.description = '';
+          addRelationVisible.value = true;
+        }
+        
+        function onRelationTargetChange(val) {
+          const c = characters.value.find(c => c.id === val);
+          if (c) {
+            relationForm.targetName = c.name;
+          }
+        }
+        
+        function saveRelation() {
+          if (!activeChar.value) return;
+          if (!relationForm.targetName.trim()) {
+            ElementPlus.ElMessage.warning('请输入对方角色名称');
+            return;
+          }
+          if (!relationForm.relationType.trim()) {
+            ElementPlus.ElMessage.warning('请输入关系类型');
+            return;
+          }
+          activeChar.value.relations.push({
+            targetId: relationForm.targetId,
+            targetName: relationForm.targetName,
+            relationType: relationForm.relationType,
+            description: relationForm.description,
+            source: 'manual',
+            createdAt: nowStr(),
+          });
+          addRelationVisible.value = false;
+          ElementPlus.ElMessage.success('关系已添加');
+        }
+        
+        function removeRelation(idx) {
+          if (activeChar.value) {
+            activeChar.value.relations.splice(idx, 1);
+          }
+        }
+        
+        // Arc functions
+        function openAddArc() {
+          arcForm.stage = '';
+          arcForm.title = '';
+          arcForm.description = '';
+          arcForm.volume = null;
+          arcForm.chapter = null;
+          addArcVisible.value = true;
+        }
+        
+        function saveArc() {
+          if (!activeChar.value) return;
+          if (!arcForm.title.trim()) {
+            ElementPlus.ElMessage.warning('请输入弧光标题');
+            return;
+          }
+          activeChar.value.arcs.push({
+            stage: arcForm.stage,
+            title: arcForm.title,
+            description: arcForm.description,
+            volume: arcForm.volume,
+            chapter: arcForm.chapter,
+            source: 'manual',
+            createdAt: nowStr(),
+          });
+          addArcVisible.value = false;
+          ElementPlus.ElMessage.success('角色弧光已添加');
+        }
+        
+        function removeArc(idx) {
+          if (activeChar.value) {
+            activeChar.value.arcs.splice(idx, 1);
+          }
+        }
+        
+        // Experience functions
+        function openAddExperience() {
+          expForm.title = '';
+          expForm.description = '';
+          expForm.volume = null;
+          expForm.chapter = null;
+          addExperienceVisible.value = true;
+        }
+        
+        function saveExperience() {
+          if (!activeChar.value) return;
+          if (!expForm.title.trim()) {
+            ElementPlus.ElMessage.warning('请输入经历标题');
+            return;
+          }
+          activeChar.value.experiences.push({
+            title: expForm.title,
+            description: expForm.description,
+            volume: expForm.volume,
+            chapter: expForm.chapter,
+            source: 'manual',
+            createdAt: nowStr(),
+          });
+          addExperienceVisible.value = false;
+          ElementPlus.ElMessage.success('角色经历已添加');
+        }
+        
+        // Memory functions
+        function openAddMemory() {
+          memForm.content = '';
+          memForm.volume = null;
+          memForm.chapter = null;
+          memForm.importance = 'medium';
+          addMemoryVisible.value = true;
+        }
+        
+        function saveMemory() {
+          if (!activeChar.value) return;
+          if (!memForm.content.trim()) {
+            ElementPlus.ElMessage.warning('请输入记忆内容');
+            return;
+          }
+          activeChar.value.memories.push({
+            content: memForm.content,
+            volume: memForm.volume,
+            chapter: memForm.chapter,
+            importance: memForm.importance,
+            source: 'manual',
+            createdAt: nowStr(),
+          });
+          addMemoryVisible.value = false;
+          ElementPlus.ElMessage.success('角色记忆已添加');
+        }
+        
+        // Attribute functions
+        function openAddAttribute() {
+          attrForm.name = '';
+          attrForm.value = '';
+          addAttrVisible.value = true;
+        }
+        
+        function saveAttribute() {
+          if (!activeChar.value) return;
+          if (!attrForm.name.trim()) {
+            ElementPlus.ElMessage.warning('请输入属性名称');
+            return;
+          }
+          activeChar.value.attributes.push({
+            name: attrForm.name,
+            value: attrForm.value,
+          });
+          addAttrVisible.value = false;
+          ElementPlus.ElMessage.success('属性已添加');
+        }
+        
+        function removeAttribute(idx) {
+          if (activeChar.value) {
+            activeChar.value.attributes.splice(idx, 1);
+          }
+        }
+        
+        // AI generation functions (simulated)
+        function aiGenCharProfile() {
+          ElementPlus.ElMessage.info('AI 正在完善角色设定...');
+          setTimeout(() => {
+            ElementPlus.ElMessage.success('AI 已完善角色设定');
+          }, 1500);
+        }
+        
+        function aiGenRelations() {
+          if (!activeChar.value) return;
+          ElementPlus.ElMessage.info('AI 正在生成角色关系...');
+          setTimeout(() => {
+            const otherChars = characters.value.filter(c => c.id !== activeChar.value.id);
+            if (otherChars.length > 0) {
+              otherChars.forEach(c => {
+                activeChar.value.relations.push({
+                  targetId: c.id,
+                  targetName: c.name,
+                  relationType: '待定关系',
+                  description: 'AI 自动分析生成的关系描述',
+                  source: 'ai',
+                  createdAt: nowStr(),
+                });
+              });
+            }
+            ElementPlus.ElMessage.success('AI 已生成角色关系');
+          }, 1500);
+        }
+        
+        function aiGenArc() {
+          if (!activeChar.value) return;
+          ElementPlus.ElMessage.info('AI 正在生成角色弧光...');
+          setTimeout(() => {
+            activeChar.value.arcs.push({
+              stage: '前期',
+              title: 'AI生成的弧光阶段',
+              description: 'AI 分析生成的角色成长阶段描述',
+              volume: 1,
+              chapter: null,
+              source: 'ai',
+              createdAt: nowStr(),
+            });
+            ElementPlus.ElMessage.success('AI 已生成角色弧光');
+          }, 1200);
+        }
+        
+        function aiGenExperiences() {
+          if (!activeChar.value) return;
+          ElementPlus.ElMessage.info('AI 正在生成角色经历...');
+          setTimeout(() => {
+            activeChar.value.experiences.push({
+              title: 'AI生成的重要经历',
+              description: '这是 AI 根据角色背景自动生成的经历描述',
+              volume: 1,
+              chapter: 1,
+              source: 'ai',
+              createdAt: nowStr(),
+            });
+            ElementPlus.ElMessage.success('AI 已生成角色经历');
+          }, 1200);
+        }
+        
+        function aiGenMemories() {
+          if (!activeChar.value) return;
+          ElementPlus.ElMessage.info('AI 正在提取角色记忆...');
+          setTimeout(() => {
+            activeChar.value.memories.push({
+              content: 'AI 从剧情中提取的角色记忆片段',
+              volume: 1,
+              chapter: 1,
+              importance: 'high',
+              source: 'ai',
+              createdAt: nowStr(),
+            });
+            ElementPlus.ElMessage.success('AI 已提取角色记忆');
+          }, 1200);
         }
         
         // Editor
@@ -3152,7 +5322,19 @@
           aiMessages, aiInput, aiCallCount, currentAiModel,
           novelInfoForm,
           synopsisVolumes, activeSynopsisVol,
+          synopsisTab, foreshadows, foreshadowFilter, filteredForeshadows,
+          addForeshadowVisible, foreshadowForm,
+          plotlines, activePlotline, plotlineFilter, activePlotlineObj, sortedPlotlineNodes,
+          addPlotlineVisible, plotlineForm,
+          addPlotNodeVisible, plotNodeForm,
+          toolDefinitions, selectedTool, getToolDef, getToolIcon,
           characters, activeCharacter, activeChar,
+          charTab, memoryFilterVolume, filteredMemories,
+          addRelationVisible, relationForm,
+          addArcVisible, arcForm,
+          addExperienceVisible, expForm,
+          addMemoryVisible, memForm,
+          addAttrVisible, attrForm,
           worldCategories, activeWorldCat, activeWorldCategory,
           
           // Tasks
@@ -3171,11 +5353,21 @@
           openCreateNovel, createNovel, openNovel,
           saveNovelInfo, saveSynopsis, aiGenSynopsis,
           addSynopsisVolume, addPlotNode, removePlotNode,
+          addChapterNode, removeChapterNode, aiGenChapters,
+          openAddForeshadow, saveForeshadow, removeForeshadow, toggleForeshadowStatus, aiGenForeshadows,
+          openAddPlotline, savePlotline, openAddPlotNode, savePlotNode, removePlotlineNode, aiGenPlotlineNodes,
           openAddCharacter,
+          onRelationTargetChange,
+          openAddRelation, saveRelation, removeRelation,
+          openAddArc, saveArc, removeArc,
+          openAddExperience, saveExperience,
+          openAddMemory, saveMemory,
+          openAddAttribute, saveAttribute, removeAttribute,
+          aiGenCharProfile, aiGenRelations, aiGenArc, aiGenExperiences, aiGenMemories,
           selectChapter, addChapter, saveChapter,
           sendAi, quickAi,
           openAddTask, openEditTask, saveTaskDialog, deleteTask,
-          saveProfile, savePrefs,
+          saveProfile, savePrefs, onThemeChange, applyTheme,
           getProviderIcon, getBaseUrlPlaceholder, onProviderChange,
           openAddAiModel, saveAiModel, testAiModel, deleteAiModel,
         };
