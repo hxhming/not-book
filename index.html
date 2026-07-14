@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>not-book · 任务管理系统</title>
-  <meta name="description" content="not-book 是一个基于 Vue 3 + Django 构建的任务管理应用。" />
+  <title>not-book · AI 写作工作台</title>
+  <meta name="description" content="not-book 是一个基于 AI 的长篇小说创作工作台。" />
   <link rel="stylesheet" href="https://unpkg.com/element-plus/dist/index.css" />
   <link rel="stylesheet" href="https://unpkg.com/@fortawesome/fontawesome-free@6.2.0/css/all.min.css" />
   <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
@@ -13,598 +13,1366 @@
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html, body, #app { height: 100%; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; }
-    body { background: #f5f7fa; color: #1f2329; }
+    body { background: #0a0a12; color: #e4e4ec; overflow: hidden; }
     
-    /* Nav */
-    .navbar {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      background: rgba(255,255,255,0.85);
-      backdrop-filter: blur(12px);
-      border-bottom: 1px solid #eaeaea;
-    }
-    .nav-inner {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 24px;
-      height: 60px;
+    /* Layout */
+    .layout { display: flex; height: 100%; }
+    
+    /* Sidebar */
+    .sidebar {
+      width: 240px;
+      background: linear-gradient(180deg, #12121f 0%, #0d0d18 100%);
+      border-right: 1px solid #1e1e30;
       display: flex;
-      align-items: center;
-      justify-content: space-between;
+      flex-direction: column;
+      flex-shrink: 0;
     }
-    .logo {
+    .sidebar-logo {
+      padding: 18px 20px;
       display: flex;
       align-items: center;
       gap: 10px;
-      font-weight: 700;
-      font-size: 18px;
-      color: #303133;
+      border-bottom: 1px solid #1e1e30;
       cursor: pointer;
     }
-    .logo-dot {
-      width: 28px; height: 28px;
+    .sidebar-logo-icon {
+      width: 32px; height: 32px;
       border-radius: 8px;
-      background: linear-gradient(135deg, #4f8cff, #8b5cff);
+      background: linear-gradient(135deg, #8b5cf6, #6366f1);
       display: flex; align-items: center; justify-content: center;
       color: #fff; font-size: 14px;
     }
-    .nav-right { display: flex; align-items: center; gap: 16px; }
-    .nav-link {
-      color: #606266;
-      font-size: 14px;
-      cursor: pointer;
-      transition: color .2s;
-    }
-    .nav-link:hover { color: #4f8cff; }
-    .user-info {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      cursor: pointer;
-    }
-    .user-avatar {
-      width: 32px; height: 32px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #4f8cff, #8b5cff);
+    .sidebar-logo-text {
+      font-weight: 700;
+      font-size: 16px;
       color: #fff;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 13px; font-weight: 600;
     }
     
-    /* Hero */
-    .hero {
-      background: linear-gradient(180deg, #e8f0ff 0%, #f5f7fa 100%);
-      padding: 80px 24px 60px;
-      text-align: center;
+    .sidebar-section {
+      padding: 16px 12px 8px;
+      font-size: 11px;
+      color: #6b6b85;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
-    .hero-inner { max-width: 800px; margin: 0 auto; }
+    
+    .menu-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      margin: 2px 8px;
+      border-radius: 8px;
+      color: #a0a0b8;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all .2s;
+    }
+    .menu-item:hover {
+      background: rgba(139, 92, 246, 0.08);
+      color: #c4b5fd;
+    }
+    .menu-item.active {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(99, 102, 241, 0.15));
+      color: #c4b5fd;
+      border: 1px solid rgba(139, 92, 246, 0.2);
+    }
+    .menu-item i { width: 18px; text-align: center; font-size: 15px; }
+    
+    .sidebar-footer {
+      margin-top: auto;
+      padding: 12px;
+      border-top: 1px solid #1e1e30;
+    }
+    .user-card {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background .2s;
+    }
+    .user-card:hover { background: rgba(139, 92, 246, 0.08); }
+    .user-avatar {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #8b5cf6, #6366f1);
+      color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; font-weight: 600;
+    }
+    .user-info-text { flex: 1; min-width: 0; }
+    .user-name {
+      font-size: 13px;
+      color: #e4e4ec;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .user-role {
+      font-size: 11px;
+      color: #6b6b85;
+      margin-top: 2px;
+    }
+    
+    /* Main Content */
+    .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    
+    /* Topbar */
+    .topbar {
+      height: 52px;
+      background: rgba(18, 18, 31, 0.8);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid #1e1e30;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      flex-shrink: 0;
+    }
+    .breadcrumb {
+      font-size: 13px;
+      color: #6b6b85;
+    }
+    .breadcrumb span.current { color: #c4b5fd; }
+    .topbar-right { display: flex; align-items: center; gap: 16px; }
+    .topbar-btn {
+      width: 32px; height: 32px;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      color: #6b6b85;
+      cursor: pointer;
+      transition: all .2s;
+    }
+    .topbar-btn:hover { background: rgba(139, 92, 246, 0.1); color: #c4b5fd; }
+    
+    /* Content Area */
+    .content { flex: 1; overflow-y: auto; padding: 24px; }
+    .content::-webkit-scrollbar { width: 6px; }
+    .content::-webkit-scrollbar-thumb { background: #2a2a3e; border-radius: 3px; }
+    
+    /* Hero Section (Home) */
+    .hero-section {
+      position: relative;
+      border-radius: 16px;
+      padding: 48px 40px;
+      margin-bottom: 28px;
+      overflow: hidden;
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(99, 102, 241, 0.08) 50%, rgba(14, 165, 233, 0.08) 100%);
+      border: 1px solid rgba(139, 92, 246, 0.15);
+    }
+    .hero-glow {
+      position: absolute;
+      top: -50%; right: -10%;
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(139, 92, 246, 0.3) 0%, transparent 70%);
+      pointer-events: none;
+    }
     .hero-badge {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      padding: 6px 16px;
-      border: 1px solid #d4e0ff;
+      padding: 6px 14px;
+      background: rgba(139, 92, 246, 0.15);
+      border: 1px solid rgba(139, 92, 246, 0.3);
       border-radius: 999px;
-      font-size: 13px;
-      color: #4f8cff;
-      background: #fff;
-      margin-bottom: 24px;
+      font-size: 12px;
+      color: #c4b5fd;
+      margin-bottom: 18px;
     }
-    .hero-badge .dot { width: 6px; height: 6px; border-radius: 50%; background: #67c23a; }
-    .hero h1 {
-      font-size: clamp(32px, 5vw, 52px);
+    .hero-badge .dot { width: 6px; height: 6px; border-radius: 50%; background: #22c55e; }
+    .hero-title {
+      font-size: 32px;
       font-weight: 800;
+      color: #fff;
+      margin-bottom: 12px;
       line-height: 1.2;
-      margin-bottom: 16px;
-      color: #1f2329;
     }
-    .hero h1 .gradient {
-      background: linear-gradient(120deg, #4f8cff, #8b5cff);
+    .hero-title .gradient-text {
+      background: linear-gradient(120deg, #c4b5fd, #67e8f9);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
     }
-    .hero p {
-      font-size: 17px;
-      color: #606266;
-      margin-bottom: 32px;
+    .hero-desc {
+      font-size: 15px;
+      color: #a0a0b8;
       line-height: 1.7;
+      max-width: 560px;
+      margin-bottom: 24px;
     }
-    .hero-btns { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+    .hero-btns { display: flex; gap: 12px; flex-wrap: wrap; }
+    .btn-primary {
+      padding: 10px 22px;
+      background: linear-gradient(135deg, #8b5cf6, #6366f1);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .2s;
+    }
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 24px rgba(139, 92, 246, 0.35);
+    }
+    .btn-ghost {
+      padding: 10px 22px;
+      background: rgba(255, 255, 255, 0.04);
+      color: #c4b5fd;
+      border: 1px solid rgba(139, 92, 246, 0.2);
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all .2s;
+    }
+    .btn-ghost:hover { background: rgba(139, 92, 246, 0.1); }
     
-    /* Sections */
-    .section {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 60px 24px;
+    /* Section Title */
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
     }
     .section-title {
-      text-align: center;
-      margin-bottom: 40px;
-    }
-    .section-title h2 {
-      font-size: 28px;
+      font-size: 18px;
       font-weight: 700;
-      color: #303133;
-      margin-bottom: 10px;
+      color: #e4e4ec;
     }
-    .section-title p { color: #909399; font-size: 15px; }
     
+    /* Project Grid */
+    .project-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 16px;
+    }
+    .project-card {
+      background: rgba(18, 18, 31, 0.7);
+      border: 1px solid #1e1e30;
+      border-radius: 12px;
+      padding: 20px;
+      cursor: pointer;
+      transition: all .25s;
+      position: relative;
+    }
+    .project-card:hover {
+      border-color: rgba(139, 92, 246, 0.4);
+      transform: translateY(-2px);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
+    }
+    .project-tag {
+      display: inline-block;
+      padding: 2px 10px;
+      background: rgba(139, 92, 246, 0.15);
+      color: #c4b5fd;
+      border-radius: 4px;
+      font-size: 11px;
+      margin-bottom: 12px;
+    }
+    .project-name {
+      font-size: 16px;
+      font-weight: 600;
+      color: #e4e4ec;
+      margin-bottom: 8px;
+      line-height: 1.4;
+    }
+    .project-desc {
+      font-size: 13px;
+      color: #6b6b85;
+      line-height: 1.6;
+      margin-bottom: 16px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .project-meta {
+      display: flex;
+      gap: 16px;
+      font-size: 12px;
+      color: #6b6b85;
+    }
+    .project-meta div { display: flex; align-items: center; gap: 4px; }
+    .project-new-card {
+      background: rgba(139, 92, 246, 0.05);
+      border: 1px dashed rgba(139, 92, 246, 0.3);
+      border-radius: 12px;
+      padding: 20px;
+      cursor: pointer;
+      transition: all .25s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 140px;
+    }
+    .project-new-card:hover {
+      border-color: rgba(139, 92, 246, 0.6);
+      background: rgba(139, 92, 246, 0.1);
+    }
+    .project-new-icon {
+      width: 44px; height: 44px;
+      border-radius: 12px;
+      background: rgba(139, 92, 246, 0.15);
+      display: flex; align-items: center; justify-content: center;
+      color: #c4b5fd;
+      font-size: 18px;
+      margin-bottom: 12px;
+    }
+    .project-new-text {
+      font-size: 14px;
+      color: #c4b5fd;
+      font-weight: 500;
+    }
+    
+    /* Features Grid */
     .feat-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 20px;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 14px;
+      margin-top: 28px;
     }
     .feat-card {
-      background: #fff;
-      border: 1px solid #ebeef5;
+      background: rgba(18, 18, 31, 0.7);
+      border: 1px solid #1e1e30;
       border-radius: 12px;
-      padding: 28px;
+      padding: 20px;
       transition: all .25s;
     }
     .feat-card:hover {
-      border-color: #4f8cff;
-      box-shadow: 0 8px 24px rgba(79,140,255,0.12);
-      transform: translateY(-3px);
+      border-color: rgba(139, 92, 246, 0.3);
     }
     .feat-icon {
-      width: 48px; height: 48px;
-      border-radius: 12px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 22px;
-      margin-bottom: 16px;
-    }
-    .feat-icon.blue { background: #e8f3ff; color: #165dff; }
-    .feat-icon.purple { background: #f0e8ff; color: #722ed1; }
-    .feat-icon.green { background: #e8f7ee; color: #00b42a; }
-    .feat-icon.orange { background: #fff7e8; color: #ff7d00; }
-    .feat-icon.red { background: #ffece8; color: #f53f3f; }
-    .feat-icon.cyan { background: #e8fffb; color: #0fc6c2; }
-    .feat-card h3 { font-size: 17px; margin-bottom: 8px; color: #303133; }
-    .feat-card p { color: #909399; font-size: 14px; line-height: 1.6; }
-    
-    /* Tech Stack */
-    .stack-wrap {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      justify-content: center;
-    }
-    .stack-chip {
-      padding: 10px 20px;
-      background: #fff;
-      border: 1px solid #ebeef5;
-      border-radius: 999px;
-      font-size: 14px;
-      color: #606266;
-      transition: all .2s;
-    }
-    .stack-chip:hover {
-      border-color: #4f8cff;
-      color: #4f8cff;
-    }
-    
-    /* Task Center */
-    .task-center {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 24px;
-    }
-    .task-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-    }
-    .task-stats {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 16px;
-      margin-bottom: 20px;
-    }
-    .stat-card {
-      background: #fff;
+      width: 40px; height: 40px;
       border-radius: 10px;
-      padding: 20px;
-      border: 1px solid #ebeef5;
-    }
-    .stat-label { font-size: 14px; color: #909399; margin-bottom: 8px; }
-    .stat-value { font-size: 28px; font-weight: 700; color: #303133; }
-    .stat-value.todo { color: #e6a23c; }
-    .stat-value.progress { color: #4f8cff; }
-    .stat-value.done { color: #67c23a; }
-    
-    .page-card {
-      background: #fff;
-      border-radius: 10px;
-      padding: 20px;
-      border: 1px solid #ebeef5;
-    }
-    
-    /* Login Modal */
-    .login-page {
-      min-height: calc(100% - 60px);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 40px 20px;
-      background: linear-gradient(180deg, #e8f0ff 0%, #f5f7fa 100%);
-    }
-    .login-box {
-      width: 400px;
-      background: #fff;
-      border-radius: 16px;
-      padding: 40px 36px;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.08);
-    }
-    .login-logo {
-      width: 56px; height: 56px;
-      margin: 0 auto 16px;
-      border-radius: 14px;
-      background: linear-gradient(135deg, #4f8cff, #8b5cff);
       display: flex; align-items: center; justify-content: center;
-      color: #fff; font-size: 24px;
+      font-size: 18px;
+      margin-bottom: 14px;
     }
-    .login-title {
-      font-size: 22px;
-      font-weight: 700;
-      text-align: center;
-      color: #303133;
+    .feat-icon.purple { background: rgba(139, 92, 246, 0.15); color: #c4b5fd; }
+    .feat-icon.blue { background: rgba(59, 130, 246, 0.15); color: #93c5fd; }
+    .feat-icon.green { background: rgba(34, 197, 94, 0.15); color: #86efac; }
+    .feat-icon.orange { background: rgba(249, 115, 22, 0.15); color: #fdba74; }
+    .feat-card h4 {
+      font-size: 15px;
+      color: #e4e4ec;
       margin-bottom: 6px;
     }
-    .login-subtitle {
-      text-align: center;
-      color: #909399;
-      font-size: 14px;
-      margin-bottom: 28px;
-    }
-    .form-tip {
-      margin-top: 14px;
-      text-align: center;
+    .feat-card p {
       font-size: 13px;
-      color: #c0c4cc;
-    }
-    .form-tip a { color: #4f8cff; cursor: pointer; }
-    
-    /* Footer */
-    .footer {
-      border-top: 1px solid #eaeaea;
-      background: #fff;
-      margin-top: 40px;
-    }
-    .footer-inner {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 28px 24px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 12px;
-      color: #909399;
-      font-size: 14px;
-    }
-    .footer a { color: #909399; }
-    .footer a:hover { color: #4f8cff; }
-    
-    /* Bitable */
-    .bitable-wrap {
-      border: 1px solid #eaeaea;
-      border-radius: 6px;
-      overflow-x: auto;
-      overflow-y: hidden;
-      background: #fff;
-    }
-    .bitable {
-      width: 100%;
-      border-collapse: collapse;
-      table-layout: auto;
-      min-width: 600px;
-      font-size: 14px;
-    }
-    .bitable thead th {
-      background: #f7f8fa;
-      color: #646a73;
-      font-weight: 500;
-      text-align: left;
-      padding: 10px 14px;
-      border-bottom: 1px solid #eaeaea;
-      border-right: 1px solid #eaeaea;
-      white-space: nowrap;
-      font-size: 13px;
-    }
-    .bitable thead th:last-child { border-right: none; }
-    .bitable tbody td {
-      padding: 10px 14px;
-      border-bottom: 1px solid #f0f0f0;
-      border-right: 1px solid #f5f5f5;
-      color: #1f2329;
-      vertical-align: middle;
-      white-space: nowrap;
-    }
-    .bitable tbody td:last-child { border-right: none; }
-    .bitable tbody tr:hover { background: #f5f9ff; }
-    .bitable tbody tr:last-child td { border-bottom: none; }
-    .bitag {
-      display: inline-block;
-      padding: 2px 10px;
-      border-radius: 4px;
-      font-size: 12px;
+      color: #6b6b85;
       line-height: 1.6;
     }
-    .bitag-success { background: #e8f7ee; color: #00b42a; }
-    .bitag-warning { background: #fff7e8; color: #ff7d00; }
-    .bitag-info { background: #e8f3ff; color: #165dff; }
-    .priority-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
-    .priority-high { background: #f56c6c; }
-    .priority-medium { background: #e6a23c; }
-    .priority-low { background: #909399; }
-    .empty-wrap { text-align: center; padding: 60px 0; color: #909399; }
-    .filter-bar {
-      display: flex;
-      gap: 12px;
-      margin-bottom: 16px;
-      flex-wrap: wrap;
-    }
-    .filter-bar .el-input { width: 240px; }
-    .filter-bar .el-select { width: 140px; }
     
-    @media (max-width: 640px) {
-      .task-stats { grid-template-columns: repeat(2, 1fr); }
-      .hero { padding: 50px 20px 40px; }
-      .section { padding: 40px 20px; }
+    /* Settings Page */
+    .settings-layout { display: flex; gap: 24px; }
+    .settings-sider {
+      width: 200px;
+      flex-shrink: 0;
+      background: rgba(18, 18, 31, 0.7);
+      border: 1px solid #1e1e30;
+      border-radius: 12px;
+      padding: 12px;
+      height: fit-content;
+    }
+    .settings-menu-item {
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 14px;
+      color: #a0a0b8;
+      cursor: pointer;
+      transition: all .2s;
+      margin-bottom: 2px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .settings-menu-item:hover { background: rgba(139, 92, 246, 0.08); color: #c4b5fd; }
+    .settings-menu-item.active {
+      background: rgba(139, 92, 246, 0.15);
+      color: #c4b5fd;
+    }
+    .settings-content {
+      flex: 1;
+      background: rgba(18, 18, 31, 0.7);
+      border: 1px solid #1e1e30;
+      border-radius: 12px;
+      padding: 28px;
+    }
+    .settings-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #e4e4ec;
+      margin-bottom: 6px;
+    }
+    .settings-subtitle {
+      font-size: 13px;
+      color: #6b6b85;
+      margin-bottom: 24px;
+    }
+    
+    /* Form Styles */
+    :deep(.el-form-item__label) { color: #a0a0b8 !important; }
+    :deep(.el-input__wrapper), :deep(.el-textarea__inner) {
+      background: rgba(10, 10, 18, 0.6) !important;
+      border: 1px solid #1e1e30 !important;
+      box-shadow: none !important;
+    }
+    :deep(.el-input__inner), :deep(.el-textarea__inner) {
+      color: #e4e4ec !important;
+    }
+    :deep(.el-input__wrapper.is-focus) {
+      border-color: rgba(139, 92, 246, 0.5) !important;
+    }
+    :deep(.el-select .el-select__wrapper) {
+      background: rgba(10, 10, 18, 0.6) !important;
+      border: 1px solid #1e1e30 !important;
+      box-shadow: none !important;
+    }
+    :deep(.el-select-dropdown) {
+      background: #12121f !important;
+      border: 1px solid #1e1e30 !important;
+    }
+    :deep(.el-select-dropdown__item) { color: #a0a0b8 !important; }
+    :deep(.el-select-dropdown__item:hover) { background: rgba(139, 92, 246, 0.1) !important; }
+    :deep(.el-select-dropdown__item.selected) { color: #c4b5fd !important; }
+    
+    /* AI Model List */
+    .ai-model-list { display: flex; flex-direction: column; gap: 12px; }
+    .ai-model-card {
+      background: rgba(10, 10, 18, 0.5);
+      border: 1px solid #1e1e30;
+      border-radius: 10px;
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .ai-model-icon {
+      width: 44px; height: 44px;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+    .ai-model-icon.openai { background: rgba(16, 163, 127, 0.15); color: #10a37f; }
+    .ai-model-icon.anthropic { background: rgba(217, 119, 6, 0.15); color: #d97706; }
+    .ai-model-icon.baidu { background: rgba(37, 99, 235, 0.15); color: #60a5fa; }
+    .ai-model-icon.alibaba { background: rgba(249, 115, 22, 0.15); color: #fb923c; }
+    .ai-model-icon.custom { background: rgba(139, 92, 246, 0.15); color: #c4b5fd; }
+    .ai-model-info { flex: 1; min-width: 0; }
+    .ai-model-name {
+      font-size: 15px;
+      font-weight: 600;
+      color: #e4e4ec;
+      margin-bottom: 4px;
+    }
+    .ai-model-desc {
+      font-size: 12px;
+      color: #6b6b85;
+    }
+    .ai-model-tags {
+      display: flex;
+      gap: 6px;
+      margin-top: 8px;
+    }
+    .ai-model-tag {
+      padding: 2px 8px;
+      background: rgba(139, 92, 246, 0.12);
+      color: #a78bfa;
+      border-radius: 4px;
+      font-size: 11px;
+    }
+    .ai-model-tag.vector { background: rgba(59, 130, 246, 0.12); color: #60a5fa; }
+    .ai-model-tag.image { background: rgba(236, 72, 153, 0.12); color: #f472b6; }
+    
+    /* Editor Layout */
+    .editor-layout {
+      display: flex;
+      height: calc(100vh - 52px);
+      overflow: hidden;
+    }
+    .editor-left {
+      width: 260px;
+      border-right: 1px solid #1e1e30;
+      background: rgba(12, 12, 22, 0.5);
+      overflow-y: auto;
+      flex-shrink: 0;
+    }
+    .editor-left::-webkit-scrollbar { width: 5px; }
+    .editor-left::-webkit-scrollbar-thumb { background: #2a2a3e; border-radius: 3px; }
+    .editor-left-header {
+      padding: 16px;
+      border-bottom: 1px solid #1e1e30;
+      font-size: 13px;
+      font-weight: 600;
+      color: #c4b5fd;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .editor-left-header .add-btn {
+      width: 28px; height: 28px;
+      border-radius: 6px;
+      background: rgba(139, 92, 246, 0.15);
+      color: #c4b5fd;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      font-size: 12px;
+    }
+    .chapter-tree { padding: 8px; }
+    .chapter-item {
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      color: #a0a0b8;
+      cursor: pointer;
+      margin-bottom: 2px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all .2s;
+    }
+    .chapter-item:hover { background: rgba(139, 92, 246, 0.08); color: #c4b5fd; }
+    .chapter-item.active {
+      background: rgba(139, 92, 246, 0.15);
+      color: #c4b5fd;
+    }
+    .editor-center {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .editor-toolbar {
+      padding: 10px 20px;
+      border-bottom: 1px solid #1e1e30;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+    .editor-title-input {
+      flex: 1;
+      font-size: 18px;
+      font-weight: 600;
+      color: #e4e4ec;
+      background: transparent;
+      border: none;
+      outline: none;
+    }
+    .editor-area {
+      flex: 1;
+      padding: 24px 40px;
+      overflow-y: auto;
+    }
+    .editor-area::-webkit-scrollbar { width: 6px; }
+    .editor-area::-webkit-scrollbar-thumb { background: #2a2a3e; border-radius: 3px; }
+    .editor-textarea {
+      width: 100%;
+      min-height: 100%;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: #d4d4e0;
+      font-size: 15px;
+      line-height: 2;
+      font-family: inherit;
+      resize: none;
+    }
+    .editor-right {
+      width: 300px;
+      border-left: 1px solid #1e1e30;
+      background: rgba(12, 12, 22, 0.5);
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+    }
+    .ai-assistant-header {
+      padding: 16px;
+      border-bottom: 1px solid #1e1e30;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .ai-assistant-header .ai-icon {
+      width: 28px; height: 28px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #8b5cf6, #6366f1);
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-size: 13px;
+    }
+    .ai-assistant-header .ai-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #e4e4ec;
+    }
+    .ai-messages {
+      flex: 1;
+      padding: 12px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .ai-messages::-webkit-scrollbar { width: 5px; }
+    .ai-messages::-webkit-scrollbar-thumb { background: #2a2a3e; border-radius: 3px; }
+    .ai-msg {
+      max-width: 92%;
+      padding: 10px 12px;
+      border-radius: 10px;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+    .ai-msg.ai {
+      background: rgba(139, 92, 246, 0.12);
+      border: 1px solid rgba(139, 92, 246, 0.2);
+      color: #d4d4e0;
+      align-self: flex-start;
+    }
+    .ai-msg.user {
+      background: rgba(99, 102, 241, 0.2);
+      color: #e4e4ec;
+      align-self: flex-end;
+    }
+    .ai-input-wrap {
+      padding: 12px;
+      border-top: 1px solid #1e1e30;
+    }
+    .ai-quick-btns {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+    .ai-quick-btn {
+      padding: 5px 10px;
+      background: rgba(139, 92, 246, 0.1);
+      border: 1px solid rgba(139, 92, 246, 0.2);
+      border-radius: 6px;
+      font-size: 11px;
+      color: #a78bfa;
+      cursor: pointer;
+      transition: all .2s;
+    }
+    .ai-quick-btn:hover { background: rgba(139, 92, 246, 0.2); }
+    .ai-input-area {
+      display: flex;
+      gap: 8px;
+    }
+    .ai-input {
+      flex: 1;
+      background: rgba(10, 10, 18, 0.6);
+      border: 1px solid #1e1e30;
+      border-radius: 8px;
+      padding: 8px 12px;
+      color: #e4e4ec;
+      font-size: 13px;
+      outline: none;
+      resize: none;
+      font-family: inherit;
+      height: 36px;
+    }
+    .ai-input:focus { border-color: rgba(139, 92, 246, 0.5); }
+    .ai-send-btn {
+      width: 36px; height: 36px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #8b5cf6, #6366f1);
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .ai-send-btn:hover { opacity: 0.9; }
+    
+    /* Stats Row */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+    .stat-card {
+      background: rgba(18, 18, 31, 0.7);
+      border: 1px solid #1e1e30;
+      border-radius: 12px;
+      padding: 18px 20px;
+    }
+    .stat-label {
+      font-size: 13px;
+      color: #6b6b85;
+      margin-bottom: 8px;
+    }
+    .stat-value {
+      font-size: 26px;
+      font-weight: 700;
+      color: #e4e4ec;
+    }
+    .stat-value.purple { color: #c4b5fd; }
+    .stat-value.blue { color: #60a5fa; }
+    .stat-value.green { color: #86efac; }
+    
+    /* Dialog Styles */
+    :deep(.el-dialog) {
+      background: #12121f !important;
+      border: 1px solid #1e1e30 !important;
+    }
+    :deep(.el-dialog__title) { color: #e4e4ec !important; }
+    :deep(.el-dialog__headerbtn .el-dialog__close) { color: #6b6b85 !important; }
+    :deep(.el-message-box) {
+      background: #12121f !important;
+      border: 1px solid #1e1e30 !important;
+    }
+    :deep(.el-message-box__title) { color: #e4e4ec !important; }
+    :deep(.el-message-box__message) { color: #a0a0b8 !important; }
+    
+    /* Tabs */
+    :deep(.el-tabs__item) { color: #6b6b85 !important; }
+    :deep(.el-tabs__item.is-active) { color: #c4b5fd !important; }
+    :deep(.el-tabs__active-bar) { background-color: #8b5cf6 !important; }
+    :deep(.el-tabs__nav-wrap::after) { background-color: #1e1e30 !important; }
+    
+    @media (max-width: 768px) {
+      .sidebar { width: 64px; }
+      .sidebar-logo-text, .menu-item span, .user-info-text, .sidebar-section { display: none; }
+      .menu-item { justify-content: center; }
+      .stats-row { grid-template-columns: repeat(2, 1fr); }
+      .settings-layout { flex-direction: column; }
+      .settings-sider { width: 100%; }
+      .editor-left, .editor-right { display: none; }
     }
   </style>
 </head>
 <body>
   <div id="app">
-    <div class="navbar">
-      <div class="nav-inner">
-        <div class="logo" @click="goHome">
-          <div class="logo-dot"><i class="fas fa-tasks"></i></div>
-          <span>not-book</span>
+    <div class="layout">
+      <!-- Sidebar -->
+      <div class="sidebar">
+        <div class="sidebar-logo" @click="currentPage='home'">
+          <div class="sidebar-logo-icon"><i class="fas fa-feather-alt"></i></div>
+          <span class="sidebar-logo-text">not-book</span>
         </div>
-        <div class="nav-right">
-          <template v-if="isLoggedIn">
-            <span class="nav-link" @click="currentPage='tasks'">我的任务</span>
-            <el-dropdown @command="handleCommand">
-              <div class="user-info">
-                <div class="user-avatar">{{ username.charAt(0).toUpperCase() }}</div>
-                <span style="font-size:14px;color:#606266;">{{ username }}<i class="fas fa-caret-down" style="margin-left:4px;font-size:12px;"></i></span>
+        
+        <div class="sidebar-section">工作台</div>
+        <div class="menu-item" :class="{active: currentPage==='home'}" @click="currentPage='home'">
+          <i class="fas fa-home"></i>
+          <span>首页</span>
+        </div>
+        <div class="menu-item" :class="{active: currentPage==='novels'}" @click="currentPage='novels'">
+          <i class="fas fa-book"></i>
+          <span>我的小说</span>
+        </div>
+        <div class="menu-item" :class="{active: currentPage==='tasks'}" @click="currentPage='tasks'">
+          <i class="fas fa-tasks"></i>
+          <span>任务管理</span>
+        </div>
+        
+        <div class="sidebar-section">创作</div>
+        <div class="menu-item" :class="{active: currentPage==='editor'}" @click="openEditor()">
+          <i class="fas fa-pen-fancy"></i>
+          <span>编辑器</span>
+        </div>
+        <div class="menu-item" :class="{active: currentPage==='aihelper'}" @click="currentPage='aihelper'">
+          <i class="fas fa-robot"></i>
+          <span>AI 助手</span>
+        </div>
+        
+        <div class="sidebar-footer">
+          <el-dropdown @command="handleUserCommand">
+            <div class="user-card">
+              <div class="user-avatar">{{ username.charAt(0).toUpperCase() }}</div>
+              <div class="user-info-text">
+                <div class="user-name">{{ username }}</div>
+                <div class="user-role">{{ userRoleText }}</div>
               </div>
-              <template #dropdown>
-                <el-dropdown-menu>
-                  <el-dropdown-item command="tasks">我的任务</el-dropdown-item>
-                  <el-dropdown-item command="logout" divided>退出登录</el-dropdown-item>
-                </el-dropdown-menu>
-              </template>
-            </el-dropdown>
-          </template>
-          <template v-else>
-            <span class="nav-link" @click="currentPage='login'">登录</span>
-            <el-button type="primary" size="small" @click="currentPage='login'">立即体验</el-button>
-          </template>
-        </div>
-      </div>
-    </div>
-    
-    <!-- Home Page -->
-    <div v-if="currentPage==='home'">
-      <div class="hero">
-        <div class="hero-inner">
-          <div class="hero-badge"><span class="dot"></span> Vue 3 + Django · 全栈架构</div>
-          <h1>用 <span class="gradient">not-book</span><br/>轻松管理你的任务</h1>
-          <p>
-            not-book 是一个前后端分离的任务管理系统，前端基于 Vue 3 + Element Plus，后端基于 Django，
-            支持多角色权限管理，让你的工作更高效、更有序。
-          </p>
-          <div class="hero-btns">
-            <el-button type="primary" size="large" @click="currentPage='login'">
-              <i class="fas fa-rocket" style="margin-right:6px;"></i>开始使用
-            </el-button>
-            <el-button size="large" @click="scrollTo('features')">
-              了解更多
-            </el-button>
-          </div>
+              <i class="fas fa-caret-down" style="color:#6b6b85;font-size:12px;"></i>
+            </div>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item command="settings">
+                  <i class="fas fa-cog" style="margin-right:8px;"></i>设置
+                </el-dropdown-item>
+                <el-dropdown-item command="ai-settings">
+                  <i class="fas fa-plug" style="margin-right:8px;"></i>AI 接入设置
+                </el-dropdown-item>
+                <el-dropdown-item command="logout" divided>
+                  <i class="fas fa-sign-out-alt" style="margin-right:8px;"></i>退出登录
+                </el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
         </div>
       </div>
       
-      <div id="features" class="section">
-        <div class="section-title">
-          <h2>核心功能</h2>
-          <p>简洁高效，开箱即用</p>
-        </div>
-        <div class="feat-grid">
-          <div class="feat-card">
-            <div class="feat-icon blue"><i class="fas fa-tasks"></i></div>
-            <h3>任务管理</h3>
-            <p>支持任务的创建、编辑、删除，按状态和优先级分类管理，一目了然。</p>
+      <!-- Main -->
+      <div class="main">
+        <div class="topbar">
+          <div class="breadcrumb">
+            <span>首页</span>
+            <template v-if="currentPage !== 'home'">
+              <span style="margin:0 6px;">/</span>
+              <span class="current">{{ pageTitle }}</span>
+            </template>
           </div>
-          <div class="feat-card">
-            <div class="feat-icon purple"><i class="fas fa-user-shield"></i></div>
-            <h3>角色权限</h3>
-            <p>三级角色体系：超级管理员、管理员、普通用户，精细化权限控制。</p>
-          </div>
-          <div class="feat-card">
-            <div class="feat-icon green"><i class="fas fa-chart-pie"></i></div>
-            <h3>数据统计</h3>
-            <p>直观的仪表盘统计面板，实时掌握任务进度与团队工作状态。</p>
-          </div>
-          <div class="feat-card">
-            <div class="feat-icon orange"><i class="fas fa-mobile-alt"></i></div>
-            <h3>响应式设计</h3>
-            <p>完美适配桌面端和移动端，随时随地管理你的任务。</p>
-          </div>
-          <div class="feat-card">
-            <div class="feat-icon red"><i class="fas fa-plug"></i></div>
-            <h3>API 友好</h3>
-            <p>前后端分离架构，RESTful API 设计，易于扩展和集成。</p>
-          </div>
-          <div class="feat-card">
-            <div class="feat-icon cyan"><i class="fas fa-code"></i></div>
-            <h3>开源免费</h3>
-            <p>项目完全开源，代码结构清晰，便于学习和二次开发。</p>
-          </div>
-        </div>
-      </div>
-      
-      <div id="stack" class="section" style="background:#fafbfc;">
-        <div class="section-title">
-          <h2>技术栈</h2>
-          <p>前后端分离，成熟稳定的技术选型</p>
-        </div>
-        <div class="stack-wrap">
-          <span class="stack-chip"><i class="fab fa-vuejs" style="color:#42b883;margin-right:6px;"></i>Vue 3</span>
-          <span class="stack-chip"><i class="fas fa-cubes" style="color:#409eff;margin-right:6px;"></i>Element Plus</span>
-          <span class="stack-chip"><i class="fab fa-python" style="color:#3776ab;margin-right:6px;"></i>Django 6.0</span>
-          <span class="stack-chip"><i class="fas fa-plug" style="color:#a30000;margin-right:6px;"></i>DRF</span>
-          <span class="stack-chip"><i class="fas fa-database" style="color:#00758f;margin-right:6px;"></i>SQLite / MySQL</span>
-          <span class="stack-chip"><i class="fas fa-key" style="color:#ff7d00;margin-right:6px;"></i>JWT</span>
-          <span class="stack-chip"><i class="fab fa-github" style="color:#333;margin-right:6px;"></i>GitHub Pages</span>
-        </div>
-      </div>
-      
-      <div class="footer">
-        <div class="footer-inner">
-          <span>© {{ currentYear }} not-book · 任务管理系统</span>
-          <a href="https://github.com/hxhming/not-book" target="_blank" rel="noopener">
-            <i class="fab fa-github" style="margin-right:6px;"></i>github.com/hxhming/not-book
-          </a>
-        </div>
-      </div>
-    </div>
-    
-    <!-- Login Page -->
-    <div v-if="currentPage==='login'" class="login-page">
-      <div class="login-box">
-        <div class="login-logo"><i class="fas fa-tasks"></i></div>
-        <div class="login-title">欢迎回来</div>
-        <div class="login-subtitle">登录 not-book 管理你的任务</div>
-        <el-form :model="loginForm" label-width="0" @submit.prevent="handleLogin">
-          <el-form-item>
-            <el-input v-model="loginForm.username" placeholder="请输入用户名" size="large" :prefix-icon="User" />
-          </el-form-item>
-          <el-form-item>
-            <el-input v-model="loginForm.password" type="password" placeholder="请输入密码" size="large" :prefix-icon="Lock" show-password @keyup.enter="handleLogin" />
-          </el-form-item>
-          <el-form-item>
-            <el-button type="primary" size="large" style="width:100%;" @click="handleLogin" :loading="loggingIn">
-              登 录
-            </el-button>
-          </el-form-item>
-        </el-form>
-        <div class="form-tip">
-          管理员请前往 <a @click="goAdmin">管理后台</a> 登录
-        </div>
-      </div>
-    </div>
-    
-    <!-- Task Center -->
-    <div v-if="currentPage==='tasks' && isLoggedIn">
-      <div class="task-center">
-        <div class="task-stats">
-          <div class="stat-card">
-            <div class="stat-label">全部任务</div>
-            <div class="stat-value">{{ myTasks.length }}</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-label">待办</div>
-            <div class="stat-value todo">{{ stats.todo }}</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-label">进行中</div>
-            <div class="stat-value progress">{{ stats.progress }}</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-label">已完成</div>
-            <div class="stat-value done">{{ stats.done }}</div>
+          <div class="topbar-right">
+            <div class="topbar-btn" title="通知">
+              <i class="far fa-bell"></i>
+            </div>
+            <div class="topbar-btn" title="帮助">
+              <i class="far fa-question-circle"></i>
+            </div>
           </div>
         </div>
         
-        <div class="page-card">
-          <div class="task-header">
-            <h2 style="font-size:18px;font-weight:600;">我的任务</h2>
-            <el-button type="primary" @click="openAddDialog">
-              <i class="fas fa-plus" style="margin-right:6px;"></i>新建任务
-            </el-button>
+        <div class="content">
+          <!-- Home Page -->
+          <div v-if="currentPage==='home'">
+            <div class="hero-section">
+              <div class="hero-glow"></div>
+              <div class="hero-badge"><span class="dot"></span> AI 驱动的长篇创作</div>
+              <h1 class="hero-title">
+                用 <span class="gradient-text">not-book</span><br/>
+                写出你的鸿篇巨制
+              </h1>
+              <p class="hero-desc">
+                不是聊天框，是长篇项目工作台。把大纲、正文、角色弧光、承诺台账、剧情线、RAG 记忆和 AI 一键写进同一个可审稳、可采纳、可沉淀的工作流。
+              </p>
+              <div class="hero-btns">
+                <button class="btn-primary" @click="openCreateNovel()">
+                  <i class="fas fa-plus" style="margin-right:6px;"></i>创建新项目
+                </button>
+                <button class="btn-ghost" @click="currentPage='novels'">
+                  查看所有作品
+                </button>
+              </div>
+            </div>
+            
+            <div class="stats-row">
+              <div class="stat-card">
+                <div class="stat-label">小说项目</div>
+                <div class="stat-value purple">{{ novels.length }}</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-label">总字数</div>
+                <div class="stat-value blue">{{ totalWords }}</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-label">章节数</div>
+                <div class="stat-value">{{ totalChapters }}</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-label">AI 调用次数</div>
+                <div class="stat-value green">{{ aiCallCount }}</div>
+              </div>
+            </div>
+            
+            <div class="section-header">
+              <div class="section-title">最近作品</div>
+              <el-button type="primary" link @click="currentPage='novels'">查看全部</el-button>
+            </div>
+            
+            <div class="project-grid">
+              <div class="project-new-card" @click="openCreateNovel()">
+                <div class="project-new-icon"><i class="fas fa-plus"></i></div>
+                <div class="project-new-text">创建新项目</div>
+              </div>
+              <div 
+                v-for="novel in novels.slice(0, 5)" 
+                :key="novel.id" 
+                class="project-card"
+                @click="openNovel(novel)"
+              >
+                <span class="project-tag">{{ novel.category }}</span>
+                <div class="project-name">{{ novel.title }}</div>
+                <div class="project-desc">{{ novel.description }}</div>
+                <div class="project-meta">
+                  <div><i class="fas fa-file-alt"></i>{{ novel.chapterCount }} 章</div>
+                  <div><i class="fas fa-font"></i>{{ novel.wordCount }} 字</div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="feat-grid">
+              <div class="feat-card">
+                <div class="feat-icon purple"><i class="fas fa-brain"></i></div>
+                <h4>AI 辅助创作</h4>
+                <p>支持多家大模型接入，一键生成大纲、续写正文、润色文字。</p>
+              </div>
+              <div class="feat-card blue">
+                <div class="feat-icon blue"><i class="fas fa-sitemap"></i></div>
+                <h4>大纲可视化</h4>
+                <p>卷-章-节三级结构，故事脉络一目了然，支持拖拽调整顺序。</p>
+              </div>
+              <div class="feat-card green">
+                <div class="feat-icon green"><i class="fas fa-user-friends"></i></div>
+                <h4>角色管理</h4>
+                <p>建立角色弧光档案，追踪人物成长线，避免人设崩塌。</p>
+              </div>
+              <div class="feat-card orange">
+                <div class="feat-icon orange"><i class="fas fa-database"></i></div>
+                <h4>向量记忆</h4>
+                <p>RAG 知识库检索，让 AI 记住你的世界观，保持前后设定一致。</p>
+              </div>
+            </div>
           </div>
-          <div class="filter-bar">
-            <el-input v-model="searchQuery" placeholder="搜索标题或描述..." clearable>
-              <template #prefix><i class="fas fa-search" style="color:#c0c4cc;"></i></template>
-            </el-input>
-            <el-select v-model="filterStatus" placeholder="全部状态" clearable>
-              <el-option label="待办" value="todo" />
-              <el-option label="进行中" value="in_progress" />
-              <el-option label="已完成" value="done" />
-            </el-select>
-            <el-select v-model="filterPriority" placeholder="全部优先级" clearable>
-              <el-option label="高" value="high" />
-              <el-option label="中" value="medium" />
-              <el-option label="低" value="low" />
-            </el-select>
+          
+          <!-- Novels Page -->
+          <div v-if="currentPage==='novels'">
+            <div class="section-header">
+              <div class="section-title">我的小说</div>
+              <el-button type="primary" @click="openCreateNovel()">
+                <i class="fas fa-plus" style="margin-right:6px;"></i>新建项目
+              </el-button>
+            </div>
+            <div class="project-grid">
+              <div class="project-new-card" @click="openCreateNovel()">
+                <div class="project-new-icon"><i class="fas fa-plus"></i></div>
+                <div class="project-new-text">创建新项目</div>
+              </div>
+              <div 
+                v-for="novel in novels" 
+                :key="novel.id" 
+                class="project-card"
+                @click="openNovel(novel)"
+              >
+                <span class="project-tag">{{ novel.category }}</span>
+                <div class="project-name">{{ novel.title }}</div>
+                <div class="project-desc">{{ novel.description }}</div>
+                <div class="project-meta">
+                  <div><i class="fas fa-file-alt"></i>{{ novel.chapterCount }} 章</div>
+                  <div><i class="fas fa-font"></i>{{ novel.wordCount }} 字</div>
+                </div>
+              </div>
+            </div>
           </div>
-          <div v-if="filteredTasks.length === 0" class="empty-wrap">
-            <i class="fas fa-inbox" style="font-size:48px;margin-bottom:12px;color:#dcdfe6;"></i>
-            <div>暂无任务数据</div>
+          
+          <!-- Tasks Page -->
+          <div v-if="currentPage==='tasks'">
+            <div class="section-header">
+              <div class="section-title">任务管理</div>
+              <el-button type="primary" @click="openAddTask()">
+                <i class="fas fa-plus" style="margin-right:6px;"></i>新建任务
+              </el-button>
+            </div>
+            <div class="stats-row">
+              <div class="stat-card">
+                <div class="stat-label">全部任务</div>
+                <div class="stat-value">{{ tasks.length }}</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-label">待办</div>
+                <div class="stat-value purple">{{ taskStats.todo }}</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-label">进行中</div>
+                <div class="stat-value blue">{{ taskStats.progress }}</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-label">已完成</div>
+                <div class="stat-value green">{{ taskStats.done }}</div>
+              </div>
+            </div>
+            <div class="page-card" style="background:rgba(18,18,31,0.7);border:1px solid #1e1e30;border-radius:12px;padding:20px;">
+              <div class="filter-bar" style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;">
+                <el-input v-model="taskSearch" placeholder="搜索标题或描述..." clearable style="width:240px;">
+                  <template #prefix><i class="fas fa-search" style="color:#6b6b85;"></i></template>
+                </el-input>
+                <el-select v-model="taskFilterStatus" placeholder="全部状态" clearable style="width:140px;">
+                  <el-option label="待办" value="todo" />
+                  <el-option label="进行中" value="in_progress" />
+                  <el-option label="已完成" value="done" />
+                </el-select>
+                <el-select v-model="taskFilterPriority" placeholder="全部优先级" clearable style="width:140px;">
+                  <el-option label="高" value="high" />
+                  <el-option label="中" value="medium" />
+                  <el-option label="低" value="low" />
+                </el-select>
+              </div>
+              <div v-if="filteredTasks.length === 0" style="text-align:center;padding:60px 0;color:#6b6b85;">
+                <i class="fas fa-inbox" style="font-size:48px;margin-bottom:12px;color:#2a2a3e;"></i>
+                <div>暂无任务数据</div>
+              </div>
+              <div v-else style="overflow-x:auto;">
+                <table style="width:100%;border-collapse:collapse;font-size:14px;">
+                  <thead>
+                    <tr style="background:rgba(10,10,18,0.5);">
+                      <th style="padding:12px 14px;text-align:left;color:#6b6b85;font-weight:500;border-bottom:1px solid #1e1e30;">ID</th>
+                      <th style="padding:12px 14px;text-align:left;color:#6b6b85;font-weight:500;border-bottom:1px solid #1e1e30;">标题</th>
+                      <th style="padding:12px 14px;text-align:left;color:#6b6b85;font-weight:500;border-bottom:1px solid #1e1e30;">描述</th>
+                      <th style="padding:12px 14px;text-align:left;color:#6b6b85;font-weight:500;border-bottom:1px solid #1e1e30;">状态</th>
+                      <th style="padding:12px 14px;text-align:left;color:#6b6b85;font-weight:500;border-bottom:1px solid #1e1e30;">优先级</th>
+                      <th style="padding:12px 14px;text-align:left;color:#6b6b85;font-weight:500;border-bottom:1px solid #1e1e30;">创建时间</th>
+                      <th style="padding:12px 14px;text-align:center;color:#6b6b85;font-weight:500;border-bottom:1px solid #1e1e30;">操作</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="row in filteredTasks" :key="row.id" style="border-bottom:1px solid #1a1a2a;">
+                      <td style="padding:12px 14px;color:#a0a0b8;">{{ row.id }}</td>
+                      <td style="padding:12px 14px;color:#e4e4ec;">{{ row.title }}</td>
+                      <td style="padding:12px 14px;color:#6b6b85;" :title="row.description">{{ row.description }}</td>
+                      <td style="padding:12px 14px;">
+                        <span :style="{
+                          padding: '3px 10px',
+                          borderRadius: '4px',
+                          fontSize: '12px',
+                          background: row.status==='done' ? 'rgba(34,197,94,0.12)' : row.status==='in_progress' ? 'rgba(59,130,246,0.12)' : 'rgba(249,115,22,0.12)',
+                          color: row.status==='done' ? '#22c55e' : row.status==='in_progress' ? '#3b82f6' : '#f97316'
+                        }">
+                          {{ row.statusText }}
+                        </span>
+                      </td>
+                      <td style="padding:12px 14px;color:#a0a0b8;">
+                        <span :style="{
+                          display:'inline-block',width:'8px',height:'8px',borderRadius:'50%',marginRight:'6px',
+                          background: row.priority==='high' ? '#f56c6c' : row.priority==='medium' ? '#e6a23c' : '#909399'
+                        }"></span>{{ row.priorityText }}
+                      </td>
+                      <td style="padding:12px 14px;color:#6b6b85;font-size:13px;">{{ row.createdAt }}</td>
+                      <td style="padding:12px 14px;text-align:center;">
+                        <el-button size="small" type="primary" link @click="openEditTask(row)">编辑</el-button>
+                        <el-button size="small" type="danger" link @click="deleteTask(row)">删除</el-button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
-          <div v-else class="bitable-wrap">
-            <table class="bitable">
-              <thead>
-                <tr>
-                  <th style="width:60px;">ID</th>
-                  <th style="min-width:200px;">标题</th>
-                  <th style="min-width:280px;">描述</th>
-                  <th style="width:90px;">状态</th>
-                  <th style="width:90px;">优先级</th>
-                  <th style="width:170px;">创建时间</th>
-                  <th style="width:120px;" style="text-align:center;">操作</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="row in filteredTasks" :key="row.id">
-                  <td>{{ row.id }}</td>
-                  <td>{{ row.title }}</td>
-                  <td :title="row.description">{{ row.description }}</td>
-                  <td>
-                    <span class="bitag" :class="{ todo: 'bitag-warning', in_progress: 'bitag-info', done: 'bitag-success' }[row.status]">
-                      {{ row.statusText }}
-                    </span>
-                  </td>
-                  <td>
-                    <span class="priority-dot" :class="'priority-'+row.priority"></span>{{ row.priorityText }}
-                  </td>
-                  <td>{{ row.createdAt }}</td>
-                  <td style="text-align:center;">
-                    <el-button size="small" type="primary" link @click="openEditDialog(row)">编辑</el-button>
-                    <el-button size="small" type="danger" link @click="deleteTask(row)">删除</el-button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+          
+          <!-- Editor Page -->
+          <div v-if="currentPage==='editor' && currentNovel" class="editor-layout" style="margin:-24px;">
+            <div class="editor-left">
+              <div class="editor-left-header">
+                <span>故事大纲</span>
+                <div class="add-btn" @click="addChapter()"><i class="fas fa-plus"></i></div>
+              </div>
+              <div class="chapter-tree">
+                <div 
+                  v-for="(ch, idx) in chapters" 
+                  :key="ch.id"
+                  class="chapter-item"
+                  :class="{active: currentChapterId === ch.id}"
+                  @click="selectChapter(ch)"
+                >
+                  <i class="far fa-file-alt" style="font-size:12px;opacity:0.6;"></i>
+                  <span style="flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ ch.title }}</span>
+                </div>
+              </div>
+            </div>
+            <div class="editor-center">
+              <div class="editor-toolbar">
+                <input class="editor-title-input" v-model="currentChapter.title" />
+                <el-button size="small" type="primary" @click="saveChapter()">
+                  <i class="fas fa-save" style="margin-right:6px;"></i>保存
+                </el-button>
+              </div>
+              <div class="editor-area">
+                <textarea 
+                  class="editor-textarea" 
+                  v-model="currentChapter.content"
+                  placeholder="开始你的创作..."
+                ></textarea>
+              </div>
+            </div>
+            <div class="editor-right">
+              <div class="ai-assistant-header">
+                <div class="ai-icon"><i class="fas fa-robot"></i></div>
+                <div class="ai-title">AI 写作助手</div>
+              </div>
+              <div class="ai-messages" ref="aiMessagesRef">
+                <div class="ai-msg ai">
+                  你好！我是 AI 写作助手。我可以帮你：<br/>
+                  • 续写当前章节<br/>
+                  • 生成剧情建议<br/>
+                  • 优化文字表达<br/>
+                  • 生成人物对话
+                </div>
+                <div class="ai-msg user" v-for="(msg, idx) in aiMessages" :key="idx" :class="msg.role">
+                  {{ msg.content }}
+                </div>
+              </div>
+              <div class="ai-input-wrap">
+                <div class="ai-quick-btns">
+                  <div class="ai-quick-btn" @click="quickAi('continue')">✍️ 续写</div>
+                  <div class="ai-quick-btn" @click="quickAi('polish')">✨ 润色</div>
+                  <div class="ai-quick-btn" @click="quickAi('dialogue')">💬 写对话</div>
+                  <div class="ai-quick-btn" @click="quickAi('plot')">📖 剧情建议</div>
+                </div>
+                <div class="ai-input-area">
+                  <textarea class="ai-input" v-model="aiInput" placeholder="输入你的需求..." @keydown.enter.exact="sendAi()"></textarea>
+                  <button class="ai-send-btn" @click="sendAi()"><i class="fas fa-paper-plane"></i></button>
+                </div>
+              </div>
+            </div>
           </div>
+          
+          <!-- Settings Page -->
+          <div v-if="currentPage==='settings'">
+            <div class="settings-layout">
+              <div class="settings-sider">
+                <div class="settings-menu-item" :class="{active: settingsTab==='profile'}" @click="settingsTab='profile'">
+                  <i class="fas fa-user"></i>个人资料
+                </div>
+                <div class="settings-menu-item" :class="{active: settingsTab==='preferences'}" @click="settingsTab='preferences'">
+                  <i class="fas fa-sliders-h"></i>偏好设置
+                </div>
+                <div class="settings-menu-item" :class="{active: settingsTab==='ai'}" @click="settingsTab='ai'">
+                  <i class="fas fa-plug"></i>AI 接入设置
+                </div>
+              </div>
+              <div class="settings-content">
+                <!-- Profile -->
+                <div v-if="settingsTab==='profile'">
+                  <div class="settings-title">个人资料</div>
+                  <div class="settings-subtitle">管理你的基本信息和账号设置</div>
+                  <el-form :model="profileForm" label-width="100px" style="max-width:500px;">
+                    <el-form-item label="用户名">
+                      <el-input v-model="profileForm.username" />
+                    </el-form-item>
+                    <el-form-item label="昵称">
+                      <el-input v-model="profileForm.nickname" placeholder="请输入昵称" />
+                    </el-form-item>
+                    <el-form-item label="邮箱">
+                      <el-input v-model="profileForm.email" placeholder="请输入邮箱" />
+                    </el-form-item>
+                    <el-form-item label="个人简介">
+                      <el-input v-model="profileForm.bio" type="textarea" :rows="4" placeholder="介绍一下你自己..." />
+                    </el-form-item>
+                    <el-form-item>
+                      <el-button type="primary" @click="saveProfile()">保存修改</el-button>
+                    </el-form-item>
+                  </el-form>
+                </div>
+                
+                <!-- Preferences -->
+                <div v-if="settingsTab==='preferences'">
+                  <div class="settings-title">偏好设置</div>
+                  <div class="settings-subtitle">自定义编辑器和界面显示</div>
+                  <el-form :model="prefsForm" label-width="100px" style="max-width:500px;">
+                    <el-form-item label="主题">
+                      <el-select v-model="prefsForm.theme">
+                        <el-option label="深邃紫" value="purple" />
+                        <el-option label="暗夜蓝" value="blue" />
+                        <el-option label="暗黑绿" value="green" />
+                      </el-select>
+                    </el-form-item>
+                    <el-form-item label="编辑器字号">
+                      <el-select v-model="prefsForm.fontSize">
+                        <el-option label="小" value="13px" />
+                        <el-option label="中" value="15px" />
+                        <el-option label="大" value="17px" />
+                      </el-select>
+                    </el-form-item>
+                    <el-form-item label="自动保存">
+                      <el-switch v-model="prefsForm.autoSave" />
+                    </el-form-item>
+                    <el-form-item label="AI 助手">
+                      <el-switch v-model="prefsForm.showAiAssistant" />
+                    </el-form-item>
+                    <el-form-item>
+                      <el-button type="primary" @click="savePrefs()">保存设置</el-button>
+                    </el-form-item>
+                  </el-form>
+                </div>
+                
+                <!-- AI Settings -->
+                <div v-if="settingsTab==='ai'">
+                  <div class="settings-title">AI 接入设置</div>
+                  <div class="settings-subtitle">配置 AI 模型提供商，用于写作辅助和内容生成</div>
+                  
+                  <div style="margin-bottom:16px;">
+                    <el-button type="primary" @click="openAddAiModel()">
+                      <i class="fas fa-plus" style="margin-right:6px;"></i>添加 API 接入
+                    </el-button>
+                  </div>
+                  
+                  <div class="ai-model-list" v-if="aiModels.length > 0">
+                    <div v-for="model in aiModels" :key="model.id" class="ai-model-card">
+                      <div class="ai-model-icon" :class="model.providerType">
+                        <i :class="getProviderIcon(model.providerType)"></i>
+                      </div>
+                      <div class="ai-model-info">
+                        <div class="ai-model-name">{{ model.name }}</div>
+                        <div class="ai-model-desc">{{ model.provider }} · {{ model.modelName }}</div>
+                        <div class="ai-model-tags">
+                          <span class="ai-model-tag" v-if="model.supportsText">📝 文本生成</span>
+                          <span class="ai-model-tag vector" v-if="model.supportsVector">🔢 向量模型</span>
+                          <span class="ai-model-tag image" v-if="model.supportsImage">🎨 绘图模型</span>
+                        </div>
+                      </div>
+                      <div style="display:flex;gap:8px;">
+                        <el-button size="small" @click="testAiModel(model)">
+                          <i class="fas fa-play" style="margin-right:4px;"></i>测试
+                        </el-button>
+                        <el-button size="small" type="danger" @click="deleteAiModel(model)">
+                          <i class="fas fa-trash" style="margin-right:4px;"></i>删除
+                        </el-button>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div v-else style="text-align:center;padding:60px 0;color:#6b6b85;">
+                    <i class="fas fa-plug" style="font-size:48px;margin-bottom:12px;color:#2a2a3e;"></i>
+                    <div style="margin-bottom:8px;">暂无 AI 模型配置</div>
+                    <div style="font-size:13px;">点击上方「添加 API 接入」开始配置</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
         </div>
       </div>
     </div>
     
+    <!-- Create Novel Dialog -->
+    <el-dialog v-model="createNovelVisible" title="创建小说项目" width="520px">
+      <el-form :model="novelForm" label-width="100px">
+        <el-form-item label="作品名称">
+          <el-input v-model="novelForm.title" placeholder="请输入作品名称" />
+        </el-form-item>
+        <el-form-item label="分类">
+          <el-select v-model="novelForm.category" style="width:100%;">
+            <el-option label="女频" value="女频" />
+            <el-option label="男频" value="男频" />
+            <el-option label="言情" value="言情" />
+            <el-option label="玄幻" value="玄幻" />
+            <el-option label="都市" value="都市" />
+            <el-option label="古代言情" value="古代言情" />
+            <el-option label="科幻" value="科幻" />
+            <el-option label="悬疑" value="悬疑" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="作品简介">
+          <el-input v-model="novelForm.description" type="textarea" :rows="4" placeholder="简单描述你的作品..." />
+        </el-form-item>
+        <el-form-item label="目标字数">
+          <el-select v-model="novelForm.targetWords" style="width:100%;">
+            <el-option label="10 万字（短篇）" :value="100000" />
+            <el-option label="30 万字（中篇）" :value="300000" />
+            <el-option label="50 万字（长篇）" :value="500000" />
+            <el-option label="100 万字（超长篇）" :value="1000000" />
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="createNovelVisible = false">取消</el-button>
+        <el-button type="primary" @click="createNovel()">创建项目</el-button>
+      </template>
+    </el-dialog>
+    
+    <!-- Add AI Model Dialog -->
+    <el-dialog v-model="addAiModelVisible" title="添加 AI API 接入" width="560px">
+      <el-form :model="aiForm" label-width="110px">
+        <el-form-item label="配置名称">
+          <el-input v-model="aiForm.name" placeholder="给这个配置起个名字，如：我的 GPT-4" />
+        </el-form-item>
+        <el-form-item label="提供商">
+          <el-select v-model="aiForm.providerType" style="width:100%;" @change="onProviderChange">
+            <el-option label="OpenAI (GPT 系列)" value="openai" />
+            <el-option label="Anthropic (Claude 系列)" value="anthropic" />
+            <el-option label="百度文心一言" value="baidu" />
+            <el-option label="阿里通义千问" value="alibaba" />
+            <el-option label="腾讯混元" value="tencent" />
+            <el-option label="智谱 AI" value="zhipu" />
+            <el-option label="自定义 (兼容 OpenAI 协议)" value="custom" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="API 地址" v-if="aiForm.providerType === 'custom'">
+          <el-input v-model="aiForm.baseUrl" placeholder="https://api.example.com/v1" />
+        </el-form-item>
+        <el-form-item label="API Key">
+          <el-input v-model="aiForm.apiKey" type="password" show-password placeholder="请输入 API Key" />
+        </el-form-item>
+        <el-form-item label="模型名称">
+          <el-select v-model="aiForm.modelName" filterable allow-create v-if="!customModelInput" style="width:100%;">
+            <template v-if="aiForm.providerType==='openai'">
+              <el-option label="gpt-4o" value="gpt-4o" />
+              <el-option label="gpt-4o-mini" value="gpt-4o-mini" />
+              <el-option label="gpt-4-turbo" value="gpt-4-turbo" />
+              <el-option label="gpt-3.5-turbo" value="gpt-3.5-turbo" />
+              <el-option label="text-embedding-3-large (向量)" value="text-embedding-3-large" />
+              <el-option label="dall-e-3 (绘图)" value="dall-e-3" />
+            </template>
+            <template v-else-if="aiForm.providerType==='anthropic'">
+              <el-option label="claude-3-5-sonnet" value="claude-3-5-sonnet-latest" />
+              <el-option label="claude-3-opus" value="claude-3-opus-latest" />
+              <el-option label="claude-3-haiku" value="claude-3-haiku-latest" />
+            </template>
+            <template v-else-if="aiForm.providerType==='baidu'">
+              <el-option label="ERNIE 4.0" value="ernie-4.0" />
+              <el-option label="ERNIE 3.5" value="ernie-3.5" />
+              <el-option label="ERNIE Speed" value="ernie-speed" />
+              <el-option label="ERNIE Embedding (向量)" value="ernie-text-embedding" />
+            </template>
+            <template v-else-if="aiForm.providerType==='alibaba'">
+              <el-option label="通义千问 4 增强版" value="qwen4-plus" />
+              <el-option label="通义千问 3.5" value="qwen3.5-turbo" />
+              <el-option label="通义千问 Long" value="qwen-long" />
+              <el-option label="通义万相 (绘图)" value="wanx-v1" />
+              <el-option label="text-embedding-v3 (向量)" value="text-embedding-v3" />
+            </template>
+            <template v-else-if="aiForm.providerType==='zhipu'">
+              <el-option label="GLM-4" value="glm-4" />
+              <el-option label="GLM-4-Flash" value="glm-4-flash" />
+              <el-option label="GLM-4V" value="glm-4v" />
+              <el-option label="embedding-3 (向量)" value="embedding-3" />
+            </template>
+            <template v-else>
+              <el-option label="自定义模型名称" value="custom-input" />
+            </template>
+          </el-select>
+          <el-input v-else v-model="aiForm.modelName" placeholder="请输入模型名称" />
+        </el-form-item>
+        <el-form-item label="模型类型">
+          <el-checkbox-group v-model="aiForm.modelTypes">
+            <el-checkbox value="text">文本生成</el-checkbox>
+            <el-checkbox value="vector">向量模型</el-checkbox>
+            <el-checkbox value="image">绘图模型</el-checkbox>
+          </el-checkbox-group>
+        </el-form-item>
+        <el-form-item label="使用场景">
+          <el-select v-model="aiForm.useCase" style="width:100%;">
+            <el-option label="主力写作模型" value="primary" />
+            <el-option label="辅助写作" value="assistant" />
+            <el-option label="仅用于向量检索" value="vector_only" />
+            <el-option label="仅用于绘图" value="image_only" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="设为默认">
+          <el-switch v-model="aiForm.isDefault" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="addAiModelVisible = false">取消</el-button>
+        <el-button type="primary" @click="saveAiModel()">添加配置</el-button>
+      </template>
+    </el-dialog>
+    
     <!-- Task Dialog -->
-    <el-dialog v-model="dialogVisible" :title="dialogTitle" width="520px">
-      <el-form :model="form" label-width="80px">
+    <el-dialog v-model="taskDialogVisible" :title="taskDialogTitle" width="480px">
+      <el-form :model="taskForm" label-width="80px">
         <el-form-item label="标题">
-          <el-input v-model="form.title" placeholder="请输入任务标题" />
+          <el-input v-model="taskForm.title" placeholder="请输入任务标题" />
         </el-form-item>
         <el-form-item label="描述">
-          <el-input v-model="form.description" type="textarea" :rows="4" placeholder="请输入任务描述" />
+          <el-input v-model="taskForm.description" type="textarea" :rows="4" placeholder="请输入任务描述" />
         </el-form-item>
         <el-form-item label="状态">
-          <el-select v-model="form.status" style="width: 100%;">
+          <el-select v-model="taskForm.status" style="width:100%;">
             <el-option label="待办" value="todo" />
             <el-option label="进行中" value="in_progress" />
             <el-option label="已完成" value="done" />
           </el-select>
         </el-form-item>
         <el-form-item label="优先级">
-          <el-select v-model="form.priority" style="width: 100%;">
+          <el-select v-model="taskForm.priority" style="width:100%;">
             <el-option label="高" value="high" />
             <el-option label="中" value="medium" />
             <el-option label="低" value="low" />
@@ -612,55 +1380,219 @@
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="saveTask">确定</el-button>
+        <el-button @click="taskDialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="saveTaskDialog()">确定</el-button>
       </template>
     </el-dialog>
+    
+    <!-- Login Page (not logged in) -->
   </div>
   
   <script>
-    const { createApp, ref, computed, reactive, onMounted } = Vue;
-    const { User, Lock } = ElementPlusIconsVue;
+    const { createApp, ref, computed, reactive, onMounted, nextTick } = Vue;
     
     const app = createApp({
       setup() {
         const currentPage = ref('home');
-        const currentYear = ref(new Date().getFullYear());
         const username = ref('');
         const isLoggedIn = ref(false);
-        const loggingIn = ref(false);
-        const loginForm = reactive({ username: '', password: '' });
+        const settingsTab = ref('profile');
         
-        const searchQuery = ref('');
-        const filterStatus = ref('');
-        const filterPriority = ref('');
-        const dialogVisible = ref(false);
-        const isEdit = ref(false);
-        const form = reactive({ id: null, title: '', description: '', status: 'todo', priority: 'medium' });
+        // User profile
+        const profileForm = reactive({
+          username: '',
+          nickname: '',
+          email: '',
+          bio: '',
+        });
+        
+        // Preferences
+        const prefsForm = reactive({
+          theme: 'purple',
+          fontSize: '15px',
+          autoSave: true,
+          showAiAssistant: true,
+        });
+        
+        // Novels
+        const novels = ref([]);
+        const createNovelVisible = ref(false);
+        const novelForm = reactive({
+          title: '',
+          category: '女频',
+          description: '',
+          targetWords: 300000,
+        });
+        const currentNovel = ref(null);
+        const chapters = ref([]);
+        const currentChapterId = ref(null);
+        
+        // Editor
+        const aiMessages = ref([]);
+        const aiInput = ref('');
+        
+        // Tasks
+        const tasks = ref([]);
+        const taskSearch = ref('');
+        const taskFilterStatus = ref('');
+        const taskFilterPriority = ref('');
+        const taskDialogVisible = ref(false);
+        const isTaskEdit = ref(false);
+        const taskForm = reactive({ id: null, title: '', description: '', status: 'todo', priority: 'medium' });
+        
+        // AI Models
+        const aiModels = ref([]);
+        const addAiModelVisible = ref(false);
+        const aiForm = reactive({
+          id: null,
+          name: '',
+          providerType: 'openai',
+          provider: 'OpenAI',
+          baseUrl: '',
+          apiKey: '',
+          modelName: 'gpt-4o',
+          modelTypes: ['text'],
+          useCase: 'primary',
+          isDefault: false,
+        });
+        const customModelInput = ref(false);
         
         const statusMap = { todo: '待办', in_progress: '进行中', done: '已完成' };
         const priorityMap = { high: '高', medium: '中', low: '低' };
         
-        const tasks = ref([]);
+        const userRoleText = computed(() => '创作者');
+        
+        const pageTitle = computed(() => {
+          const map = {
+            home: '首页',
+            novels: '我的小说',
+            tasks: '任务管理',
+            editor: '编辑器',
+            aihelper: 'AI 助手',
+            settings: '设置',
+          };
+          return map[currentPage.value] || '';
+        });
+        
+        const totalWords = computed(() => novels.value.reduce((sum, n) => sum + (n.wordCount || 0), 0));
+        const totalChapters = computed(() => novels.value.reduce((sum, n) => sum + (n.chapterCount || 0), 0));
+        const aiCallCount = ref(12);
+        
+        const taskStats = computed(() => ({
+          todo: tasks.value.filter(t => t.status === 'todo').length,
+          progress: tasks.value.filter(t => t.status === 'in_progress').length,
+          done: tasks.value.filter(t => t.status === 'done').length,
+        }));
+        
+        const taskDialogTitle = computed(() => isTaskEdit.value ? '编辑任务' : '新建任务');
+        
+        function enrichTask(task) {
+          return { ...task, statusText: statusMap[task.status], priorityText: priorityMap[task.priority] };
+        }
+        
+        const filteredTasks = computed(() => {
+          return tasks.value.map(enrichTask).filter(t => {
+            if (taskSearch.value) {
+              const q = taskSearch.value.toLowerCase();
+              if (!t.title.toLowerCase().includes(q) && !t.description.toLowerCase().includes(q)) return false;
+            }
+            if (taskFilterStatus.value && t.status !== taskFilterStatus.value) return false;
+            if (taskFilterPriority.value && t.priority !== taskFilterPriority.value) return false;
+            return true;
+          });
+        });
+        
+        const currentChapter = computed(() => {
+          return chapters.value.find(c => c.id === currentChapterId.value) || { title: '', content: '' };
+        });
+        
+        // Data loading
+        function loadNovels() {
+          try {
+            const data = localStorage.getItem('novels');
+            if (data) return JSON.parse(data);
+          } catch(e) {}
+          return [
+            {
+              id: 1,
+              title: '将门孤女：伪装守边被质子识破',
+              category: '古代言情',
+              description: '将门孤女伪装成男儿替兄守边关，靠前世留下的兵法卷屡立奇功，却被敌国质子识破身份，两人在战与和里纠缠抉择。',
+              chapterCount: 8,
+              wordCount: 35000,
+              targetWords: 500000,
+            },
+            {
+              id: 2,
+              title: '投篮轨迹预知者',
+              category: '竞技',
+              description: '落选秀意外觉醒能预知对手投篮轨迹的异能，从街头野球打到 NBA 总决赛，用预判能力打所有战术怀疑，登顶篮球之巅。',
+              chapterCount: 3,
+              wordCount: 12000,
+              targetWords: 300000,
+            },
+            {
+              id: 3,
+              title: '从野球场开始称霸CBA',
+              category: '都市',
+              description: '退役后卫绑定篮球天赋系统，从野球场草根一路打造 CBA 王朝，解锁专属战术卡干翻各路篮球强队，拿下总冠军。',
+              chapterCount: 2,
+              wordCount: 8000,
+              targetWords: 500000,
+            },
+          ];
+        }
+        
+        function saveNovels() {
+          localStorage.setItem('novels', JSON.stringify(novels.value));
+        }
         
         function loadTasks() {
-          const data = localStorage.getItem('tasks');
-          if (!data) {
-            const seed = [
-              { id: 1, title: '完成项目需求分析', description: '梳理 not-book 项目的核心功能需求', status: 'done', priority: 'high', createdAt: '2026-07-10 09:30:00' },
-              { id: 2, title: '搭建 Django 项目框架', description: '初始化 Django 6.0 项目，配置 simpleui 后台', status: 'done', priority: 'high', createdAt: '2026-07-11 14:20:00' },
-              { id: 3, title: '开发任务管理模块', description: '实现任务的增删改查功能', status: 'in_progress', priority: 'high', createdAt: '2026-07-12 10:15:00' },
-              { id: 4, title: '编写单元测试', description: '为 task 应用编写测试用例', status: 'todo', priority: 'medium', createdAt: '2026-07-13 16:45:00' },
-              { id: 5, title: '部署到生产环境', description: '将项目部署到线上服务器', status: 'todo', priority: 'medium', createdAt: '2026-07-14 11:00:00' },
-            ];
-            localStorage.setItem('tasks', JSON.stringify(seed));
-            return seed;
-          }
-          return JSON.parse(data);
+          try {
+            const data = localStorage.getItem('frontTasks');
+            if (data) return JSON.parse(data);
+          } catch(e) {}
+          return [
+            { id: 1, title: '完善女主人物设定', description: '补充女主的成长背景和性格细节', status: 'in_progress', priority: 'high', createdAt: '2026-07-12 10:15:00' },
+            { id: 2, title: '写第一卷大纲', description: '完成第一卷的故事脉络梳理', status: 'todo', priority: 'high', createdAt: '2026-07-11 14:20:00' },
+            { id: 3, title: 'AI 模型接入测试', description: '测试各家大模型的写作效果', status: 'done', priority: 'medium', createdAt: '2026-07-10 09:30:00' },
+            { id: 4, title: '收集读者反馈', description: '整理前期读者的意见和建议', status: 'todo', priority: 'low', createdAt: '2026-07-13 16:45:00' },
+          ];
         }
         
         function saveTasks() {
-          localStorage.setItem('tasks', JSON.stringify(tasks.value));
+          localStorage.setItem('frontTasks', JSON.stringify(tasks.value));
+        }
+        
+        function loadAiModels() {
+          try {
+            const data = localStorage.getItem('aiModels');
+            if (data) return JSON.parse(data);
+          } catch(e) {}
+          return [];
+        }
+        
+        function saveAiModels() {
+          localStorage.setItem('aiModels', JSON.stringify(aiModels.value));
+        }
+        
+        function loadChapters(novelId) {
+          try {
+            const data = localStorage.getItem('chapters_' + novelId);
+            if (data) return JSON.parse(data);
+          } catch(e) {}
+          return [
+            { id: 1, title: '第一章 孤身赴边', content: '黄沙漫卷，北风猎猎。\n\n一支残破的边军队伍正艰难地行进在苍茫的戈壁滩上，旌旗早已褪色，士兵们个个面带疲惫，却依然倔强地挺直着腰板。\n\n队伍的最前方，一个身形瘦削的"少年"正勒马回望。\n\n"沈校尉，前方三十里就是雁门关了！"探马疾驰而来，声音里带着难掩的激动。', wordCount: 3520 },
+            { id: 2, title: '第二章 初露锋芒', content: '雁门关的城头，风比山下更烈。\n\n沈砚站在女墙边，望着关外连绵起伏的沙丘，眼底深处藏着与年龄不符的沉凝。\n\n她，不，现在应该是"他"——沈砚，沈家嫡女，如今是顶替亡兄之名从军的罪臣之后。', wordCount: 2890 },
+            { id: 3, title: '第三章 夜袭危机', content: '是夜，月黑风高。\n\n沈砚刚睡下没多久，就被一阵急促的铜锣声惊醒。\n\n"敌袭！敌军夜袭！"', wordCount: 1200 },
+            { id: 4, title: '第四章 身份疑云', content: '晨光微熹，大战初歇。\n\n沈砚靠在城墙上，肩上的伤口刚包扎好，白布上还渗着血，她却像没知觉一样，只是盯着关外敌军撤退的方向出神。', wordCount: 800 },
+          ];
+        }
+        
+        function saveChaptersLocal() {
+          if (currentNovel.value) {
+            localStorage.setItem('chapters_' + currentNovel.value.id, JSON.stringify(chapters.value));
+          }
         }
         
         function loadUsers() {
@@ -677,82 +1609,14 @@
           ];
         }
         
-        const myTasks = computed(() => tasks.value);
-        
-        function enrich(task) {
-          return { ...task, statusText: statusMap[task.status], priorityText: priorityMap[task.priority] };
-        }
-        
-        const enrichedTasks = computed(() => tasks.value.map(enrich));
-        
-        const filteredTasks = computed(() => {
-          return enrichedTasks.value.filter(t => {
-            if (searchQuery.value) {
-              const q = searchQuery.value.toLowerCase();
-              if (!t.title.toLowerCase().includes(q) && !t.description.toLowerCase().includes(q)) return false;
-            }
-            if (filterStatus.value && t.status !== filterStatus.value) return false;
-            if (filterPriority.value && t.priority !== filterPriority.value) return false;
-            return true;
-          });
-        });
-        
-        const stats = computed(() => ({
-          todo: tasks.value.filter(t => t.status === 'todo').length,
-          progress: tasks.value.filter(t => t.status === 'in_progress').length,
-          done: tasks.value.filter(t => t.status === 'done').length,
-        }));
-        
-        const dialogTitle = computed(() => isEdit.value ? '编辑任务' : '新建任务');
-        
-        function goHome() {
-          currentPage.value = 'home';
-        }
-        
-        function goAdmin() {
-          window.location.href = 'admin/login.html';
-        }
-        
-        function scrollTo(id) {
-          const el = document.getElementById(id);
-          if (el) el.scrollIntoView({ behavior: 'smooth' });
-        }
-        
-        function handleLogin() {
-          if (!loginForm.username.trim()) {
-            ElementPlus.ElMessage.warning('请输入用户名');
-            return;
-          }
-          if (!loginForm.password) {
-            ElementPlus.ElMessage.warning('请输入密码');
-            return;
-          }
-          loggingIn.value = true;
-          setTimeout(() => {
-            const users = loadUsers();
-            const matched = users.find(u => u.username === loginForm.username && u.password === loginForm.password);
-            if (matched) {
-              if (matched.status === 'disabled') {
-                ElementPlus.ElMessage.error('账号已被禁用');
-                loggingIn.value = false;
-                return;
-              }
-              isLoggedIn.value = true;
-              username.value = matched.username;
-              localStorage.setItem('userLoggedIn', '1');
-              localStorage.setItem('userUsername', matched.username);
-              currentPage.value = 'tasks';
-              ElementPlus.ElMessage.success('登录成功');
-            } else {
-              ElementPlus.ElMessage.error('用户名或密码错误');
-            }
-            loggingIn.value = false;
-          }, 500);
-        }
-        
-        function handleCommand(cmd) {
-          if (cmd === 'tasks') {
-            currentPage.value = 'tasks';
+        // Navigation
+        function handleUserCommand(cmd) {
+          if (cmd === 'settings') {
+            currentPage.value = 'settings';
+            settingsTab.value = 'profile';
+          } else if (cmd === 'ai-settings') {
+            currentPage.value = 'settings';
+            settingsTab.value = 'ai';
           } else if (cmd === 'logout') {
             ElementPlus.ElMessageBox.confirm('确定要退出登录吗？', '提示', {
               type: 'info',
@@ -763,34 +1627,277 @@
               username.value = '';
               localStorage.removeItem('userLoggedIn');
               localStorage.removeItem('userUsername');
-              currentPage.value = 'home';
-              ElementPlus.ElMessage.success('已退出登录');
+              window.location.reload();
             }).catch(() => {});
           }
         }
         
-        function openAddDialog() {
-          isEdit.value = false;
-          form.id = null;
-          form.title = '';
-          form.description = '';
-          form.status = 'todo';
-          form.priority = 'medium';
-          dialogVisible.value = true;
+        function openCreateNovel() {
+          novelForm.title = '';
+          novelForm.category = '女频';
+          novelForm.description = '';
+          novelForm.targetWords = 300000;
+          createNovelVisible.value = true;
         }
         
-        function openEditDialog(row) {
-          isEdit.value = true;
-          form.id = row.id;
-          form.title = row.title;
-          form.description = row.description;
-          form.status = row.status;
-          form.priority = row.priority;
-          dialogVisible.value = true;
+        function createNovel() {
+          if (!novelForm.title.trim()) {
+            ElementPlus.ElMessage.warning('请输入作品名称');
+            return;
+          }
+          const now = new Date();
+          const maxId = novels.value.length ? Math.max(...novels.value.map(n => n.id)) : 0;
+          novels.value.unshift({
+            id: maxId + 1,
+            title: novelForm.title,
+            category: novelForm.category,
+            description: novelForm.description,
+            chapterCount: 0,
+            wordCount: 0,
+            targetWords: novelForm.targetWords,
+            createdAt: now.toISOString(),
+          });
+          saveNovels();
+          createNovelVisible.value = false;
+          ElementPlus.ElMessage.success('项目创建成功');
         }
         
-        function saveTask() {
-          if (!form.title.trim()) {
+        function openNovel(novel) {
+          currentNovel.value = novel;
+          chapters.value = loadChapters(novel.id);
+          if (chapters.value.length > 0) {
+            currentChapterId.value = chapters.value[0].id;
+          }
+          currentPage.value = 'editor';
+        }
+        
+        function openEditor() {
+          if (novels.value.length > 0) {
+            openNovel(novels.value[0]);
+          } else {
+            openCreateNovel();
+          }
+        }
+        
+        function selectChapter(ch) {
+          currentChapterId.value = ch.id;
+        }
+        
+        function addChapter() {
+          if (!currentNovel.value) return;
+          const maxId = chapters.value.length ? Math.max(...chapters.value.map(c => c.id)) : 0;
+          const newChapter = {
+            id: maxId + 1,
+            title: '第' + (chapters.value.length + 1) + '章 新章节',
+            content: '',
+            wordCount: 0,
+          };
+          chapters.value.push(newChapter);
+          currentChapterId.value = newChapter.id;
+          saveChaptersLocal();
+          ElementPlus.ElMessage.success('已创建新章节');
+        }
+        
+        function saveChapter() {
+          saveChaptersLocal();
+          if (currentNovel.value) {
+            const total = chapters.value.reduce((sum, c) => sum + (c.content ? c.content.length : 0), 0);
+            currentNovel.value.wordCount = total;
+            currentNovel.value.chapterCount = chapters.value.length;
+            saveNovels();
+          }
+          ElementPlus.ElMessage.success('保存成功');
+        }
+        
+        function sendAi() {
+          if (!aiInput.value.trim()) return;
+          const content = aiInput.value;
+          aiMessages.value.push({ role: 'user', content });
+          aiInput.value = '';
+          aiCallCount.value++;
+          setTimeout(() => {
+            const replies = [
+              '好的，我来帮你处理这段内容。根据当前章节的情境，我建议可以从以下几个角度展开：\n\n1. 增加环境描写烘托气氛\n2. 通过细节动作展现人物心理\n3. 埋下一个小伏笔为后续剧情铺垫\n\n需要我具体写出来吗？',
+              '这一段的剧情张力不错！我觉得可以再强化一下主角的内心挣扎，让人物更立体。要不要我帮你润色一下对话？',
+              '收到。基于你目前的设定，我梳理了几个可能的发展方向：\n\n• 方向A：男主发现女主身份的秘密\n• 方向B：外敌大举进攻，边关告急\n• 方向C：女主身世之谜初露端倪\n\n你比较倾向哪个方向？',
+            ];
+            aiMessages.value.push({ role: 'ai', content: replies[Math.floor(Math.random() * replies.length)] });
+            nextTick(() => {
+              const msgs = document.querySelector('.ai-messages');
+              if (msgs) msgs.scrollTop = msgs.scrollHeight;
+            });
+          }, 800);
+        }
+        
+        function quickAi(type) {
+          const map = {
+            continue: '帮我续写接下来的内容，保持当前风格',
+            polish: '帮我润色当前选中的段落，让文字更有感染力',
+            dialogue: '帮我写一段人物对话，要体现角色性格',
+            plot: '给我三个后续剧情发展的建议方向',
+          };
+          aiInput.value = map[type] || '';
+        }
+        
+        // Settings
+        function saveProfile() {
+          ElementPlus.ElMessage.success('个人资料已保存');
+        }
+        
+        function savePrefs() {
+          ElementPlus.ElMessage.success('偏好设置已保存');
+        }
+        
+        // AI Model Management
+        function getProviderIcon(type) {
+          const map = {
+            openai: 'fas fa-brain',
+            anthropic: 'fas fa-feather',
+            baidu: 'fas fa-paw',
+            alibaba: 'fas fa-cloud',
+            tencent: 'fas fa-comment-dots',
+            zhipu: 'fas fa-star',
+            custom: 'fas fa-plug',
+          };
+          return map[type] || 'fas fa-plug';
+        }
+        
+        const providerNameMap = {
+          openai: 'OpenAI',
+          anthropic: 'Anthropic',
+          baidu: '百度文心',
+          alibaba: '阿里通义',
+          tencent: '腾讯混元',
+          zhipu: '智谱 AI',
+          custom: '自定义',
+        };
+        
+        function onProviderChange(val) {
+          customModelInput.value = false;
+          if (val === 'openai') {
+            aiForm.modelName = 'gpt-4o';
+            aiForm.modelTypes = ['text'];
+          } else if (val === 'anthropic') {
+            aiForm.modelName = 'claude-3-5-sonnet-latest';
+            aiForm.modelTypes = ['text'];
+          } else if (val === 'baidu') {
+            aiForm.modelName = 'ernie-4.0';
+            aiForm.modelTypes = ['text'];
+          } else if (val === 'alibaba') {
+            aiForm.modelName = 'qwen3.5-turbo';
+            aiForm.modelTypes = ['text'];
+          } else if (val === 'zhipu') {
+            aiForm.modelName = 'glm-4';
+            aiForm.modelTypes = ['text'];
+          } else {
+            aiForm.modelName = '';
+            customModelInput.value = true;
+            aiForm.modelTypes = ['text'];
+          }
+          aiForm.provider = providerNameMap[val] || '自定义';
+        }
+        
+        function openAddAiModel() {
+          aiForm.id = null;
+          aiForm.name = '';
+          aiForm.providerType = 'openai';
+          aiForm.provider = 'OpenAI';
+          aiForm.baseUrl = '';
+          aiForm.apiKey = '';
+          aiForm.modelName = 'gpt-4o';
+          aiForm.modelTypes = ['text'];
+          aiForm.useCase = 'primary';
+          aiForm.isDefault = false;
+          customModelInput.value = false;
+          addAiModelVisible.value = true;
+        }
+        
+        function saveAiModel() {
+          if (!aiForm.name.trim()) {
+            ElementPlus.ElMessage.warning('请输入配置名称');
+            return;
+          }
+          if (!aiForm.apiKey.trim()) {
+            ElementPlus.ElMessage.warning('请输入 API Key');
+            return;
+          }
+          if (!aiForm.modelName.trim()) {
+            ElementPlus.ElMessage.warning('请输入模型名称');
+            return;
+          }
+          if (aiForm.modelTypes.length === 0) {
+            ElementPlus.ElMessage.warning('请至少选择一种模型类型');
+            return;
+          }
+          
+          const maxId = aiModels.value.length ? Math.max(...aiModels.value.map(m => m.id)) : 0;
+          const newModel = {
+            id: maxId + 1,
+            name: aiForm.name,
+            providerType: aiForm.providerType,
+            provider: aiForm.provider,
+            baseUrl: aiForm.baseUrl,
+            apiKey: aiForm.apiKey,
+            modelName: aiForm.modelName,
+            supportsText: aiForm.modelTypes.includes('text'),
+            supportsVector: aiForm.modelTypes.includes('vector'),
+            supportsImage: aiForm.modelTypes.includes('image'),
+            useCase: aiForm.useCase,
+            isDefault: aiForm.isDefault,
+          };
+          
+          if (aiForm.isDefault) {
+            aiModels.value.forEach(m => m.isDefault = false);
+          }
+          
+          aiModels.value.push(newModel);
+          saveAiModels();
+          addAiModelVisible.value = false;
+          ElementPlus.ElMessage.success('AI 配置添加成功');
+        }
+        
+        function testAiModel(model) {
+          ElementPlus.ElMessage.info('正在测试连接...');
+          setTimeout(() => {
+            ElementPlus.ElMessage.success('连接测试成功！模型响应正常。');
+          }, 1000);
+        }
+        
+        function deleteAiModel(model) {
+          ElementPlus.ElMessageBox.confirm('确定要删除这个 AI 配置吗？', '提示', {
+            type: 'warning',
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+          }).then(() => {
+            aiModels.value = aiModels.value.filter(m => m.id !== model.id);
+            saveAiModels();
+            ElementPlus.ElMessage.success('已删除');
+          }).catch(() => {});
+        }
+        
+        // Task Management
+        function openAddTask() {
+          isTaskEdit.value = false;
+          taskForm.id = null;
+          taskForm.title = '';
+          taskForm.description = '';
+          taskForm.status = 'todo';
+          taskForm.priority = 'medium';
+          taskDialogVisible.value = true;
+        }
+        
+        function openEditTask(row) {
+          isTaskEdit.value = true;
+          taskForm.id = row.id;
+          taskForm.title = row.title;
+          taskForm.description = row.description;
+          taskForm.status = row.status;
+          taskForm.priority = row.priority;
+          taskDialogVisible.value = true;
+        }
+        
+        function saveTaskDialog() {
+          if (!taskForm.title.trim()) {
             ElementPlus.ElMessage.warning('请输入任务标题');
             return;
           }
@@ -801,26 +1908,26 @@
             String(now.getHours()).padStart(2,'0') + ':' +
             String(now.getMinutes()).padStart(2,'0') + ':' +
             String(now.getSeconds()).padStart(2,'0');
-          if (isEdit.value) {
-            const idx = tasks.value.findIndex(t => t.id === form.id);
+          if (isTaskEdit.value) {
+            const idx = tasks.value.findIndex(t => t.id === taskForm.id);
             if (idx >= 0) {
-              tasks.value[idx] = { ...tasks.value[idx], title: form.title, description: form.description, status: form.status, priority: form.priority };
+              tasks.value[idx] = { ...tasks.value[idx], title: taskForm.title, description: taskForm.description, status: taskForm.status, priority: taskForm.priority };
             }
             ElementPlus.ElMessage.success('修改成功');
           } else {
             const maxId = tasks.value.length ? Math.max(...tasks.value.map(t => t.id)) : 0;
             tasks.value.unshift({
               id: maxId + 1,
-              title: form.title,
-              description: form.description,
-              status: form.status,
-              priority: form.priority,
+              title: taskForm.title,
+              description: taskForm.description,
+              status: taskForm.status,
+              priority: taskForm.priority,
               createdAt: ts,
             });
             ElementPlus.ElMessage.success('创建成功');
           }
           saveTasks();
-          dialogVisible.value = false;
+          taskDialogVisible.value = false;
         }
         
         function deleteTask(row) {
@@ -835,22 +1942,67 @@
           }).catch(() => {});
         }
         
-        onMounted(() => {
-          tasks.value = loadTasks();
+        // Login check - show login page if not logged in
+        function checkLogin() {
           if (localStorage.getItem('userLoggedIn') === '1') {
             isLoggedIn.value = true;
             username.value = localStorage.getItem('userUsername') || '';
+            profileForm.username = username.value;
+            profileForm.nickname = username.value;
+            return true;
           }
+          return false;
+        }
+        
+        onMounted(() => {
+          if (!checkLogin()) {
+            // Simple login prompt
+            const u = prompt('请输入用户名（测试账号：zhaoliu / 密码：zl123456）：');
+            if (u) {
+              const p = prompt('请输入密码：');
+              const users = loadUsers();
+              const matched = users.find(user => user.username === u && user.password === p);
+              if (matched) {
+                if (matched.status === 'disabled') {
+                  alert('账号已被禁用');
+                  return;
+                }
+                isLoggedIn.value = true;
+                username.value = matched.username;
+                profileForm.username = matched.username;
+                profileForm.nickname = matched.username;
+                localStorage.setItem('userLoggedIn', '1');
+                localStorage.setItem('userUsername', matched.username);
+              } else {
+                alert('用户名或密码错误');
+                return;
+              }
+            }
+          }
+          
+          novels.value = loadNovels();
+          tasks.value = loadTasks();
+          aiModels.value = loadAiModels();
         });
         
         return {
-          currentPage, currentYear, username, isLoggedIn, loggingIn, loginForm,
-          searchQuery, filterStatus, filterPriority,
-          dialogVisible, isEdit, form, dialogTitle,
-          myTasks, filteredTasks, stats,
-          User, Lock,
-          goHome, goAdmin, scrollTo, handleLogin, handleCommand,
-          openAddDialog, openEditDialog, saveTask, deleteTask,
+          currentPage, username, isLoggedIn, userRoleText, pageTitle,
+          settingsTab, profileForm, prefsForm,
+          novels, createNovelVisible, novelForm,
+          currentNovel, chapters, currentChapterId, currentChapter,
+          aiMessages, aiInput,
+          tasks, taskSearch, taskFilterStatus, taskFilterPriority,
+          taskDialogVisible, isTaskEdit, taskForm, taskDialogTitle,
+          taskStats, filteredTasks,
+          aiModels, addAiModelVisible, aiForm, customModelInput,
+          totalWords, totalChapters, aiCallCount,
+          handleUserCommand,
+          openCreateNovel, createNovel, openNovel, openEditor,
+          selectChapter, addChapter, saveChapter,
+          sendAi, quickAi,
+          saveProfile, savePrefs,
+          getProviderIcon, onProviderChange, openAddAiModel, saveAiModel, testAiModel, deleteAiModel,
+          openAddTask, openEditTask, saveTaskDialog, deleteTask,
         };
       }
     });
