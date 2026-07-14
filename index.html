@@ -738,9 +738,8 @@
                 return;
               }
               if (matched.role === 'superadmin' || matched.role === 'admin') {
-                localStorage.setItem('isLoggedIn', '1');
-                localStorage.setItem('username', matched.username);
-                window.location.href = 'admin/index.html';
+                ElementPlus.ElMessage.error('管理员账号请前往管理后台登录');
+                loggingIn.value = false;
                 return;
               }
               isLoggedIn.value = true;
