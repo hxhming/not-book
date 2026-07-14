@@ -146,6 +146,11 @@
           document.getElementById('errorMsg').classList.add('show');
           return;
         }
+        if (matched.role !== 'superadmin' && matched.role !== 'admin') {
+          document.getElementById('errorMsg').textContent = '您没有管理后台访问权限';
+          document.getElementById('errorMsg').classList.add('show');
+          return;
+        }
         localStorage.setItem('isLoggedIn', '1');
         localStorage.setItem('username', u);
         window.location.href = 'index.html';
