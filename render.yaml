@@ -1,0 +1,23 @@
+databases:
+  - name: not-book-db
+    databaseName: not_book
+    plan: free
+
+services:
+  - type: web
+    name: not-book
+    runtime: python
+    plan: free
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn not_book.wsgi:application"
+    envVars:
+      - key: DEBUG
+        value: False
+      - key: SECRET_KEY
+        generateValue: true
+      - key: WEB_CONCURRENCY
+        value: 4
+      - key: DATABASE_URL
+        fromDatabase:
+          name: not-book-db
+          property: connectionString
