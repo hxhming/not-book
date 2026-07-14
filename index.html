@@ -737,11 +737,6 @@
                 loggingIn.value = false;
                 return;
               }
-              if (matched.role === 'superadmin' || matched.role === 'admin') {
-                ElementPlus.ElMessage.error('管理员账号请前往管理后台登录');
-                loggingIn.value = false;
-                return;
-              }
               isLoggedIn.value = true;
               username.value = matched.username;
               localStorage.setItem('userLoggedIn', '1');
