@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="zh-hans">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>任务管理 - Django 站点管理员</title>
+  <link rel="stylesheet" href="https://unpkg.com/element-plus/dist/index.css" />
+  <link rel="stylesheet" href="https://unpkg.com/@fortawesome/fontawesome-free@6.2.0/css/all.min.css" />
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <script src="https://unpkg.com/element-plus"></script>
+  <script src="https://unpkg.com/@element-plus/icons-vue"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body, #app { height: 100%; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; background: #f0f2f5; }
+    .layout { display: flex; height: 100%; }
+    /* Sidebar */
+    .sidebar {
+      width: 220px;
+      background: #001529;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+    .sidebar-logo {
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      border-bottom: 1px solid #1f2d3d;
+      font-size: 17px;
+      font-weight: 600;
+    }
+    .sidebar-logo .logo-icon {
+      width: 32px; height: 32px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #4f8cff, #8b5cff);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+    }
+    .sidebar-menu { padding: 12px 0; flex: 1; }
+    .menu-item {
+      padding: 12px 24px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 14px;
+      color: #b0c4de;
+      transition: all .2s;
+    }
+    .menu-item:hover { color: #fff; background: #0f2545; }
+    .menu-item.active {
+      color: #fff;
+      background: #4f8cff;
+      border-right: 3px solid #fff;
+    }
+    .menu-item i { width: 18px; text-align: center; }
+    /* Main */
+    .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    .header {
+      height: 60px;
+      background: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      box-shadow: 0 1px 4px rgba(0,21,41,0.08);
+      flex-shrink: 0;
+    }
+    .header-left { display: flex; align-items: center; gap: 16px; }
+    .breadcrumb { font-size: 14px; color: #606266; }
+    .header-right { display: flex; align-items: center; gap: 16px; font-size: 14px; }
+    .user-info { display: flex; align-items: center; gap: 8px; color: #303133; cursor: pointer; }
+    .avatar {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: linear-gradient(135deg, #4f8cff, #8b5cff);
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-size: 13px; font-weight: 600;
+    }
+    .content { flex: 1; padding: 20px; overflow: auto; }
+    .page-card {
+      background: #fff;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    }
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .page-title { font-size: 18px; font-weight: 600; color: #303133; }
+    .filter-bar {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    .filter-bar .el-input { width: 240px; }
+    .filter-bar .el-select { width: 160px; }
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    .stat-card {
+      background: #fff;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    }
+    .stat-label { font-size: 14px; color: #909399; margin-bottom: 8px; }
+    .stat-value { font-size: 28px; font-weight: 700; color: #303133; }
+    .stat-value.todo { color: #e6a23c; }
+    .stat-value.progress { color: #4f8cff; }
+    .stat-value.done { color: #67c23a; }
+    .stat-value.total { color: #8b5cff; }
+    /* Table */
+    .el-table { font-size: 14px; }
+    .priority-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
+    .priority-high { background: #f56c6c; }
+    .priority-medium { background: #e6a23c; }
+    .priority-low { background: #909399; }
+    .logout-btn { cursor: pointer; color: #909399; font-size: 14px; }
+    .logout-btn:hover { color: #f56c6c; }
+    .empty-wrap { text-align: center; padding: 60px 0; color: #909399; }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div class="layout">
+      <div class="sidebar">
+        <div class="sidebar-logo">
+          <div class="logo-icon"><i class="fas fa-tasks"></i></div>
+          <span>not-book</span>
+        </div>
+        <div class="sidebar-menu">
+          <div class="menu-item" :class="{active: currentMenu==='dashboard'}" @click="currentMenu='dashboard'">
+            <i class="fas fa-tachometer-alt"></i>
+            <span>仪表盘</span>
+          </div>
+          <div class="menu-item" :class="{active: currentMenu==='task'}" @click="currentMenu='task'">
+            <i class="fas fa-clipboard-list"></i>
+            <span>任务管理</span>
+          </div>
+          <div class="menu-item" :class="{active: currentMenu==='user'}" @click="currentMenu='user'">
+            <i class="fas fa-users"></i>
+            <span>用户管理</span>
+          </div>
+        </div>
+      </div>
+      <div class="main">
+        <div class="header">
+          <div class="header-left">
+            <div class="breadcrumb">
+              <i class="fas fa-home" style="color:#909399;margin-right:6px;"></i>
+              首页 / <span style="color:#303133;">{{ menuTitle }}</span>
+            </div>
+          </div>
+          <div class="header-right">
+            <div class="user-info">
+              <div class="avatar">{{ username.charAt(0).toUpperCase() }}</div>
+              <span>{{ username }}</span>
+            </div>
+            <span class="logout-btn" @click="logout">
+              <i class="fas fa-sign-out-alt"></i> 退出
+            </span>
+          </div>
+        </div>
+        <div class="content">
+          <!-- Dashboard -->
+          <div v-if="currentMenu==='dashboard'">
+            <div class="stats-row">
+              <div class="stat-card">
+                <div class="stat-label">全部任务</div>
+                <div class="stat-value total">{{ tasks.length }}</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-label">待办</div>
+                <div class="stat-value todo">{{ stats.todo }}</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-label">进行中</div>
+                <div class="stat-value progress">{{ stats.progress }}</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-label">已完成</div>
+                <div class="stat-value done">{{ stats.done }}</div>
+              </div>
+            </div>
+            <div class="page-card">
+              <div class="page-header">
+                <div class="page-title">最近任务</div>
+              </div>
+              <el-table :data="recentTasks" stripe style="width: 100%">
+                <el-table-column prop="title" label="标题" />
+                <el-table-column prop="statusText" label="状态" width="120">
+                  <template #default="scope">
+                    <el-tag :type="statusTagType(scope.row.status)" size="small">{{ scope.row.statusText }}</el-tag>
+                  </template>
+                </el-table-column>
+                <el-table-column prop="priorityText" label="优先级" width="100">
+                  <template #default="scope">
+                    <span class="priority-dot" :class="'priority-'+scope.row.priority"></span>{{ scope.row.priorityText }}
+                  </template>
+                </el-table-column>
+                <el-table-column prop="createdAt" label="创建时间" width="180" />
+              </el-table>
+            </div>
+          </div>
+          <!-- Task Management -->
+          <div v-if="currentMenu==='task'" class="page-card">
+            <div class="page-header">
+              <div class="page-title">任务管理</div>
+              <el-button type="primary" @click="openAddDialog">
+                <i class="fas fa-plus" style="margin-right:6px;"></i>新增任务
+              </el-button>
+            </div>
+            <div class="filter-bar">
+              <el-input v-model="searchQuery" placeholder="搜索标题或描述..." clearable>
+                <template #prefix><i class="fas fa-search" style="color:#c0c4cc;"></i></template>
+              </el-input>
+              <el-select v-model="filterStatus" placeholder="全部状态" clearable>
+                <el-option label="待办" value="todo" />
+                <el-option label="进行中" value="in_progress" />
+                <el-option label="已完成" value="done" />
+              </el-select>
+              <el-select v-model="filterPriority" placeholder="全部优先级" clearable>
+                <el-option label="高" value="high" />
+                <el-option label="中" value="medium" />
+                <el-option label="低" value="low" />
+              </el-select>
+            </div>
+            <div v-if="filteredTasks.length === 0" class="empty-wrap">
+              <i class="fas fa-inbox" style="font-size:48px;margin-bottom:12px;color:#dcdfe6;"></i>
+              <div>暂无任务数据</div>
+            </div>
+            <el-table v-else :data="filteredTasks" stripe style="width: 100%">
+              <el-table-column prop="id" label="ID" width="80" />
+              <el-table-column prop="title" label="标题" min-width="200" />
+              <el-table-column prop="description" label="描述" min-width="240" show-overflow-tooltip />
+              <el-table-column prop="statusText" label="状态" width="110">
+                <template #default="scope">
+                  <el-tag :type="statusTagType(scope.row.status)" size="small">{{ scope.row.statusText }}</el-tag>
+                </template>
+              </el-table-column>
+              <el-table-column prop="priorityText" label="优先级" width="100">
+                <template #default="scope">
+                  <span class="priority-dot" :class="'priority-'+scope.row.priority"></span>{{ scope.row.priorityText }}
+                </template>
+              </el-table-column>
+              <el-table-column prop="createdAt" label="创建时间" width="170" />
+              <el-table-column label="操作" width="200" fixed="right">
+                <template #default="scope">
+                  <el-button type="primary" link size="small" @click="openEditDialog(scope.row)">编辑</el-button>
+                  <el-button type="danger" link size="small" @click="deleteTask(scope.row)">删除</el-button>
+                </template>
+              </el-table-column>
+            </el-table>
+          </div>
+          <!-- User Management -->
+          <div v-if="currentMenu==='user'" class="page-card">
+            <div class="page-header">
+              <div class="page-title">用户管理</div>
+            </div>
+            <el-table :data="users" stripe style="width: 100%">
+              <el-table-column prop="id" label="ID" width="80" />
+              <el-table-column prop="username" label="用户名" width="200" />
+              <el-table-column prop="email" label="邮箱" min-width="240" />
+              <el-table-column prop="is_superuser" label="超级管理员" width="140">
+                <template #default="scope">
+                  <el-tag :type="scope.row.is_superuser ? 'success' : 'info'" size="small">
+                    {{ scope.row.is_superuser ? '是' : '否' }}
+                  </el-tag>
+                </template>
+              </el-table-column>
+              <el-table-column prop="date_joined" label="加入时间" width="200" />
+            </el-table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Add/Edit Dialog -->
+    <el-dialog v-model="dialogVisible" :title="dialogTitle" width="520px">
+      <el-form :model="form" label-width="80px">
+        <el-form-item label="标题">
+          <el-input v-model="form.title" placeholder="请输入任务标题" />
+        </el-form-item>
+        <el-form-item label="描述">
+          <el-input v-model="form.description" type="textarea" :rows="4" placeholder="请输入任务描述" />
+        </el-form-item>
+        <el-form-item label="状态">
+          <el-select v-model="form.status" style="width: 100%;">
+            <el-option label="待办" value="todo" />
+            <el-option label="进行中" value="in_progress" />
+            <el-option label="已完成" value="done" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="优先级">
+          <el-select v-model="form.priority" style="width: 100%;">
+            <el-option label="高" value="high" />
+            <el-option label="中" value="medium" />
+            <el-option label="低" value="low" />
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="dialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="saveTask">确定</el-button>
+      </template>
+    </el-dialog>
+  </div>
+  <script>
+    const { createApp, ref, computed, onMounted, reactive } = Vue;
+    const app = createApp({
+      setup() {
+        if (localStorage.getItem('isLoggedIn') !== '1') {
+          window.location.href = 'login.html';
+        }
+        const username = ref(localStorage.getItem('username') || 'admin');
+        const currentMenu = ref('dashboard');
+        const searchQuery = ref('');
+        const filterStatus = ref('');
+        const filterPriority = ref('');
+        const dialogVisible = ref(false);
+        const isEdit = ref(false);
+        const form = reactive({ id: null, title: '', description: '', status: 'todo', priority: 'medium' });
+        const statusMap = { todo: '待办', in_progress: '进行中', done: '已完成' };
+        const priorityMap = { high: '高', medium: '中', low: '低' };
+
+        function loadTasks() {
+          const data = localStorage.getItem('tasks');
+          if (!data) {
+            const seed = [
+              { id: 1, title: '完成项目需求分析', description: '梳理 not-book 项目的核心功能需求', status: 'done', priority: 'high', createdAt: '2026-07-10 09:30:00' },
+              { id: 2, title: '搭建 Django 项目框架', description: '初始化 Django 6.0 项目，配置 simpleui 后台', status: 'done', priority: 'high', createdAt: '2026-07-11 14:20:00' },
+              { id: 3, title: '开发任务管理模块', description: '实现任务的增删改查功能', status: 'in_progress', priority: 'high', createdAt: '2026-07-12 10:15:00' },
+              { id: 4, title: '编写单元测试', description: '为 task 应用编写测试用例', status: 'todo', priority: 'medium', createdAt: '2026-07-13 16:45:00' },
+              { id: 5, title: '部署到生产环境', description: '将项目部署到线上服务器', status: 'todo', priority: 'medium', createdAt: '2026-07-14 11:00:00' },
+            ];
+            localStorage.setItem('tasks', JSON.stringify(seed));
+            return seed;
+          }
+          return JSON.parse(data);
+        }
+
+        const tasks = ref([]);
+
+        function saveTasks() {
+          localStorage.setItem('tasks', JSON.stringify(tasks.value));
+        }
+
+        function enrich(task) {
+          return { ...task, statusText: statusMap[task.status], priorityText: priorityMap[task.priority] };
+        }
+
+        const enrichedTasks = computed(() => tasks.value.map(enrich));
+
+        const filteredTasks = computed(() => {
+          return enrichedTasks.value.filter(t => {
+            if (searchQuery.value) {
+              const q = searchQuery.value.toLowerCase();
+              if (!t.title.toLowerCase().includes(q) && !t.description.toLowerCase().includes(q)) return false;
+            }
+            if (filterStatus.value && t.status !== filterStatus.value) return false;
+            if (filterPriority.value && t.priority !== filterPriority.value) return false;
+            return true;
+          });
+        });
+
+        const recentTasks = computed(() => {
+          return [...enrichedTasks.value].slice(0, 5);
+        });
+
+        const stats = computed(() => ({
+          todo: tasks.value.filter(t => t.status === 'todo').length,
+          progress: tasks.value.filter(t => t.status === 'in_progress').length,
+          done: tasks.value.filter(t => t.status === 'done').length,
+        }));
+
+        const menuTitle = computed(() => ({
+          dashboard: '仪表盘', task: '任务管理', user: '用户管理'
+        }[currentMenu.value] || ''));
+
+        const dialogTitle = computed(() => isEdit.value ? '编辑任务' : '新增任务');
+
+        function statusTagType(status) {
+          return { todo: 'warning', in_progress: 'primary', done: 'success' }[status];
+        }
+
+        function openAddDialog() {
+          isEdit.value = false;
+          form.id = null;
+          form.title = '';
+          form.description = '';
+          form.status = 'todo';
+          form.priority = 'medium';
+          dialogVisible.value = true;
+        }
+
+        function openEditDialog(row) {
+          isEdit.value = true;
+          form.id = row.id;
+          form.title = row.title;
+          form.description = row.description;
+          form.status = row.status;
+          form.priority = row.priority;
+          dialogVisible.value = true;
+        }
+
+        function saveTask() {
+          if (!form.title.trim()) {
+            ElementPlus.ElMessage.warning('请输入任务标题');
+            return;
+          }
+          const now = new Date();
+          const ts = now.getFullYear() + '-' +
+            String(now.getMonth()+1).padStart(2,'0') + '-' +
+            String(now.getDate()).padStart(2,'0') + ' ' +
+            String(now.getHours()).padStart(2,'0') + ':' +
+            String(now.getMinutes()).padStart(2,'0') + ':' +
+            String(now.getSeconds()).padStart(2,'0');
+          if (isEdit.value) {
+            const idx = tasks.value.findIndex(t => t.id === form.id);
+            if (idx >= 0) {
+              tasks.value[idx] = { ...tasks.value[idx], title: form.title, description: form.description, status: form.status, priority: form.priority };
+            }
+            ElementPlus.ElMessage.success('修改成功');
+          } else {
+            const maxId = tasks.value.length ? Math.max(...tasks.value.map(t => t.id)) : 0;
+            tasks.value.unshift({
+              id: maxId + 1,
+              title: form.title,
+              description: form.description,
+              status: form.status,
+              priority: form.priority,
+              createdAt: ts,
+            });
+            ElementPlus.ElMessage.success('新增成功');
+          }
+          saveTasks();
+          dialogVisible.value = false;
+        }
+
+        function deleteTask(row) {
+          ElementPlus.ElMessageBox.confirm('确定要删除任务 "' + row.title + '" 吗？', '提示', {
+            type: 'warning',
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+          }).then(() => {
+            tasks.value = tasks.value.filter(t => t.id !== row.id);
+            saveTasks();
+            ElementPlus.ElMessage.success('删除成功');
+          }).catch(() => {});
+        }
+
+        function logout() {
+          ElementPlus.ElMessageBox.confirm('确定要退出登录吗？', '提示', {
+            type: 'info',
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+          }).then(() => {
+            localStorage.removeItem('isLoggedIn');
+            localStorage.removeItem('username');
+            window.location.href = 'login.html';
+          }).catch(() => {});
+        }
+
+        const users = ref([
+          { id: 1, username: 'admin', email: 'admin@example.com', is_superuser: true, date_joined: '2026-07-10 09:00:00' },
+        ]);
+
+        onMounted(() => {
+          tasks.value = loadTasks();
+        });
+
+        return {
+          username, currentMenu, searchQuery, filterStatus, filterPriority,
+          dialogVisible, isEdit, form,
+          tasks, filteredTasks, recentTasks, stats, menuTitle, dialogTitle,
+          statusTagType, openAddDialog, openEditDialog, saveTask, deleteTask, logout,
+          users,
+        };
+      }
+    });
+    app.use(ElementPlus);
+    for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
+      app.component(key, component);
+    }
+    app.mount('#app');
+  </script>
+</body>
+</html>

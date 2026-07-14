@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="zh-hans">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>登录 - Django 站点管理员</title>
+  <link rel="stylesheet" href="https://unpkg.com/element-plus/dist/index.css" />
+  <link rel="stylesheet" href="https://unpkg.com/@fortawesome/fontawesome-free@6.2.0/css/all.min.css" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; }
+    .bg {
+      min-height: 100vh;
+      background: #f0f2f5;
+      background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080"><defs><linearGradient id="a" x1="0%25" y1="0%25" x2="100%25" y2="100%25"><stop offset="0%25" style="stop-color:%234f8cff;stop-opacity:0.15"/><stop offset="100%25" style="stop-color:%238b5cff;stop-opacity:0.15"/></linearGradient></defs><rect fill="url(%23a)" width="1920" height="1080"/><circle cx="300" cy="200" r="180" fill="%234f8cff" opacity="0.08"/><circle cx="1600" cy="850" r="220" fill="%238b5cff" opacity="0.08"/></svg>');
+      background-repeat: no-repeat;
+      background-position: 50%;
+      background-size: 100% 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .login-box {
+      width: 400px;
+      background: #fff;
+      border-radius: 12px;
+      padding: 40px 36px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+    }
+    .login-title {
+      font-size: 22px;
+      font-weight: 600;
+      text-align: center;
+      color: #303133;
+      margin-bottom: 8px;
+    }
+    .login-subtitle {
+      text-align: center;
+      color: #909399;
+      font-size: 14px;
+      margin-bottom: 32px;
+    }
+    .logo-icon {
+      width: 56px;
+      height: 56px;
+      margin: 0 auto 16px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #4f8cff, #8b5cff);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 26px;
+    }
+    .form-item { margin-bottom: 20px; }
+    .form-item label {
+      display: block;
+      font-size: 14px;
+      color: #606266;
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+    .form-item input {
+      width: 100%;
+      height: 42px;
+      padding: 0 14px;
+      border: 1px solid #dcdfe6;
+      border-radius: 8px;
+      font-size: 14px;
+      transition: border-color .2s;
+      outline: none;
+    }
+    .form-item input:focus { border-color: #4f8cff; }
+    .login-btn {
+      width: 100%;
+      height: 44px;
+      background: linear-gradient(120deg, #4f8cff, #8b5cff);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity .2s;
+    }
+    .login-btn:hover { opacity: 0.9; }
+    .login-tip {
+      margin-top: 16px;
+      font-size: 12px;
+      color: #c0c4cc;
+      text-align: center;
+    }
+    .error-msg {
+      color: #f56c6c;
+      font-size: 13px;
+      margin-top: -10px;
+      margin-bottom: 14px;
+      display: none;
+    }
+    .error-msg.show { display: block; }
+  </style>
+</head>
+<body>
+  <div class="bg">
+    <div class="login-box">
+      <div class="logo-icon"><i class="fas fa-tasks"></i></div>
+      <div class="login-title">not-book 管理后台</div>
+      <div class="login-subtitle">SimpleUI · 任务管理系统</div>
+      <div id="errorMsg" class="error-msg">用户名或密码错误</div>
+      <form id="loginForm">
+        <div class="form-item">
+          <label for="username">用户名</label>
+          <input type="text" id="username" placeholder="请输入用户名" value="admin" autocomplete="username" />
+        </div>
+        <div class="form-item">
+          <label for="password">密码</label>
+          <input type="password" id="password" placeholder="请输入密码" value="admin123456" autocomplete="current-password" />
+        </div>
+        <button type="submit" class="login-btn">登 录</button>
+      </form>
+      <div class="login-tip">默认账号：admin / admin123456</div>
+    </div>
+  </div>
+  <script>
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      var u = document.getElementById('username').value;
+      var p = document.getElementById('password').value;
+      if (u === 'admin' && p === 'admin123456') {
+        localStorage.setItem('isLoggedIn', '1');
+        localStorage.setItem('username', u);
+        window.location.href = 'index.html';
+      } else {
+        document.getElementById('errorMsg').classList.add('show');
+      }
+    });
+    if (localStorage.getItem('isLoggedIn') === '1') {
+      window.location.href = 'index.html';
+    }
+  </script>
+</body>
+</html>
