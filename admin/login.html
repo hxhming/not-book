@@ -111,15 +111,15 @@
       <form id="loginForm">
         <div class="form-item">
           <label for="username">用户名</label>
-          <input type="text" id="username" placeholder="请输入用户名" value="admin" autocomplete="username" />
+          <input type="text" id="username" placeholder="请输入用户名" autocomplete="off" />
         </div>
         <div class="form-item">
           <label for="password">密码</label>
-          <input type="password" id="password" placeholder="请输入密码" value="admin123456" autocomplete="current-password" />
+          <input type="password" id="password" placeholder="请输入密码" autocomplete="off" />
         </div>
         <button type="submit" class="login-btn">登 录</button>
       </form>
-      <div class="login-tip">默认账号：admin / admin123456</div>
+      <div class="login-tip">请输入管理员账号和密码</div>
     </div>
   </div>
   <script>
@@ -127,7 +127,7 @@
       e.preventDefault();
       var u = document.getElementById('username').value;
       var p = document.getElementById('password').value;
-      if (u === 'admin' && p === 'admin123456') {
+      if (u === 'hxhming' && p === 'hxhming') {
         localStorage.setItem('isLoggedIn', '1');
         localStorage.setItem('username', u);
         window.location.href = 'index.html';

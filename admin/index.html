@@ -321,7 +321,7 @@
         if (localStorage.getItem('isLoggedIn') !== '1') {
           window.location.href = 'login.html';
         }
-        const username = ref(localStorage.getItem('username') || 'admin');
+        const username = ref(localStorage.getItem('username') || 'hxhming');
         const currentMenu = ref('dashboard');
         const searchQuery = ref('');
         const filterStatus = ref('');
@@ -471,7 +471,7 @@
         }
 
         const users = ref([
-          { id: 1, username: 'admin', email: 'admin@example.com', is_superuser: true, date_joined: '2026-07-10 09:00:00' },
+          { id: 1, username: 'hxhming', email: 'hxhming@github.com', is_superuser: true, date_joined: '2026-07-10 09:00:00' },
         ]);
 
         onMounted(() => {
