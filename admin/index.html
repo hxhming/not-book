@@ -450,9 +450,7 @@
         </el-form-item>
         <el-form-item label="角色">
           <el-select v-model="userForm.role" style="width: 100%;" :disabled="isUserEdit && userForm.role === 'superadmin'">
-            <el-option v-if="isUserEdit && userForm.role === 'superadmin'" label="超级管理员" value="superadmin" />
-            <el-option v-if="!isUserEdit || userForm.role !== 'superadmin'" label="管理员" value="admin" />
-            <el-option v-if="!isUserEdit || userForm.role !== 'superadmin'" label="普通用户" value="user" />
+            <el-option v-for="opt in roleOptions" :key="opt.value" :label="opt.label" :value="opt.value" />
           </el-select>
           <div v-if="isUserEdit && userForm.role === 'superadmin'" style="color:#909399;font-size:12px;margin-top:6px;">超级管理员角色不可修改</div>
         </el-form-item>
@@ -699,6 +697,16 @@
           return { superadmin: 'bitag-danger', admin: 'bitag-warning', user: 'bitag-info' }[role] || 'bitag-info';
         }
 
+        const roleOptions = computed(() => {
+          if (isUserEdit.value && userForm.role === 'superadmin') {
+            return [{ label: '超级管理员', value: 'superadmin' }];
+          }
+          return [
+            { label: '管理员', value: 'admin' },
+            { label: '普通用户', value: 'user' },
+          ];
+        });
+
         const filteredUsers = computed(() => {
           return users.value.filter(u => {
             if (userSearchQuery.value) {
@@ -831,7 +839,7 @@
           users, filteredUsers, userSearchQuery, userFilterRole, userFilterStatus,
           userDialogVisible, isUserEdit, userForm, userDialogTitle,
           openAddUserDialog, openEditUserDialog, saveUser, deleteUser,
-          currentUserRole, roleLabel, roleTagClass,
+          currentUserRole, roleLabel, roleTagClass, roleOptions,
         };
       }
     });
