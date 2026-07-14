@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>not-book · 基于 Django 的任务管理应用</title>
+  <meta name="description" content="not-book 是一个基于 Django 6.0 构建的任务管理应用。" />
+  <style>
+    :root {
+      --bg: #0f1115;
+      --bg-soft: #161a22;
+      --card: #1b212c;
+      --border: #262d3a;
+      --text: #e6e9ef;
+      --muted: #9aa4b2;
+      --accent: #4f8cff;
+      --accent-2: #8b5cff;
+      --green: #34d399;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+        "Hiragino Sans GB", "Microsoft YaHei", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: inherit; text-decoration: none; }
+
+    /* Nav */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      backdrop-filter: blur(12px);
+      background: rgba(15, 17, 21, 0.7);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-inner {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .logo {
+      font-weight: 700;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .logo-dot {
+      width: 22px; height: 22px;
+      border-radius: 7px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    }
+    .nav-links { display: flex; gap: 28px; }
+    .nav-links a { color: var(--muted); font-size: 14px; transition: color .2s; }
+    .nav-links a:hover { color: var(--text); }
+
+    /* Hero */
+    header {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 96px 24px 64px;
+      text-align: center;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 28px;
+      background: var(--bg-soft);
+    }
+    .badge .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); }
+    h1 {
+      font-size: clamp(36px, 6vw, 64px);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+      margin-bottom: 20px;
+    }
+    .gradient {
+      background: linear-gradient(120deg, var(--accent), var(--accent-2));
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .lead {
+      font-size: clamp(16px, 2vw, 20px);
+      color: var(--muted);
+      max-width: 620px;
+      margin: 0 auto 36px;
+    }
+    .cta { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 22px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 15px;
+      transition: transform .15s, box-shadow .2s;
+      border: 1px solid transparent;
+    }
+    .btn-primary {
+      background: linear-gradient(120deg, var(--accent), var(--accent-2));
+      color: #fff;
+      box-shadow: 0 8px 24px rgba(79, 140, 255, 0.3);
+    }
+    .btn-primary:hover { transform: translateY(-2px); }
+    .btn-ghost {
+      background: var(--bg-soft);
+      border-color: var(--border);
+      color: var(--text);
+    }
+    .btn-ghost:hover { border-color: var(--accent); }
+
+    /* Sections */
+    section { max-width: 1080px; margin: 0 auto; padding: 64px 24px; }
+    .section-title {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+    .section-title h2 {
+      font-size: clamp(26px, 4vw, 36px);
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+    .section-title p { color: var(--muted); margin-top: 10px; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 20px;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 26px;
+      transition: border-color .2s, transform .2s;
+    }
+    .card:hover { border-color: var(--accent); transform: translateY(-3px); }
+    .card .icon {
+      width: 42px; height: 42px;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+      background: rgba(79, 140, 255, 0.12);
+      margin-bottom: 16px;
+    }
+    .card h3 { font-size: 17px; margin-bottom: 8px; }
+    .card p { color: var(--muted); font-size: 14px; }
+
+    /* Stack */
+    .stack {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: center;
+    }
+    .chip {
+      padding: 10px 18px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: var(--bg-soft);
+      font-size: 14px;
+      color: var(--text);
+    }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--border);
+      margin-top: 40px;
+    }
+    .footer-inner {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 32px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .footer-inner a:hover { color: var(--accent); }
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="nav-inner">
+      <div class="logo"><span class="logo-dot"></span> not-book</div>
+      <div class="nav-links">
+        <a href="#features">功能</a>
+        <a href="#stack">技术栈</a>
+        <a href="https://github.com/hxhming/not-book" target="_blank" rel="noopener">GitHub</a>
+      </div>
+    </div>
+  </nav>
+
+  <header>
+    <div class="badge"><span class="dot"></span> Django 6.0 · Python 3</div>
+    <h1>用 <span class="gradient">not-book</span><br/>管理你的任务</h1>
+    <p class="lead">
+      not-book 是一个基于 Django 构建的任务管理应用，结构清晰、易于扩展，
+      帮助你高效地组织与追踪待办事项。
+    </p>
+    <div class="cta">
+      <a class="btn btn-primary" href="https://github.com/hxhming/not-book" target="_blank" rel="noopener">
+        查看源码 →
+      </a>
+      <a class="btn btn-ghost" href="#features">了解功能</a>
+    </div>
+  </header>
+
+  <section id="features">
+    <div class="section-title">
+      <h2>核心特性</h2>
+      <p>简洁的项目结构，开箱即用</p>
+    </div>
+    <div class="grid">
+      <div class="card">
+        <div class="icon">📋</div>
+        <h3>任务应用</h3>
+        <p>内置 task 应用，提供模型、视图与管理后台的标准化骨架，便于快速迭代。</p>
+      </div>
+      <div class="card">
+        <div class="icon">🛠️</div>
+        <h3>Django Admin</h3>
+        <p>开箱即用的管理后台，方便对数据进行增删改查与运维管理。</p>
+      </div>
+      <div class="card">
+        <div class="icon">🗄️</div>
+        <h3>SQLite 数据库</h3>
+        <p>默认集成 SQLite，零配置即可运行，也支持切换到 PostgreSQL / MySQL。</p>
+      </div>
+      <div class="card">
+        <div class="icon">⚙️</div>
+        <h3>ASGI / WSGI</h3>
+        <p>同时提供 ASGI 与 WSGI 入口，支持同步与异步部署场景。</p>
+      </div>
+      <div class="card">
+        <div class="icon">🔒</div>
+        <h3>安全中间件</h3>
+        <p>内置 CSRF、点击劫持防护、会话与认证等安全中间件链。</p>
+      </div>
+      <div class="card">
+        <div class="icon">🌱</div>
+        <h3>易于扩展</h3>
+        <p>清晰的应用分层与迁移机制，方便持续添加新功能与数据模型。</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="stack">
+    <div class="section-title">
+      <h2>技术栈</h2>
+      <p>基于成熟稳定的 Python 生态</p>
+    </div>
+    <div class="stack">
+      <span class="chip">Python 3</span>
+      <span class="chip">Django 6.0</span>
+      <span class="chip">SQLite</span>
+      <span class="chip">ASGI / WSGI</span>
+      <span class="chip">Django Admin</span>
+      <span class="chip">Django ORM</span>
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer-inner">
+      <span>© <span id="year"></span> not-book</span>
+      <a href="https://github.com/hxhming/not-book" target="_blank" rel="noopener">github.com/hxhming/not-book</a>
+    </div>
+  </footer>
+
+  <script>document.getElementById("year").textContent = new Date().getFullYear();</script>
+</body>
+</html>
