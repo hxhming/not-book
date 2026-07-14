@@ -161,9 +161,6 @@
       border-right: 1px solid #f5f5f5;
       color: #1f2329;
       vertical-align: middle;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
     }
     .bitable tbody td:last-child { border-right: none; }
     .bitable tbody tr:hover { background: #f5f9ff; }
@@ -363,7 +360,7 @@
           <div v-if="currentMenu==='user'" class="page-card">
             <div class="page-header">
               <div class="page-title">用户管理</div>
-              <el-button type="primary" @click="openAddUserDialog">
+              <el-button v-if="currentUserRole === 'superadmin'" type="primary" @click="openAddUserDialog">
                 <i class="fas fa-user-plus" style="margin-right:6px;"></i>新增用户
               </el-button>
             </div>
@@ -372,8 +369,9 @@
                 <template #prefix><i class="fas fa-search" style="color:#c0c4cc;"></i></template>
               </el-input>
               <el-select v-model="userFilterRole" placeholder="全部角色" clearable>
-                <el-option label="超级管理员" value="superuser" />
-                <el-option label="普通用户" value="normal" />
+                <el-option label="超级管理员" value="superadmin" />
+                <el-option label="管理员" value="admin" />
+                <el-option label="普通用户" value="user" />
               </el-select>
               <el-select v-model="userFilterStatus" placeholder="全部状态" clearable>
                 <el-option label="活跃" value="active" />
@@ -388,20 +386,20 @@
               <table class="bitable">
                 <thead>
                   <tr>
-                    <th style="width:60px;">ID</th>
+                    <th v-if="currentUserRole === 'superadmin'" style="width:60px;">ID</th>
                     <th style="width:180px;">用户名</th>
                     <th style="min-width:220px;">邮箱</th>
-                    <th style="width:140px;">手机号</th>
-                    <th style="width:110px;">角色</th>
+                    <th v-if="currentUserRole === 'superadmin'" style="width:140px;">手机号</th>
+                    <th v-if="currentUserRole === 'superadmin'" style="width:110px;">角色</th>
                     <th style="width:90px;">状态</th>
                     <th style="width:170px;">最后登录</th>
-                    <th style="width:170px;">注册时间</th>
-                    <th style="width:140px;" class="col-actions">操作</th>
+                    <th v-if="currentUserRole === 'superadmin'" style="width:170px;">注册时间</th>
+                    <th v-if="currentUserRole === 'superadmin'" style="width:140px;" class="col-actions">操作</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr v-for="(row, idx) in filteredUsers" :key="row.id">
-                    <td>{{ row.id }}</td>
+                    <td v-if="currentUserRole === 'superadmin'">{{ row.id }}</td>
                     <td>
                       <div class="user-cell">
                         <div class="user-avatar">{{ row.username.charAt(0).toUpperCase() }}</div>
@@ -409,10 +407,10 @@
                       </div>
                     </td>
                     <td>{{ row.email }}</td>
-                    <td>{{ row.phone }}</td>
-                    <td>
-                      <span class="bitag" :class="row.is_superuser ? 'bitag-danger' : 'bitag-info'">
-                        {{ row.is_superuser ? '超级管理员' : '普通用户' }}
+                    <td v-if="currentUserRole === 'superadmin'">{{ row.phone }}</td>
+                    <td v-if="currentUserRole === 'superadmin'">
+                      <span class="bitag" :class="roleTagClass(row.role)">
+                        {{ roleLabel(row.role) }}
                       </span>
                     </td>
                     <td>
@@ -421,10 +419,10 @@
                       </span>
                     </td>
                     <td>{{ row.last_login }}</td>
-                    <td>{{ row.date_joined }}</td>
-                    <td class="col-actions">
+                    <td v-if="currentUserRole === 'superadmin'">{{ row.date_joined }}</td>
+                    <td v-if="currentUserRole === 'superadmin'" class="col-actions">
                       <button class="btn-link btn-link-primary" @click="openEditUserDialog(row)">编辑</button>
-                      <button v-if="!row.is_superuser" class="btn-link btn-link-danger" @click="deleteUser(row)">删除</button>
+                      <button v-if="row.role !== 'superadmin'" class="btn-link btn-link-danger" @click="deleteUser(row)">删除</button>
                     </td>
                   </tr>
                 </tbody>
@@ -450,9 +448,9 @@
           <el-input v-model="userForm.password" type="password" placeholder="请输入密码" show-password />
         </el-form-item>
         <el-form-item label="角色">
-          <el-select v-model="userForm.is_superuser" style="width: 100%;">
-            <el-option label="超级管理员" :value="true" />
-            <el-option label="普通用户" :value="false" />
+          <el-select v-model="userForm.role" style="width: 100%;">
+            <el-option label="管理员" value="admin" />
+            <el-option label="普通用户" value="user" />
           </el-select>
         </el-form-item>
         <el-form-item label="状态">
@@ -517,7 +515,7 @@
         const userFilterStatus = ref('');
         const userDialogVisible = ref(false);
         const isUserEdit = ref(false);
-        const userForm = reactive({ id: null, username: '', email: '', phone: '', password: '', is_superuser: false, status: 'active' });
+        const userForm = reactive({ id: null, username: '', email: '', phone: '', password: '', role: 'user', status: 'active' });
         const statusMap = { todo: '待办', in_progress: '进行中', done: '已完成' };
         const priorityMap = { high: '高', medium: '中', low: '低' };
 
@@ -663,16 +661,36 @@
           const data = localStorage.getItem('users');
           if (!data) {
             const seed = [
-              { id: 1, username: 'hxhming', email: 'hxhming@github.com', phone: '13800138000', password: 'hxhming', is_superuser: true, status: 'active', last_login: '2026-07-15 08:30:00', date_joined: '2026-07-10 09:00:00' },
-              { id: 2, username: 'zhangsan', email: 'zhangsan@example.com', phone: '13900139001', password: 'zs123456', is_superuser: false, status: 'active', last_login: '2026-07-14 16:20:00', date_joined: '2026-07-11 14:30:00' },
-              { id: 3, username: 'lisi', email: 'lisi@example.com', phone: '13900139002', password: 'ls123456', is_superuser: false, status: 'active', last_login: '2026-07-13 10:15:00', date_joined: '2026-07-11 15:00:00' },
-              { id: 4, username: 'wangwu', email: 'wangwu@example.com', phone: '13900139003', password: 'ww123456', is_superuser: false, status: 'disabled', last_login: '2026-07-12 09:45:00', date_joined: '2026-07-12 08:00:00' },
-              { id: 5, username: 'zhaoliu', email: 'zhaoliu@example.com', phone: '13900139004', password: 'zl123456', is_superuser: false, status: 'active', last_login: '—', date_joined: '2026-07-14 11:30:00' },
+              { id: 1, username: 'hxhming', email: 'hxhming@github.com', phone: '13800138000', password: 'hxhming', role: 'superadmin', status: 'active', last_login: '2026-07-15 08:30:00', date_joined: '2026-07-10 09:00:00' },
+              { id: 2, username: 'zhangsan', email: 'zhangsan@example.com', phone: '13900139001', password: 'zs123456', role: 'admin', status: 'active', last_login: '2026-07-14 16:20:00', date_joined: '2026-07-11 14:30:00' },
+              { id: 3, username: 'lisi', email: 'lisi@example.com', phone: '13900139002', password: 'ls123456', role: 'admin', status: 'active', last_login: '2026-07-13 10:15:00', date_joined: '2026-07-11 15:00:00' },
+              { id: 4, username: 'wangwu', email: 'wangwu@example.com', phone: '13900139003', password: 'ww123456', role: 'user', status: 'disabled', last_login: '2026-07-12 09:45:00', date_joined: '2026-07-12 08:00:00' },
+              { id: 5, username: 'zhaoliu', email: 'zhaoliu@example.com', phone: '13900139004', password: 'zl123456', role: 'user', status: 'active', last_login: '—', date_joined: '2026-07-14 11:30:00' },
             ];
             localStorage.setItem('users', JSON.stringify(seed));
             return seed;
           }
-          return JSON.parse(data);
+          let list = JSON.parse(data);
+          let migrated = false;
+          list = list.map(u => {
+            if (u.role) return u;
+            migrated = true;
+            return {
+              id: u.id,
+              username: u.username,
+              email: u.email,
+              phone: u.phone || '',
+              password: u.password || '',
+              role: u.is_superuser ? 'superadmin' : 'user',
+              status: u.status || 'active',
+              last_login: u.last_login || '—',
+              date_joined: u.date_joined || '—',
+            };
+          });
+          if (migrated) {
+            localStorage.setItem('users', JSON.stringify(list));
+          }
+          return list;
         }
 
         const users = ref([]);
@@ -681,14 +699,26 @@
           localStorage.setItem('users', JSON.stringify(users.value));
         }
 
+        const currentUserRole = computed(() => {
+          const u = users.value.find(u => u.username === username.value);
+          return u ? u.role : 'user';
+        });
+
+        function roleLabel(role) {
+          return { superadmin: '超级管理员', admin: '管理员', user: '普通用户' }[role] || '普通用户';
+        }
+
+        function roleTagClass(role) {
+          return { superadmin: 'bitag-danger', admin: 'bitag-warning', user: 'bitag-info' }[role] || 'bitag-info';
+        }
+
         const filteredUsers = computed(() => {
           return users.value.filter(u => {
             if (userSearchQuery.value) {
               const q = userSearchQuery.value.toLowerCase();
               if (!u.username.toLowerCase().includes(q) && !u.email.toLowerCase().includes(q)) return false;
             }
-            if (userFilterRole.value === 'superuser' && !u.is_superuser) return false;
-            if (userFilterRole.value === 'normal' && u.is_superuser) return false;
+            if (userFilterRole.value && u.role !== userFilterRole.value) return false;
             if (userFilterStatus.value && u.status !== userFilterStatus.value) return false;
             return true;
           });
@@ -703,7 +733,7 @@
           userForm.email = '';
           userForm.phone = '';
           userForm.password = '';
-          userForm.is_superuser = false;
+          userForm.role = 'user';
           userForm.status = 'active';
           userDialogVisible.value = true;
         }
@@ -715,7 +745,7 @@
           userForm.email = row.email;
           userForm.phone = row.phone;
           userForm.password = row.password || '';
-          userForm.is_superuser = row.is_superuser;
+          userForm.role = row.role;
           userForm.status = row.status;
           userDialogVisible.value = true;
         }
@@ -723,6 +753,10 @@
         function saveUser() {
           if (!userForm.username.trim()) {
             ElementPlus.ElMessage.warning('请输入用户名');
+            return;
+          }
+          if (currentUserRole.value !== 'superadmin') {
+            ElementPlus.ElMessage.error('没有权限');
             return;
           }
           const now = new Date();
@@ -735,10 +769,30 @@
           if (isUserEdit.value) {
             const idx = users.value.findIndex(u => u.id === userForm.id);
             if (idx >= 0) {
-              users.value[idx] = { ...users.value[idx], username: userForm.username, email: userForm.email, phone: userForm.phone, password: userForm.password, is_superuser: userForm.is_superuser, status: userForm.status };
+              const oldRole = users.value[idx].role;
+              const newRole = userForm.role;
+              if (oldRole === 'superadmin' && newRole !== 'superadmin') {
+                ElementPlus.ElMessage.error('不能降级超级管理员');
+                return;
+              }
+              if (newRole === 'superadmin') {
+                const existingSuperadmin = users.value.find(u => u.role === 'superadmin' && u.id !== userForm.id);
+                if (existingSuperadmin) {
+                  ElementPlus.ElMessage.error('超级管理员只能有一个');
+                  return;
+                }
+              }
+              users.value[idx] = { ...users.value[idx], username: userForm.username, email: userForm.email, phone: userForm.phone, password: userForm.password, role: userForm.role, status: userForm.status };
             }
             ElementPlus.ElMessage.success('用户修改成功');
           } else {
+            if (userForm.role === 'superadmin') {
+              const existingSuperadmin = users.value.find(u => u.role === 'superadmin');
+              if (existingSuperadmin) {
+                ElementPlus.ElMessage.error('超级管理员只能有一个');
+                return;
+              }
+            }
             const maxId = users.value.length ? Math.max(...users.value.map(u => u.id)) : 0;
             users.value.push({
               id: maxId + 1,
@@ -746,7 +800,7 @@
               email: userForm.email,
               phone: userForm.phone,
               password: userForm.password,
-              is_superuser: userForm.is_superuser,
+              role: userForm.role,
               status: userForm.status,
               last_login: '—',
               date_joined: ts,
@@ -758,6 +812,14 @@
         }
 
         function deleteUser(row) {
+          if (currentUserRole.value !== 'superadmin') {
+            ElementPlus.ElMessage.error('没有权限');
+            return;
+          }
+          if (row.role === 'superadmin') {
+            ElementPlus.ElMessage.error('不能删除超级管理员');
+            return;
+          }
           ElementPlus.ElMessageBox.confirm('确定要删除用户 "' + row.username + '" 吗？', '提示', {
             type: 'warning',
             confirmButtonText: '确定',
@@ -782,6 +844,7 @@
           users, filteredUsers, userSearchQuery, userFilterRole, userFilterStatus,
           userDialogVisible, isUserEdit, userForm, userDialogTitle,
           openAddUserDialog, openEditUserDialog, saveUser, deleteUser,
+          currentUserRole, roleLabel, roleTagClass,
         };
       }
     });
