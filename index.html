@@ -1715,7 +1715,7 @@
           RAG 记忆和 AI 一键写进同一个可审稳、可采纳、可沉淀的工作流。
         </p>
         <div class="hero-btns">
-          <button class="btn-primary" size="large" @click="showLogin = true">
+          <button class="btn-primary" size="large" @click="enterWorkshop()">
             <i class="fas fa-wand-magic-sparkles" style="margin-right:6px;"></i>开始 AI 创作
           </button>
           <button class="btn-ghost" size="large" @click="scrollTo('features')">
@@ -2844,39 +2844,88 @@
             <div v-if="editorSection === 'ai'">
               <div class="ws-section-header">
                 <div class="ws-section-title"><i class="fas fa-robot" style="margin-right:8px;color:#c4b5fd;"></i>AI 助手</div>
-                <el-select v-model="currentAiModel" size="small" style="width:200px;">
-                  <el-option v-for="m in aiModels" :key="m.id" :label="m.name" :value="m.id" />
-                </el-select>
+                <div style="display:flex;gap:8px;align-items:center;">
+                  <el-radio-group v-model="aiRole" size="small">
+                    <el-radio-button value="ask">
+                      <i class="fas fa-magnifying-glass" style="margin-right:4px;"></i>Ask 询问
+                    </el-radio-button>
+                    <el-radio-button value="agent">
+                      <i class="fas fa-wand-magic-sparkles" style="margin-right:4px;"></i>Agent 执行
+                    </el-radio-button>
+                  </el-radio-group>
+                  <el-select v-model="currentAiModel" size="small" style="width:160px;">
+                    <el-option v-for="m in aiModels" :key="m.id" :label="m.name" :value="m.id" />
+                  </el-select>
+                </div>
               </div>
               <div style="background:rgba(18,18,31,0.7);border:1px solid #1e1e30;border-radius:12px;padding:20px;min-height:500px;display:flex;flex-direction:column;">
-                <div style="flex:1;padding:10px;overflow-y:auto;">
+                <div v-if="aiRole === 'ask'" style="background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.3);border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:13px;color:#93c5fd;">
+                  <i class="fas fa-circle-info" style="margin-right:6px;"></i>
+                  <strong>Ask 询问助手</strong>：只能查询和分析内容，不能修改或创建数据。适合了解设定、梳理剧情、检查伏笔。
+                </div>
+                <div v-if="aiRole === 'agent'" style="background:rgba(139,92,246,0.1);border:1px solid rgba(139,92,246,0.3);border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:13px;color:#c4b5fd;">
+                  <i class="fas fa-circle-info" style="margin-right:6px;"></i>
+                  <strong>Agent 执行助手</strong>：可以查询、创建和修改内容，执行实际操作。适合生成大纲、添加角色记忆、创建伏笔等。
+                </div>
+                <div style="flex:1;padding:10px;overflow-y:auto;" ref="aiMessagesContainer">
                   <div class="ai-msg ai" style="max-width:80%;">
-                    欢迎使用 AI 写作助手！我可以帮你完成各种写作相关的任务：<br/><br/>
-                    📝 文本生成：续写、扩写、缩写、改写<br/>
-                    💡 创意辅助：构思情节、设计人物、生成对话<br/>
-                    🔧 文字优化：润色、纠错、调整文风<br/>
-                    📊 内容分析：人物分析、剧情梳理、伏笔检查<br/><br/>
-                    你想让我帮你做什么呢？
+                    <template v-if="aiRole === 'ask'">
+                      你好！我是 <strong>Ask 询问助手</strong> 🔍<br/><br/>
+                      我可以帮你查询和分析各种创作资料：<br/><br/>
+                      📖 查设定：角色信息、世界观、故事大纲<br/>
+                      📊 做分析：人物关系梳理、剧情线分析、伏笔检查<br/>
+                      💡 出主意：构思情节、规划设定、提供建议<br/><br/>
+                      注意：我只能查询信息，不能修改或创建内容哦。需要执行操作请切换到 Agent 模式。
+                    </template>
+                    <template v-else>
+                      你好！我是 <strong>Agent 执行助手</strong> ✨<br/><br/>
+                      我可以帮你完成各种创作任务：<br/><br/>
+                      📖 查询分析：角色、世界观、大纲、剧情线查询<br/>
+                      ⚡ 执行操作：生成大纲、添加角色记忆、创建伏笔<br/>
+                      💡 规划设计：设定规划、情节设计、结构优化<br/><br/>
+                      告诉我你想做什么，我来帮你执行！
+                    </template>
+                  </div>
+                  <div class="ai-msg" v-for="(msg, idx) in aiMessages" :key="idx" :class="msg.role">
+                    <div v-if="msg.role === 'ai' && msg.toolCalls" style="margin-bottom:8px;font-size:12px;color:#8b7dd8;">
+                      <i class="fas fa-tools" style="margin-right:4px;"></i>
+                      调用工具：
+                      <span v-for="(tc, ti) in msg.toolCalls" :key="ti" style="margin-right:8px;">
+                        {{ tc.name }}
+                      </span>
+                    </div>
+                    <div v-html="msg.content"></div>
                   </div>
                 </div>
                 <div style="border-top:1px solid #1e1e30;padding-top:12px;">
                   <div class="ai-quick-btns" style="margin-bottom:10px;">
-                    <div class="ai-quick-btn">📝 生成大纲</div>
-                    <div class="ai-quick-btn">👤 设计人物</div>
-                    <div class="ai-quick-btn">🌍 构建世界观</div>
-                    <div class="ai-quick-btn">💬 写对话</div>
-                    <div class="ai-quick-btn">✨ 润色文字</div>
-                    <div class="ai-quick-btn">🔍 检查伏笔</div>
+                    <template v-if="aiRole === 'ask'">
+                      <div class="ai-quick-btn" @click="aiQuickAction('query_chars')">👤 查询角色</div>
+                      <div class="ai-quick-btn" @click="aiQuickAction('query_world')">🌍 查询世界观</div>
+                      <div class="ai-quick-btn" @click="aiQuickAction('query_synopsis')">📖 查询大纲</div>
+                      <div class="ai-quick-btn" @click="aiQuickAction('query_plotlines')">📈 分析剧情线</div>
+                      <div class="ai-quick-btn" @click="aiQuickAction('query_foreshadows')">🌱 检查伏笔</div>
+                    </template>
+                    <template v-else>
+                      <div class="ai-quick-btn" @click="aiQuickAction('gen_synopsis')">📝 生成大纲</div>
+                      <div class="ai-quick-btn" @click="aiQuickAction('add_char')">👤 设计人物</div>
+                      <div class="ai-quick-btn" @click="aiQuickAction('gen_world')">🌍 构建世界观</div>
+                      <div class="ai-quick-btn" @click="aiQuickAction('add_foreshadow')">🌱 添加伏笔</div>
+                      <div class="ai-quick-btn" @click="aiQuickAction('gen_dialogue')">💬 写对话</div>
+                      <div class="ai-quick-btn" @click="aiQuickAction('polish')">✨ 润色文字</div>
+                    </template>
                   </div>
                   <div class="ai-input-area">
                     <textarea 
                       class="ai-input" 
                       v-model="aiInput" 
-                      placeholder="输入你的需求..."
+                      :placeholder="aiRole === 'ask' ? '输入你想查询的内容...' : '输入你想执行的任务...'"
                       style="min-height:60px;"
                       @keydown.enter.exact="sendAi()"
                     ></textarea>
-                    <button class="ai-send-btn" @click="sendAi()"><i class="fas fa-paper-plane"></i></button>
+                    <button class="ai-send-btn" @click="sendAi()">
+                      <i class="fas fa-paper-plane"></i>
+                    </button>
                   </div>
                 </div>
               </div>
@@ -3539,6 +3588,7 @@
         const aiInput = ref('');
         const aiCallCount = ref(0);
         const currentAiModel = ref(null);
+        const aiRole = ref('ask'); // ask | agent
         
         // ==================== Tool Calling System ====================
         // 工具定义 - 写给AI看的格式，描述每个工具的用途和参数
@@ -4366,6 +4416,10 @@
               currentNovel.value = null;
               localStorage.removeItem('userLoggedIn');
               localStorage.removeItem('userUsername');
+              localStorage.removeItem('nb_view');
+              localStorage.removeItem('nb_wsPage');
+              localStorage.removeItem('nb_currentNovelId');
+              localStorage.removeItem('nb_editorSection');
               view.value = 'home';
               ElementPlus.ElMessage.success('已退出登录');
             }).catch(() => {});
@@ -5034,24 +5088,234 @@
         }
         
         // AI chat
+        const askReadOnlyTools = ['list_characters', 'get_character_info', 'get_world_setting', 'get_synopsis', 'get_foreshadows', 'get_plotlines', 'get_chapter_content'];
+        
+        function isToolAllowed(toolName) {
+          if (aiRole.value === 'agent') return true;
+          return askReadOnlyTools.includes(toolName);
+        }
+        
+        function detectToolIntent(content) {
+          const text = content.toLowerCase();
+          const tools = [];
+          
+          if (text.includes('角色') || text.includes('人物') || text.includes('character')) {
+            if (text.includes('列表') || text.includes('有哪些') || text.includes('全部')) {
+              tools.push({ name: 'list_characters', args: {} });
+            } else {
+              tools.push({ name: 'get_character_info', args: { character_name: extractName(content) } });
+            }
+          }
+          if (text.includes('世界观') || text.includes('设定') || text.includes('world')) {
+            tools.push({ name: 'get_world_setting', args: { category: 'all' } });
+          }
+          if (text.includes('大纲') || text.includes('卷') || text.includes('章') || text.includes('synopsis')) {
+            tools.push({ name: 'get_synopsis', args: { include_chapters: true } });
+          }
+          if (text.includes('伏笔') || text.includes('foreshadow') || text.includes('承诺')) {
+            tools.push({ name: 'get_foreshadows', args: { status: 'all' } });
+          }
+          if (text.includes('剧情线') || text.includes('plotline') || text.includes('主线') || text.includes('支线')) {
+            tools.push({ name: 'get_plotlines', args: {} });
+          }
+          
+          return tools;
+        }
+        
+        function extractName(text) {
+          const match = text.match(/(?:角色|人物|叫)[叫为是]?\s*([^\s，。、,.]+)/);
+          if (match) return match[1];
+          return null;
+        }
+        
+        function aiQuickAction(type) {
+          const actions = {
+            'query_chars': { input: '帮我列出所有角色信息', toolCalls: [{ name: 'list_characters', args: {} }] },
+            'query_world': { input: '查询所有世界观设定', toolCalls: [{ name: 'get_world_setting', args: { category: 'all' } }] },
+            'query_synopsis': { input: '查询完整故事大纲，包括所有卷和章节', toolCalls: [{ name: 'get_synopsis', args: { include_chapters: true } }] },
+            'query_plotlines': { input: '分析当前剧情线进展', toolCalls: [{ name: 'get_plotlines', args: {} }] },
+            'query_foreshadows': { input: '检查所有伏笔的状态', toolCalls: [{ name: 'get_foreshadows', args: { status: 'all' } }] },
+            'gen_synopsis': { input: '帮我生成一个完整的故事大纲', toolCalls: [] },
+            'add_char': { input: '帮我设计一个新角色', toolCalls: [] },
+            'gen_world': { input: '帮我构建世界观设定', toolCalls: [] },
+            'add_foreshadow': { input: '帮我添加一个新的伏笔', toolCalls: [] },
+            'gen_dialogue': { input: '帮我写一段精彩的对话', toolCalls: [] },
+            'polish': { input: '帮我润色一下文字', toolCalls: [] },
+          };
+          const action = actions[type];
+          if (action) {
+            aiInput.value = action.input;
+            sendAi();
+          }
+        }
+        
         function sendAi() {
           if (!aiInput.value.trim()) return;
           const content = aiInput.value;
           aiMessages.value.push({ role: 'user', content });
           aiInput.value = '';
           aiCallCount.value++;
+          
           setTimeout(() => {
-            const replies = [
-              '好的，我来帮你处理这段内容。根据当前章节的情境，我建议可以从以下几个角度展开：\n\n1. 增加环境描写烘托气氛\n2. 通过细节动作展现人物心理\n3. 埋下一个小伏笔为后续剧情铺垫\n\n需要我具体写出来吗？',
-              '这一段的剧情张力不错！我觉得可以再强化一下主角的内心挣扎，让人物更立体。要不要我帮你润色一下对话？',
-              '收到。基于你目前的设定，我梳理了几个可能的发展方向：\n\n• 方向A：男主发现女主身份的秘密\n• 方向B：外敌大举进攻，边关告急\n• 方向C：女主身世之谜初露端倪\n\n你比较倾向哪个方向？',
-            ];
-            aiMessages.value.push({ role: 'ai', content: replies[Math.floor(Math.random() * replies.length)] });
+            const detectedTools = detectToolIntent(content);
+            const allowedTools = detectedTools.filter(t => isToolAllowed(t.name));
+            const blockedTools = detectedTools.filter(t => !isToolAllowed(t.name));
+            
+            let toolResults = [];
+            allowedTools.forEach(tool => {
+              try {
+                const result = executeTool(tool.name, tool.args);
+                toolResults.push({ name: tool.name, result });
+              } catch(e) {
+                toolResults.push({ name: tool.name, result: { success: false, error: String(e) } });
+              }
+            });
+            
+            let replyContent = '';
+            
+            if (aiRole.value === 'ask') {
+              if (blockedTools.length > 0) {
+                replyContent += '<div style="background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.3);border-radius:6px;padding:8px 12px;margin-bottom:10px;font-size:13px;color:#93c5fd;">';
+                replyContent += '<i class="fas fa-lock" style="margin-right:4px;"></i>';
+                replyContent += '<strong>提示</strong>：当前是 Ask 模式，以下操作需要切换到 Agent 模式才能执行：';
+                blockedTools.forEach(t => {
+                  replyContent += '<br/>• ' + t.name;
+                });
+                replyContent += '</div>';
+              }
+              
+              if (toolResults.length > 0) {
+                replyContent += formatQueryResults(toolResults);
+              } else {
+                replyContent += generateAskReply(content);
+              }
+            } else {
+              if (toolResults.length > 0) {
+                replyContent += formatQueryResults(toolResults);
+              }
+              replyContent += '<br/><br/>' + generateAgentReply(content);
+            }
+            
+            aiMessages.value.push({ 
+              role: 'ai', 
+              content: replyContent,
+              toolCalls: allowedTools.length > 0 ? allowedTools : null
+            });
+            
             nextTick(() => {
               const msgs = document.querySelector('.ai-messages');
               if (msgs) msgs.scrollTop = msgs.scrollHeight;
             });
-          }, 800);
+          }, 500);
+        }
+        
+        function formatQueryResults(results) {
+          let html = '';
+          results.forEach((r, idx) => {
+            const res = r.result;
+            if (!res.success) {
+              html += `<div style="color:#f87171;margin-bottom:8px;"><i class="fas fa-circle-xmark" style="margin-right:4px;"></i>${r.name} 失败：${res.error}</div>`;
+              return;
+            }
+            
+            html += `<div style="margin-bottom:12px;"><div style="font-weight:600;color:#c4b5fd;margin-bottom:6px;"><i class="fas fa-check-circle" style="margin-right:4px;color:#4ade80;"></i>${r.name}</div>`;
+            
+            switch (r.name) {
+              case 'list_characters':
+                html += '<div style="display:flex;flex-wrap:wrap;gap:6px;">';
+                res.data.forEach(c => {
+                  html += `<span style="background:rgba(139,92,246,0.15);padding:4px 10px;border-radius:12px;font-size:12px;">${c.name}（${c.role}）</span>`;
+                });
+                html += '</div>';
+                break;
+                
+              case 'get_character_info':
+                const d = res.data;
+                html += `<div style="font-size:14px;"><strong>${d.name}</strong> - ${d.role}<br/>`;
+                if (d.basic) {
+                  if (d.basic.personality) html += `性格：${d.basic.personality}<br/>`;
+                  if (d.basic.background) html += `背景：${d.basic.background}<br/>`;
+                }
+                if (d.relations && d.relations.length > 0) {
+                  html += `关系：共 ${d.relations.length} 条<br/>`;
+                }
+                if (d.arcs && d.arcs.length > 0) {
+                  html += `弧光：共 ${d.arcs.length} 个阶段<br/>`;
+                }
+                html += '</div>';
+                break;
+                
+              case 'get_world_setting':
+                const cats = Object.keys(res.data);
+                html += `<div style="font-size:13px;">共 ${cats.length} 个分类：<br/>`;
+                cats.forEach(cat => {
+                  const content = String(res.data[cat]);
+                  const preview = content.length > 80 ? content.slice(0, 80) + '...' : content;
+                  html += `• <strong>${cat}</strong>：${preview}<br/>`;
+                });
+                html += '</div>';
+                break;
+                
+              case 'get_synopsis':
+                html += `<div style="font-size:13px;">共 ${res.data.total_volumes} 卷<br/>`;
+                res.data.volumes.forEach(v => {
+                  html += `• <strong>第${v.volume}卷 ${v.title}</strong>`;
+                  if (v.summary) html += ` - ${v.summary.slice(0, 50)}...`;
+                  if (v.chapters) html += `（${v.chapters.length}章）`;
+                  html += '<br/>';
+                });
+                html += '</div>';
+                break;
+                
+              case 'get_foreshadows':
+                const unresolved = res.data.filter(f => f.status === 'unresolved').length;
+                const resolved = res.data.filter(f => f.status === 'resolved').length;
+                html += `<div style="font-size:13px;">共 ${res.data.length} 个伏笔<br/>`;
+                html += `• 未回收：<span style="color:#fbbf24;">${unresolved}</span> 个<br/>`;
+                html += `• 已回收：<span style="color:#4ade80;">${resolved}</span> 个<br/>`;
+                if (res.data.length > 0) {
+                  html += '<br/>最近伏笔：<br/>';
+                  res.data.slice(0, 3).forEach(f => {
+                    const statusColor = f.status === 'unresolved' ? '#fbbf24' : '#4ade80';
+                    html += `• <span style="color:${statusColor};">[${f.status === 'unresolved' ? '未回收' : '已回收'}]</span> ${f.title}<br/>`;
+                  });
+                }
+                html += '</div>';
+                break;
+                
+              case 'get_plotlines':
+                html += `<div style="font-size:13px;">共 ${res.data.length} 条剧情线<br/>`;
+                res.data.forEach(pl => {
+                  html += `• <span style="color:${pl.color};">●</span> <strong>${pl.name}</strong>：${pl.nodes ? pl.nodes.length : 0} 个节点<br/>`;
+                });
+                html += '</div>';
+                break;
+                
+              default:
+                html += `<pre style="font-size:12px;white-space:pre-wrap;">${JSON.stringify(res.data, null, 2)}</pre>`;
+            }
+            
+            html += '</div>';
+          });
+          return html;
+        }
+        
+        function generateAskReply(content) {
+          const replies = [
+            '好的，关于你的问题，我来帮你梳理一下：<br/><br/>基于当前的创作资料，我觉得可以从这几个角度来思考：<br/>1. 先明确你想要达成的目标<br/>2. 结合已有的角色设定和世界观<br/>3. 考虑对后续剧情的影响<br/><br/>需要我帮你查询具体的设定信息吗？',
+            '这是一个很有意思的问题！<br/><br/>让我想想... 根据你目前的故事设定，有几个方向可以考虑：<br/><br/>• 从角色性格出发，看看人物会如何选择<br/>• 结合世界观设定，考虑背景环境的影响<br/>• 联系已有的伏笔和剧情线，保持前后呼应<br/><br/>你想先了解哪方面的信息？我可以帮你查询具体的设定。',
+            '收到！关于「' + content.slice(0, 20) + '...」这个问题：<br/><br/>我建议可以分步骤来：<br/>1. 先盘点一下已有的设定和素材<br/>2. 明确核心需求和目标<br/>3. 再进行具体的设计和规划<br/><br/>需要我先帮你查询一下相关的角色、世界观或大纲信息吗？',
+          ];
+          return replies[Math.floor(Math.random() * replies.length)];
+        }
+        
+        function generateAgentReply(content) {
+          const replies = [
+            '好的，我来帮你执行这个任务！<br/><br/>根据你的需求，我已经开始处理了。基于当前项目的设定，我会：<br/>1. 先分析现有数据和设定<br/>2. 制定具体的执行方案<br/>3. 逐步完成并展示结果<br/><br/>你希望我先从哪个部分开始呢？',
+            '没问题，交给我来处理！<br/><br/>我理解你想要实现的目标。为了更好地完成任务，我会：<br/>• 结合已有的角色和世界观<br/>• 保持故事风格的一致性<br/>• 确保与现有剧情线衔接顺畅<br/><br/>有什么具体的偏好或要求随时告诉我！',
+            '收到！马上开始执行 ✨<br/><br/>我已经明白了你的需求。在执行过程中，我会：<br/>• 充分利用现有的故事设定<br/>• 保持前后逻辑一致<br/>• 注重细节和质量<br/><br/>你可以随时打断我，调整方向或补充需求～',
+          ];
+          return replies[Math.floor(Math.random() * replies.length)];
         }
         
         function quickAi(type) {
@@ -5284,6 +5548,35 @@
             username.value = localStorage.getItem('userUsername') || '';
             profileForm.username = username.value;
             profileForm.nickname = username.value;
+            const savedView = localStorage.getItem('nb_view');
+            if (savedView) view.value = savedView;
+            const savedWsPage = localStorage.getItem('nb_wsPage');
+            if (savedWsPage) wsPage.value = savedWsPage;
+            const savedNovelId = localStorage.getItem('nb_currentNovelId');
+            if (savedNovelId) {
+              const novelId = parseInt(savedNovelId);
+              const novel = novels.value.find(n => n.id === novelId);
+              if (novel) openNovel(novel);
+            }
+            const savedEditorSection = localStorage.getItem('nb_editorSection');
+            if (savedEditorSection) editorSection.value = savedEditorSection;
+          }
+        });
+        
+        watch(view, (val) => {
+          if (isLoggedIn.value) localStorage.setItem('nb_view', val);
+        });
+        watch(wsPage, (val) => {
+          if (isLoggedIn.value) localStorage.setItem('nb_wsPage', val);
+        });
+        watch(editorSection, (val) => {
+          if (isLoggedIn.value) localStorage.setItem('nb_editorSection', val);
+        });
+        watch(currentNovel, (val) => {
+          if (isLoggedIn.value && val) {
+            localStorage.setItem('nb_currentNovelId', val.id);
+          } else if (isLoggedIn.value) {
+            localStorage.removeItem('nb_currentNovelId');
           }
         });
         
@@ -5299,7 +5592,7 @@
           // Novels
           novels, currentNovel, createNovelVisible, novelForm,
           chapters, currentChapterId, currentChapter,
-          aiMessages, aiInput, aiCallCount, currentAiModel,
+          aiMessages, aiInput, aiCallCount, currentAiModel, aiRole, aiQuickAction,
           novelInfoForm,
           synopsisVolumes, activeSynopsisVol, currentVol,
           synopsisTab, foreshadows, foreshadowFilter, filteredForeshadows,
