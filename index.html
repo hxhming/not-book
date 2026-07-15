@@ -1620,6 +1620,57 @@
       color: #c4b5fd;
     }
     
+    .world-group-item {
+      margin-bottom: 4px;
+    }
+    .world-group-header {
+      padding: 8px 10px;
+      background: rgba(18,18,31,0.7);
+      border: 1px solid #1e1e30;
+      border-radius: 6px;
+      font-size: 12px;
+      color: #a0a0b8;
+      cursor: pointer;
+      transition: all .2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .world-group-header:hover {
+      border-color: rgba(139, 92, 246, 0.4);
+      color: #c4b5fd;
+    }
+    .world-group-header.active {
+      background: rgba(139, 92, 246, 0.15);
+      border-color: rgba(139, 92, 246, 0.4);
+      color: #c4b5fd;
+    }
+    .world-group-header.sub {
+      padding-left: 24px;
+      font-size: 11px;
+      background: rgba(14,14,24,0.5);
+    }
+    .world-group-children {
+      padding-left: 8px;
+    }
+    
+    .perspective-item {
+      padding: 10px;
+      background: rgba(18,18,31,0.7);
+      border: 1px solid #1e1e30;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all .2s;
+      margin-bottom: 6px;
+    }
+    .perspective-item:hover {
+      border-color: rgba(139, 92, 246, 0.4);
+    }
+    .perspective-item.active {
+      background: rgba(139, 92, 246, 0.15);
+      border-color: rgba(139, 92, 246, 0.4);
+    }
+    
     /* Tools Grid */
     .tools-grid {
       display: grid;
@@ -1946,6 +1997,22 @@
       <!-- Main -->
       <main class="ws-main">
         <div class="ws-topbar">
+          <div style="display:flex;align-items:center;gap:8px;margin-right:20px;">
+            <el-button size="small" @click="manualSave()" :loading="saving">
+              <i class="fas fa-save" style="margin-right:4px;"></i>保存
+            </el-button>
+            <el-dropdown @command="handleHistoryCommand">
+              <el-button size="small">
+                <i class="fas fa-history" style="margin-right:4px;"></i>回溯
+                <i class="fas fa-chevron-down" style="font-size:10px;margin-left:2px;"></i>
+              </el-button>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item command="view-all">查看全部历史</el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
+          </div>
           <div class="ws-breadcrumb">
             <span @click="view='home'" style="cursor:pointer;">首页</span>
             <span style="margin:0 6px;">/</span>
@@ -2276,14 +2343,101 @@
             <div v-if="editorSection === 'perspectives'">
               <div class="ws-section-header">
                 <div class="ws-section-title"><i class="fas fa-eye" style="margin-right:8px;color:#c4b5fd;"></i>上帝视角图</div>
-                <el-button size="small" type="primary">
+                <el-button size="small" type="primary" @click="addPerspective()">
                   <i class="fas fa-plus" style="margin-right:6px;"></i>新增视角
                 </el-button>
               </div>
-              <div class="empty-state">
-                <i class="fas fa-eye"></i>
-                <div class="text" style="margin-bottom:6px;">暂无视角设定</div>
-                <div style="font-size:12px;color:#4a4a6a;">上帝视角图用于梳理故事中各条线索的时间线和因果关系</div>
+              <div style="display:flex;gap:16px;">
+                <!-- 左侧视角列表 -->
+                <div style="width:260px;background:rgba(18,18,31,0.7);border:1px solid #1e1e30;border-radius:12px;padding:12px;">
+                  <div style="font-size:13px;color:#6b6b85;margin-bottom:12px;">视角列表</div>
+                  <div v-if="perspectives.length === 0" style="color:#4a4a6a;font-size:12px;text-align:center;padding:20px;">暂无视角</div>
+                  <div v-else>
+                    <div v-for="p in perspectives" :key="p.id" 
+                         class="perspective-item"
+                         :class="{active: activePerspective === p.id}"
+                         @click="selectPerspective(p.id)">
+                      <div style="font-size:13px;color:#e4e4ec;margin-bottom:4px;">{{ p.name }}</div>
+                      <div style="font-size:11px;color:#6b6b85;">{{ p.description }}</div>
+                    </div>
+                  </div>
+                </div>
+                <!-- 右侧详情 -->
+                <div style="flex:1;">
+                  <div v-if="activePerspectiveData">
+                    <div style="background:rgba(18,18,31,0.7);border:1px solid #1e1e30;border-radius:12px;padding:20px;margin-bottom:16px;">
+                      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                        <div>
+                          <input v-model="activePerspectiveData.name" style="background:rgba(14,14,24,0.8);border:1px solid #1e1e30;border-radius:8px;padding:8px 12px;color:#e4e4ec;font-size:16px;font-weight:600;width:300px;" />
+                        </div>
+                        <div style="display:flex;gap:4px;">
+                          <el-button size="small" type="danger" link @click="deletePerspective(activePerspectiveData.id)">
+                            <i class="fas fa-trash"></i> 删除
+                          </el-button>
+                        </div>
+                      </div>
+                      <el-input v-model="activePerspectiveData.description" type="textarea" :rows="3" placeholder="描述这个视角的关注点..." />
+                      <div style="margin-top:16px;">
+                        <div style="font-size:13px;color:#c4b5fd;margin-bottom:8px;">涉及角色</div>
+                        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                          <el-select v-model="activePerspectiveData.characterIds" multiple style="width:200px;" size="small">
+                            <el-option v-for="char in characters" :key="char.id" :label="char.name" :value="char.id" />
+                          </el-select>
+                        </div>
+                      </div>
+                    </div>
+                    <!-- 时间线 -->
+                    <div style="background:rgba(18,18,31,0.7);border:1px solid #1e1e30;border-radius:12px;padding:20px;">
+                      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                        <div style="font-size:15px;font-weight:600;color:#e4e4ec;">时间线</div>
+                        <el-button size="small" @click="addTimelineEvent()">
+                          <i class="fas fa-plus" style="margin-right:4px;"></i>添加事件
+                        </el-button>
+                      </div>
+                      <div v-if="activePerspectiveData.timeline.length === 0" style="color:#4a4a6a;font-size:12px;padding:16px;border:1px dashed #1e1e30;border-radius:8px;">
+                        暂无时间线事件，点击上方添加
+                      </div>
+                      <div v-else>
+                        <div v-for="(event, idx) in activePerspectiveData.timeline" :key="idx" 
+                             style="display:flex;gap:12px;padding:12px;background:rgba(14,14,24,0.8);border-radius:8px;margin-bottom:8px;">
+                          <div style="width:60px;font-size:11px;color:#6b6b85;">{{ event.time }}</div>
+                          <div style="flex:1;">
+                            <input v-model="event.title" style="background:rgba(18,18,31,0.7);border:1px solid #1e1e30;border-radius:6px;padding:4px 8px;color:#e4e4ec;font-size:13px;margin-bottom:4px;width:100%;" />
+                            <input v-model="event.description" style="background:rgba(18,18,31,0.7);border:1px solid #1e1e30;border-radius:6px;padding:4px 8px;color:#a0a0b8;font-size:12px;width:100%;" placeholder="事件描述..." />
+                          </div>
+                          <el-button size="small" type="danger" link @click="removeTimelineEvent(idx)">
+                            <i class="fas fa-times"></i>
+                          </el-button>
+                        </div>
+                      </div>
+                    </div>
+                    <!-- 因果关系 -->
+                    <div style="background:rgba(18,18,31,0.7);border:1px solid #1e1e30;border-radius:12px;padding:20px;margin-top:16px;">
+                      <div style="font-size:15px;font-weight:600;color:#e4e4ec;margin-bottom:16px;">因果关系图</div>
+                      <div style="min-height:200px;border:1px dashed #1e1e30;border-radius:8px;padding:16px;">
+                        <div style="color:#4a4a6a;font-size:12px;text-align:center;">
+                          <i class="fas fa-project-diagram" style="font-size:32px;margin-bottom:8px;opacity:0.5;"></i>
+                          <div>因果关系可视化</div>
+                          <div style="font-size:11px;margin-top:4px;">基于时间线事件自动生成因果关系</div>
+                        </div>
+                        <div v-if="activePerspectiveData.timeline.length > 1" style="margin-top:16px;">
+                          <div v-for="(event, idx) in activePerspectiveData.timeline.slice(0, -1)" :key="idx" 
+                               style="display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:12px;">
+                            <span style="color:#c4b5fd;">{{ event.time }}</span>
+                            <span style="color:#6b6b85;">{{ event.title }}</span>
+                            <i class="fas fa-arrow-right" style="color:#8b5cf6;"></i>
+                            <span style="color:#6b6b85;">{{ activePerspectiveData.timeline[idx+1].title }}</span>
+                            <span style="color:#6b6b85;">{{ activePerspectiveData.timeline[idx+1].time }}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div v-else style="background:rgba(18,18,31,0.7);border:1px solid #1e1e30;border-radius:12px;padding:60px 20px;text-align:center;color:#4a4a6a;">
+                    <i class="fas fa-eye" style="font-size:36px;margin-bottom:10px;"></i>
+                    <div>选择一个视角查看详情</div>
+                  </div>
+                </div>
               </div>
             </div>
             
@@ -2550,33 +2704,91 @@
             <div v-if="editorSection === 'world'">
               <div class="ws-section-header">
                 <div class="ws-section-title"><i class="fas fa-globe-asia" style="margin-right:8px;color:#c4b5fd;"></i>世界观设定</div>
-                <el-button size="small" type="primary">
-                  <i class="fas fa-plus" style="margin-right:6px;"></i>新增设定
-                </el-button>
-              </div>
-              <div class="world-categories">
-                <div 
-                  v-for="cat in worldCategories" 
-                  :key="cat.id"
-                  class="world-cat-item"
-                  :class="{active: activeWorldCat === cat.id}"
-                  @click="activeWorldCat = cat.id"
-                >
-                  <i :class="cat.icon"></i>
-                  <span>{{ cat.name }}</span>
+                <div style="display:flex;gap:8px;">
+                  <el-button size="small" @click="addWorldGroup()">
+                    <i class="fas fa-folder-plus" style="margin-right:4px;"></i>新建分组
+                  </el-button>
+                  <el-button size="small" type="primary" @click="addWorldItem()">
+                    <i class="fas fa-plus" style="margin-right:4px;"></i>新增内容
+                  </el-button>
                 </div>
               </div>
-              <div style="margin-top:16px;background:rgba(18,18,31,0.7);border:1px solid #1e1e30;border-radius:12px;padding:24px;min-height:300px;">
-                <div v-if="activeWorldCategory">
-                  <div style="font-size:15px;font-weight:600;color:#e4e4ec;margin-bottom:12px;">
-                    {{ activeWorldCategory.name }}设定
+              <div style="display:flex;gap:16px;">
+                <!-- 左侧分组树 -->
+                <div style="width:240px;background:rgba(18,18,31,0.7);border:1px solid #1e1e30;border-radius:12px;padding:12px;">
+                  <div style="font-size:13px;color:#6b6b85;margin-bottom:12px;">分组结构</div>
+                  <div v-if="worldCategories.length === 0" style="color:#4a4a6a;font-size:12px;text-align:center;padding:20px;">暂无分组</div>
+                  <div v-else>
+                    <div v-for="cat in worldCategories" :key="cat.id" class="world-group-item">
+                      <div 
+                        class="world-group-header" 
+                        :class="{active: activeWorldCat === cat.id}"
+                        @click="selectWorldCategory(cat.id)"
+                      >
+                        <i :class="cat.icon" style="margin-right:6px;"></i>
+                        <span>{{ cat.name }}</span>
+                        <i class="fas fa-chevron-right" style="margin-left:auto;font-size:10px;" @click.stop="toggleWorldGroup(cat)"></i>
+                      </div>
+                      <div v-if="cat.expanded && cat.children && cat.children.length > 0" class="world-group-children">
+                        <div v-for="child in cat.children" :key="child.id" class="world-group-item">
+                          <div 
+                            class="world-group-header sub" 
+                            :class="{active: activeWorldCat === child.id}"
+                            @click="selectWorldCategory(child.id)"
+                          >
+                            <i :class="child.icon" style="margin-right:6px;"></i>
+                            <span>{{ child.name }}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                  <el-input 
-                    v-model="activeWorldCategory.content" 
-                    type="textarea" 
-                    :rows="12"
-                    placeholder="在这里记录该分类下的世界观设定详情..."
-                  />
+                </div>
+                <!-- 右侧内容区 -->
+                <div style="flex:1;background:rgba(18,18,31,0.7);border:1px solid #1e1e30;border-radius:12px;padding:20px;">
+                  <div v-if="activeWorldCategory">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                      <div>
+                        <div style="font-size:15px;font-weight:600;color:#e4e4ec;">{{ activeWorldCategory.name }}</div>
+                        <div style="font-size:12px;color:#6b6b85;">{{ activeWorldCategory.parentId ? '子分组' : '主分组' }}</div>
+                      </div>
+                      <div style="display:flex;gap:4px;">
+                        <el-button size="small" @click="addSubGroup(activeWorldCategory.id)">
+                          <i class="fas fa-folder-plus" style="margin-right:4px;"></i>子分组
+                        </el-button>
+                        <el-button size="small" type="danger" link @click="deleteWorldCategory(activeWorldCategory.id)">
+                          <i class="fas fa-trash"></i>
+                        </el-button>
+                      </div>
+                    </div>
+                    <el-input 
+                      v-model="getWorldSettingContent(activeWorldCategory.id)" 
+                      type="textarea" 
+                      :rows="6"
+                      placeholder="在这里记录该分组的总体设定..."
+                      style="margin-bottom:16px;"
+                    />
+                    <!-- 内容列表 -->
+                    <div style="font-size:13px;color:#c4b5fd;margin-bottom:8px;">设定内容</div>
+                    <div v-if="getWorldSettingItems(activeWorldCategory.id).length === 0" style="color:#4a4a6a;font-size:12px;padding:16px;border:1px dashed #1e1e30;border-radius:8px;">
+                      暂无内容，点击上方「新增内容」创建
+                    </div>
+                    <div v-else>
+                      <div v-for="item in getWorldSettingItems(activeWorldCategory.id)" :key="item.id" style="background:rgba(14,14,24,0.8);border:1px solid #1e1e30;border-radius:8px;padding:12px;margin-bottom:8px;">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+                          <input v-model="item.name" style="background:rgba(18,18,31,0.7);border:1px solid #1e1e30;border-radius:6px;padding:4px 8px;color:#e4e4ec;font-size:13px;" />
+                          <el-button size="small" type="danger" link @click="deleteWorldItem(activeWorldCategory.id, item.id)">
+                            <i class="fas fa-trash"></i>
+                          </el-button>
+                        </div>
+                        <el-input v-model="item.content" type="textarea" :rows="3" placeholder="内容详情..." size="small" />
+                      </div>
+                    </div>
+                  </div>
+                  <div v-else style="text-align:center;padding:60px 20px;color:#4a4a6a;">
+                    <i class="fas fa-folder-open" style="font-size:36px;margin-bottom:10px;"></i>
+                    <div>选择一个分组查看内容</div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -3119,6 +3331,12 @@
                     <el-form-item label="自动保存">
                       <el-switch v-model="prefsForm.autoSave" />
                     </el-form-item>
+                    <el-form-item label="存储方式">
+                      <el-select v-model="prefsForm.storageType" style="width:100%;" @change="onStorageTypeChange">
+                        <el-option label="本地存储（LocalStorage）" value="local" />
+                        <el-option label="云端存储（模拟）" value="cloud" />
+                      </el-select>
+                    </el-form-item>
                     <el-form-item label="显示 AI 助手">
                       <el-switch v-model="prefsForm.showAiAssistant" />
                     </el-form-item>
@@ -3267,6 +3485,36 @@
       </div>
     </el-dialog>
     
+    <!-- History Dialog -->
+    <el-dialog v-model="historyDialogVisible" title="历史版本回溯" width="700px">
+      <div v-if="historyVersions.length === 0" class="empty-state">
+        <i class="fas fa-history"></i>
+        <div class="text">暂无历史记录</div>
+      </div>
+      <div v-else style="max-height:500px;overflow-y:auto;">
+        <div v-for="(version, idx) in historyVersions" :key="version.id" 
+             style="background:rgba(18,18,31,0.7);border:1px solid #1e1e30;border-radius:8px;padding:12px;margin-bottom:8px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+            <div>
+              <span style="color:#c4b5fd;font-weight:500;">版本 {{ historyVersions.length - idx }}</span>
+              <span style="color:#6b6b85;font-size:12px;margin-left:8px;">{{ version.timestamp }}</span>
+            </div>
+            <div style="display:flex;gap:4px;">
+              <el-button size="small" @click="viewHistoryVersion(version)">查看</el-button>
+              <el-button size="small" type="primary" @click="restoreHistoryVersion(version)">回溯</el-button>
+            </div>
+          </div>
+          <div style="font-size:12px;color:#6b6b85;">
+            角色: {{ version.data.characters.length }} | 
+            大纲卷: {{ version.data.synopsisVolumes.length }} | 
+            剧情线: {{ version.data.plotlines.length }} | 
+            伏笔: {{ version.data.foreshadows.length }} | 
+            章节: {{ version.data.chapters.length }}
+          </div>
+        </div>
+      </div>
+    </el-dialog>
+    
     <!-- Create Novel Dialog -->
     <el-dialog v-model="createNovelVisible" title="创建小说项目" width="500px">
       <el-form :model="novelForm" label-width="100px">
@@ -3274,7 +3522,7 @@
           <el-input v-model="novelForm.title" placeholder="请输入作品名称" />
         </el-form-item>
         <el-form-item label="分类">
-          <el-select v-model="novelForm.category" style="width:100%;">
+          <el-select v-model="novelForm.category" style="width:100%;" allow-create filterable default-first-option>
             <el-option-group label="女频">
               <el-option label="古代言情" value="古代言情" />
               <el-option label="现代言情" value="现代言情" />
@@ -3284,6 +3532,10 @@
               <el-option label="悬疑推理" value="悬疑推理" />
               <el-option label="玄幻言情" value="玄幻言情" />
               <el-option label="浪漫青春" value="浪漫青春" />
+              <el-option label="穿越重生" value="穿越重生" />
+              <el-option label="宫斗宅斗" value="宫斗宅斗" />
+              <el-option label="女尊天下" value="女尊天下" />
+              <el-option label="种田经商" value="种田经商" />
             </el-option-group>
             <el-option-group label="男频">
               <el-option label="玄幻奇幻" value="玄幻奇幻" />
@@ -3294,6 +3546,13 @@
               <el-option label="游戏竞技" value="游戏竞技" />
               <el-option label="悬疑侦探" value="悬疑侦探" />
               <el-option label="灵异鬼怪" value="灵异鬼怪" />
+              <el-option label="仙侠修真" value="仙侠修真" />
+              <el-option label="都市重生" value="都市重生" />
+              <el-option label="星际科幻" value="星际科幻" />
+              <el-option label="东方玄幻" value="东方玄幻" />
+              <el-option label="西方奇幻" value="西方奇幻" />
+              <el-option label="末世求生" value="末世求生" />
+              <el-option label="恐怖惊悚" value="恐怖惊悚" />
             </el-option-group>
             <el-option-group label="其他">
               <el-option label="二次元" value="二次元" />
@@ -3301,6 +3560,11 @@
               <el-option label="同人衍生" value="同人衍生" />
               <el-option label="现实题材" value="现实题材" />
               <el-option label="儿童文学" value="儿童文学" />
+              <el-option label="诗歌散文" value="诗歌散文" />
+              <el-option label="剧本影视" value="剧本影视" />
+              <el-option label="游戏小说" value="游戏小说" />
+              <el-option label="体育竞技" value="体育竞技" />
+              <el-option label="职场商战" value="职场商战" />
             </el-option-group>
           </el-select>
         </el-form-item>
@@ -3308,12 +3572,18 @@
           <el-input v-model="novelForm.description" type="textarea" :rows="3" placeholder="用一句话描述你的作品..." />
         </el-form-item>
         <el-form-item label="目标字数">
-          <el-select v-model="novelForm.targetWords" style="width:100%;">
+          <el-select v-model="novelForm.targetWords" style="width:100%;" allow-create filterable default-first-option>
+            <el-option label="5 万字（短篇）" :value="50000" />
             <el-option label="10 万字（短篇）" :value="100000" />
+            <el-option label="20 万字（中篇）" :value="200000" />
             <el-option label="30 万字（中篇）" :value="300000" />
             <el-option label="50 万字（长篇）" :value="500000" />
+            <el-option label="80 万字（超长篇）" :value="800000" />
             <el-option label="100 万字（超长篇）" :value="1000000" />
-            <el-option label="200 万字（超大长篇）" :value="2000000" />
+            <el-option label="150 万字（巨长篇）" :value="1500000" />
+            <el-option label="200 万字（巨长篇）" :value="2000000" />
+            <el-option label="300 万字（史诗级）" :value="3000000" />
+            <el-option label="500 万字（超史诗）" :value="5000000" />
           </el-select>
         </el-form-item>
       </el-form>
@@ -3657,9 +3927,17 @@
           fontSize: '15px',
           autoSave: true,
           showAiAssistant: true,
+          storageType: 'local',
         });
         
         const selectedTool = ref(null);
+        
+        function onStorageTypeChange(val) {
+          if (val === 'cloud') {
+            ElementPlus.ElMessage.info('云端存储功能正在开发中，当前仍使用本地存储');
+            prefsForm.storageType = 'local';
+          }
+        }
         
         function getToolDef(name) {
           const t = toolDefinitions.value.find(t => t.function.name === name);
@@ -4178,6 +4456,64 @@
           });
         });
         
+        // Perspectives
+        const perspectives = ref([
+          { id: 'main', name: '主线视角', description: '故事主线发展', characterIds: [], timeline: [] },
+          { id: 'char1', name: '沈砚视角', description: '女主视角的故事发展', characterIds: [], timeline: [] },
+          { id: 'char2', name: '萧景琰视角', description: '男主视角的故事发展', characterIds: [], timeline: [] },
+        ]);
+        const activePerspective = ref('main');
+        
+        const activePerspectiveData = computed(() => {
+          return perspectives.value.find(p => p.id === activePerspective.value) || null;
+        });
+        
+        function addPerspective() {
+          const name = prompt('输入视角名称：');
+          if (name) {
+            perspectives.value.push({
+              id: 'perspective_' + Date.now(),
+              name,
+              description: '',
+              characterIds: [],
+              timeline: [],
+            });
+          }
+        }
+        
+        function selectPerspective(id) {
+          activePerspective.value = id;
+        }
+        
+        function deletePerspective(id) {
+          ElementPlus.ElMessageBox.confirm('确定删除此视角？', '提示', {
+            type: 'warning',
+          }).then(() => {
+            const idx = perspectives.value.findIndex(p => p.id === id);
+            if (idx > -1) {
+              perspectives.value.splice(idx, 1);
+            }
+            if (activePerspective.value === id) {
+              activePerspective.value = perspectives.value.length > 0 ? perspectives.value[0].id : null;
+            }
+            ElementPlus.ElMessage.success('已删除');
+          }).catch(() => {});
+        }
+        
+        function addTimelineEvent() {
+          if (!activePerspectiveData.value) return;
+          activePerspectiveData.value.timeline.push({
+            time: '',
+            title: '',
+            description: '',
+          });
+        }
+        
+        function removeTimelineEvent(idx) {
+          if (!activePerspectiveData.value) return;
+          activePerspectiveData.value.timeline.splice(idx, 1);
+        }
+        
         // Characters
         const characters = ref([]);
         const activeCharacter = ref(null);
@@ -4229,16 +4565,134 @@
         
         // World Settings
         const worldCategories = ref([
-          { id: 'geography', name: '地理环境', icon: 'fas fa-mountain', content: '' },
-          { id: 'history', name: '历史背景', icon: 'fas fa-landmark', content: '' },
-          { id: 'culture', name: '文化风俗', icon: 'fas fa-theater-masks', content: '' },
-          { id: 'power', name: '力量体系', icon: 'fas fa-fire', content: '' },
-          { id: 'politics', name: '政治势力', icon: 'fas fa-crown', content: '' },
-          { id: 'economy', name: '经济体系', icon: 'fas fa-coins', content: '' },
-          { id: 'religion', name: '宗教信仰', icon: 'fas fa-pray', content: '' },
-          { id: 'technology', name: '科技水平', icon: 'fas fa-microchip', content: '' },
+          { id: 'geography', name: '地理环境', icon: 'fas fa-mountain', content: '', children: [], expanded: true },
+          { id: 'history', name: '历史背景', icon: 'fas fa-landmark', content: '', children: [], expanded: true },
+          { id: 'culture', name: '文化风俗', icon: 'fas fa-theater-masks', content: '', children: [], expanded: true },
+          { id: 'power', name: '力量体系', icon: 'fas fa-fire', content: '', children: [], expanded: true },
+          { id: 'politics', name: '政治势力', icon: 'fas fa-crown', content: '', children: [], expanded: true },
+          { id: 'economy', name: '经济体系', icon: 'fas fa-coins', content: '', children: [], expanded: true },
+          { id: 'religion', name: '宗教信仰', icon: 'fas fa-pray', content: '', children: [], expanded: true },
+          { id: 'technology', name: '科技水平', icon: 'fas fa-microchip', content: '', children: [], expanded: true },
         ]);
+        const worldSettings = ref({});
         const activeWorldCat = ref('geography');
+        
+        // World setting functions
+        function selectWorldCategory(id) {
+          activeWorldCat.value = id;
+        }
+        
+        function toggleWorldGroup(cat) {
+          cat.expanded = !cat.expanded;
+        }
+        
+        function addWorldGroup() {
+          const iconOptions = ['fas fa-mountain', 'fas fa-landmark', 'fas fa-theater-masks', 'fas fa-fire', 'fas fa-crown', 'fas fa-coins', 'fas fa-pray', 'fas fa-microchip'];
+          const name = prompt('输入分组名称：');
+          if (name) {
+            worldCategories.value.push({
+              id: 'group_' + Date.now(),
+              name,
+              icon: iconOptions[Math.floor(Math.random() * iconOptions.length)],
+              content: '',
+              children: [],
+              expanded: true,
+            });
+          }
+        }
+        
+        function addSubGroup(parentId) {
+          const name = prompt('输入子分组名称：');
+          if (name) {
+            const parent = findWorldCategory(parentId);
+            if (parent) {
+              const iconOptions = ['fas fa-mountain', 'fas fa-landmark', 'fas fa-theater-masks', 'fas fa-fire', 'fas fa-crown', 'fas fa-coins', 'fas fa-pray', 'fas fa-microchip'];
+              parent.children.push({
+                id: 'subgroup_' + Date.now(),
+                name,
+                icon: iconOptions[Math.floor(Math.random() * iconOptions.length)],
+                content: '',
+                parentId,
+                children: [],
+                expanded: true,
+              });
+            }
+          }
+        }
+        
+        function findWorldCategory(id, list = null) {
+          const cats = list || worldCategories.value;
+          for (const cat of cats) {
+            if (cat.id === id) return cat;
+            if (cat.children) {
+              const found = findWorldCategory(id, cat.children);
+              if (found) return found;
+            }
+          }
+          return null;
+        }
+        
+        function deleteWorldCategory(id) {
+          ElementPlus.ElMessageBox.confirm('确定删除此分组？会同时删除所有子分组和内容。', '提示', {
+            type: 'warning',
+          }).then(() => {
+            removeWorldCategory(id);
+            if (activeWorldCat.value === id) {
+              activeWorldCat.value = worldCategories.value.length > 0 ? worldCategories.value[0].id : null;
+            }
+            ElementPlus.ElMessage.success('已删除');
+          }).catch(() => {});
+        }
+        
+        function removeWorldCategory(id, list = null) {
+          const cats = list || worldCategories.value;
+          const idx = cats.findIndex(c => c.id === id);
+          if (idx > -1) {
+            cats.splice(idx, 1);
+            return;
+          }
+          for (const cat of cats) {
+            if (cat.children) {
+              removeWorldCategory(id, cat.children);
+            }
+          }
+        }
+        
+        function addWorldItem() {
+          if (!activeWorldCat.value) {
+            ElementPlus.ElMessage.warning('请先选择一个分组');
+            return;
+          }
+          const name = prompt('输入内容名称：');
+          if (name) {
+            const items = worldSettings.value[activeWorldCat.value] || [];
+            items.push({
+              id: 'item_' + Date.now(),
+              name,
+              content: '',
+            });
+            worldSettings.value[activeWorldCat.value] = items;
+          }
+        }
+        
+        function getWorldSettingContent(catId) {
+          const cat = findWorldCategory(catId);
+          return cat ? cat.content : '';
+        }
+        
+        function getWorldSettingItems(catId) {
+          return worldSettings.value[catId] || [];
+        }
+        
+        function deleteWorldItem(catId, itemId) {
+          const items = worldSettings.value[catId];
+          if (items) {
+            const idx = items.findIndex(i => i.id === itemId);
+            if (idx > -1) {
+              items.splice(idx, 1);
+            }
+          }
+        }
         
         // Tasks
         const tasks = ref([]);
@@ -4465,6 +4919,32 @@
           }
         }
         
+        function saveNovelData(key, data) {
+          if (currentNovel.value) {
+            localStorage.setItem('nb_' + key + '_' + currentNovel.value.id, JSON.stringify(data));
+          }
+        }
+        
+        function loadNovelData(key, defaultValue) {
+          if (!currentNovel.value) return defaultValue;
+          try {
+            const data = localStorage.getItem('nb_' + key + '_' + currentNovel.value.id);
+            if (data) return JSON.parse(data);
+          } catch(e) {}
+          return defaultValue;
+        }
+        
+        function autoSaveAll() {
+          if (!currentNovel.value) return;
+          saveChaptersLocal();
+          saveNovelData('characters', characters.value);
+          saveNovelData('synopsisVolumes', synopsisVolumes.value);
+          saveNovelData('foreshadows', foreshadows.value);
+          saveNovelData('plotlines', plotlines.value);
+          saveNovelData('worldCategories', worldCategories.value);
+          saveNovelData('worldSettings', worldSettings.value);
+        }
+        
         function loadUsers() {
           try {
             const data = localStorage.getItem('users');
@@ -4605,6 +5085,7 @@
           novelInfoForm.description = novel.description;
           novelInfoForm.targetWords = novel.targetWords || 500000;
           
+          synopsisVolumes.value = loadNovelData('synopsisVolumes', []);
           if (synopsisVolumes.value.length === 0) {
             synopsisVolumes.value = [
               { 
@@ -4625,6 +5106,7 @@
             ];
           }
           
+          characters.value = loadNovelData('characters', []);
           if (characters.value.length === 0) {
             const char1 = createEmptyCharacter(1, '沈砚', '女主 / 校尉', 'linear-gradient(135deg,#8b5cf6,#6366f1)');
             char1.age = '17';
@@ -4653,8 +5135,11 @@
             
             characters.value = [char1, char2];
             activeCharacter.value = 1;
+          } else if (activeCharacter.value && !characters.value.find(c => c.id === activeCharacter.value)) {
+            activeCharacter.value = characters.value[0].id;
           }
           
+          plotlines.value = loadNovelData('plotlines', []);
           if (plotlines.value.length === 0) {
             plotlines.value = [
               {
@@ -4678,6 +5163,33 @@
             activePlotline.value = 1;
           }
           
+          foreshadows.value = loadNovelData('foreshadows', []);
+          worldCategories.value = loadNovelData('worldCategories', []);
+          if (worldCategories.value.length === 0) {
+            worldCategories.value = [
+              { id: 'geography', name: '地理环境', icon: 'mountain' },
+              { id: 'history', name: '历史背景', icon: 'scroll' },
+              { id: 'culture', name: '文化风俗', icon: 'music' },
+              { id: 'power', name: '力量体系', icon: 'zap' },
+              { id: 'politics', name: '政治势力', icon: 'crown' },
+              { id: 'economy', name: '经济体系', icon: 'coins' },
+              { id: 'religion', name: '宗教信仰', icon: 'pray' },
+              { id: 'tech', name: '科技水平', icon: 'flask' },
+            ];
+          }
+          worldSettings.value = loadNovelData('worldSettings', {});
+          
+          try {
+            const historyData = localStorage.getItem('nb_history_' + novel.id);
+            if (historyData) {
+              historyVersions.value = JSON.parse(historyData);
+            } else {
+              historyVersions.value = [];
+            }
+          } catch(e) {
+            historyVersions.value = [];
+          }
+          
           wsPage.value = 'editor';
           editorSection.value = 'outline';
         }
@@ -4695,6 +5207,68 @@
             saveNovels();
           }
           ElementPlus.ElMessage.success('保存成功');
+        }
+        
+        const saving = ref(false);
+        const historyVersions = ref([]);
+        const historyDialogVisible = ref(false);
+        
+        function manualSave() {
+          saving.value = true;
+          setTimeout(() => {
+            const version = {
+              id: Date.now(),
+              timestamp: new Date().toLocaleString('zh-CN'),
+              data: {
+                characters: JSON.parse(JSON.stringify(characters.value)),
+                worldCategories: JSON.parse(JSON.stringify(worldCategories.value)),
+                worldSettings: JSON.parse(JSON.stringify(worldSettings.value)),
+                synopsisVolumes: JSON.parse(JSON.stringify(synopsisVolumes.value)),
+                plotlines: JSON.parse(JSON.stringify(plotlines.value)),
+                foreshadows: JSON.parse(JSON.stringify(foreshadows.value)),
+                chapters: JSON.parse(JSON.stringify(chapters.value)),
+              }
+            };
+            historyVersions.value.unshift(version);
+            if (historyVersions.value.length > 50) {
+              historyVersions.value.pop();
+            }
+            localStorage.setItem('nb_history_' + currentNovel.value.id, JSON.stringify(historyVersions.value));
+            autoSaveAll();
+            saving.value = false;
+            ElementPlus.ElMessage.success('已保存到历史记录');
+          }, 500);
+        }
+        
+        function handleHistoryCommand(command) {
+          if (command === 'view-all') {
+            historyDialogVisible.value = true;
+          }
+        }
+        
+        function viewHistoryVersion(version) {
+          const dialog = document.createElement('div');
+          dialog.style.cssText = 'position:fixed;top:10%;left:10%;right:10%;bottom:10%;background:#0e0e18;border:1px solid #1e1e30;border-radius:12px;z-index:9999;overflow:auto;padding:24px;color:#e4e4ec;';
+          dialog.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;"><h3>历史版本查看 - ' + version.timestamp + '</h3><button onclick="this.parentElement.parentElement.remove()" style="padding:6px 12px;background:#1e1e30;border:none;border-radius:6px;color:#a0a0b8;cursor:pointer;">关闭</button></div>' +
+            '<div style="font-size:13px;line-height:1.8;"><pre style="white-space:pre-wrap;word-break:break-all;">' + JSON.stringify(version.data, null, 2) + '</pre></div>';
+          document.body.appendChild(dialog);
+        }
+        
+        function restoreHistoryVersion(version) {
+          ElementPlus.ElMessageBox.confirm('确定要回溯到此版本吗？当前数据将被覆盖。', '提示', {
+            type: 'warning',
+          }).then(() => {
+            characters.value = version.data.characters;
+            worldCategories.value = version.data.worldCategories;
+            worldSettings.value = version.data.worldSettings;
+            synopsisVolumes.value = version.data.synopsisVolumes;
+            plotlines.value = version.data.plotlines;
+            foreshadows.value = version.data.foreshadows;
+            chapters.value = version.data.chapters;
+            autoSaveAll();
+            historyDialogVisible.value = false;
+            ElementPlus.ElMessage.success('已回溯到该版本');
+          }).catch(() => {});
         }
         
         function saveSynopsis() {
@@ -5849,6 +6423,28 @@
             localStorage.removeItem('nb_currentNovelId');
           }
         });
+        
+        watch(chapters, (val) => {
+          saveChaptersLocal();
+        }, { deep: true });
+        watch(characters, (val) => {
+          saveNovelData('characters', val);
+        }, { deep: true });
+        watch(synopsisVolumes, (val) => {
+          saveNovelData('synopsisVolumes', val);
+        }, { deep: true });
+        watch(foreshadows, (val) => {
+          saveNovelData('foreshadows', val);
+        }, { deep: true });
+        watch(plotlines, (val) => {
+          saveNovelData('plotlines', val);
+        }, { deep: true });
+        watch(worldCategories, (val) => {
+          saveNovelData('worldCategories', val);
+        }, { deep: true });
+        watch(worldSettings, (val) => {
+          saveNovelData('worldSettings', val);
+        }, { deep: true });
         
         return {
           // View
