@@ -911,10 +911,17 @@
     :deep(.el-select-dropdown) {
       background: #12121f !important;
       border: 1px solid #1e1e30 !important;
+      max-height: 500px !important;
+      overflow-y: auto !important;
     }
     :deep(.el-select-dropdown__item) { color: #a0a0b8 !important; font-size: 13px !important; }
     :deep(.el-select-dropdown__item:hover) { background: rgba(139, 92, 246, 0.1) !important; }
     :deep(.el-select-dropdown__item.selected) { color: #c4b5fd !important; }
+    :deep(.el-select-dropdown__wrap) { max-height: 500px !important; overflow-y: auto !important; }
+    :deep(.el-scrollbar__wrap) { max-height: 500px !important; }
+    :deep(.el-select-dropdown__list) { padding: 6px 0 !important; }
+    /* Ensure popper is above dialogs */
+    :deep(.el-popper) { z-index: 3000 !important; }
     
     /* AI Model List */
     .ai-model-list { display: flex; flex-direction: column; gap: 10px; }
@@ -1721,11 +1728,12 @@
       .settings-sider { width: 100%; }
       .editor-left, .editor-right { display: none; }
       .editor-layout {
-        height: calc(100vh - 100px);
-        margin: 0;
+        height: calc(100vh - 48px);
+        margin: -24px;
       }
-      .editor-layout > div[style*="flex-direction:column"] {
-        height: 100%;
+      .ai-assistant-wrap {
+        min-height: auto !important;
+        height: calc(100vh - 48px - 48px);
       }
     }
   </style>
@@ -1902,7 +1910,12 @@
             <span>故事大纲</span>
             <span class="count">{{ synopsisVolumes.length }}卷</span>
           </div>
-          
+          <div class="ws-menu-item" :class="{active: editorSection==='fate-line'}" @click="editorSection='fate-line'">
+            <i class="fas fa-stream"></i>
+            <span>命运线</span>
+            <span class="count">{{ fateVolumes.length }}卷</span>
+          </div>
+
           <div class="ws-menu-section">设定资料</div>
           <div class="ws-menu-item" :class="{active: editorSection==='perspectives'}" @click="editorSection='perspectives'">
             <i class="fas fa-eye"></i>
@@ -2272,6 +2285,9 @@
                 <el-button size="small" type="primary" @click="saveSynopsis()">
                   <i class="fas fa-save" style="margin-right:6px;"></i>保存
                 </el-button>
+                <el-button size="small" @click="aiGenSynopsisTitle()">
+                  <i class="fas fa-heading" style="margin-right:6px;"></i>AI 生成标题
+                </el-button>
                 <el-button size="small" @click="aiGenSynopsis()">
                   <i class="fas fa-wand-magic-sparkles" style="margin-right:6px;"></i>AI 生成大纲
                 </el-button>
@@ -2346,7 +2362,82 @@
                 </div>
               </div>
             </div>
-            
+
+            <!-- 命运线 -->
+            <div v-if="editorSection === 'fate-line'">
+              <div class="ws-section-header">
+                <div class="ws-section-title"><i class="fas fa-stream" style="margin-right:8px;color:#c4b5fd;"></i>命运线</div>
+                <div style="display:flex;gap:8px;">
+                  <el-button size="small" type="primary" @click="addFateVolume()">
+                    <i class="fas fa-plus" style="margin-right:4px;"></i>新增卷
+                  </el-button>
+                </div>
+              </div>
+              <div style="display:flex;gap:16px;height:calc(100vh - 180px);">
+                <!-- 左侧：卷列表 -->
+                <div style="width:260px;background:rgba(18,18,31,0.7);border:1px solid #1e1e30;border-radius:12px;padding:12px;overflow-y:auto;">
+                  <div style="font-size:13px;color:#6b6b85;margin-bottom:12px;">卷列表</div>
+                  <div v-if="fateVolumes.length === 0" style="color:#4a4a6a;font-size:12px;text-align:center;padding:20px;">
+                    暂无卷，点击「新增卷」开始创建
+                  </div>
+                  <div v-else>
+                    <div v-for="vol in fateVolumes" :key="vol.id"
+                         style="padding:10px 12px;border-radius:8px;cursor:pointer;margin-bottom:6px;"
+                         :style="fateCurrentVolId === vol.id ? 'background:rgba(139,92,246,0.15);border:1px solid rgba(139,92,246,0.3);' : 'background:rgba(14,14,24,0.6);border:1px solid #1e1e30;'"
+                         @click="selectFateVol(vol.id)">
+                      <div style="font-size:13px;color:#e4e4ec;font-weight:600;margin-bottom:4px;">{{ vol.title || '未命名' }}</div>
+                      <div style="font-size:11px;color:#6b6b85;">
+                        {{ vol.chapterIds.length }} 章 | {{ vol.chapterIds.reduce((sum, cid) => { const ch = chapters.find(c => c.id === cid); return sum + (ch && ch.content ? ch.content.length : 0); }, 0) }} 字
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <!-- 右侧：章节管理 -->
+                <div style="flex:1;background:rgba(18,18,31,0.7);border:1px solid #1e1e30;border-radius:12px;padding:16px;overflow-y:auto;">
+                  <div v-if="!fateCurrentVol" style="color:#4a4a6a;font-size:13px;text-align:center;padding:40px;">
+                    请选择左侧某一卷进行管理
+                  </div>
+                  <div v-else>
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+                      <div>
+                        <el-input v-model="fateCurrentVol.title" placeholder="卷名" size="large" style="width:300px;" @blur="saveFateVolumes()" />
+                        <span style="font-size:12px;color:#6b6b85;margin-left:12px;">共 {{ fateVolWordCount }} 字</span>
+                      </div>
+                      <el-button size="small" type="primary" @click="addFateChapter()">
+                        <i class="fas fa-plus" style="margin-right:4px;"></i>新增章节
+                      </el-button>
+                    </div>
+                    <div style="font-size:13px;color:#6b6b85;margin-bottom:12px;">章节列表</div>
+                    <div v-if="fateCurrentVol.chapterIds.length === 0" style="color:#4a4a6a;font-size:12px;text-align:center;padding:30px;">
+                      该卷暂无章节，点击「新增章节」创建
+                    </div>
+                    <div v-else style="display:flex;flex-direction:column;gap:8px;">
+                      <div v-for="cid in fateCurrentVol.chapterIds" :key="cid"
+                           style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-radius:8px;"
+                           :style="fateCurrentChId === cid ? 'background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.3);' : 'background:rgba(14,14,24,0.6);border:1px solid #1e1e30;'"
+                           @click="selectFateCh(cid)">
+                        <div style="display:flex;align-items:center;gap:10px;">
+                          <i class="far fa-file-alt" style="color:#6b6b85;"></i>
+                          <div>
+                            <div style="font-size:13px;color:#e4e4ec;">{{ (chapters.find(c => c.id === cid) || {}).title || '未命名章节' }}</div>
+                            <div style="font-size:11px;color:#6b6b85;">{{ ((chapters.find(c => c.id === cid) || {}).content || '').length }} 字</div>
+                          </div>
+                        </div>
+                        <div style="display:flex;gap:6px;">
+                          <el-button size="small" type="primary" link @click.stop="selectFateCh(cid); editorSection='editor'">
+                            去编辑
+                          </el-button>
+                          <el-button size="small" type="danger" link @click.stop="removeFateChapter(cid)">
+                            <i class="fas fa-trash"></i>
+                          </el-button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <!-- 上帝视角图 -->
             <div v-if="editorSection === 'perspectives'">
               <div class="ws-section-header">
@@ -2946,42 +3037,56 @@
             
             <!-- 编辑器（对话式） -->
             <div v-if="editorSection === 'editor'" class="editor-layout" style="flex-direction:column;">
+              <!-- 未选择章节提示 -->
+              <div v-if="!fateCurrentChId" style="flex:1;display:flex;align-items:center;justify-content:center;">
+                <div style="text-align:center;color:#4a4a6a;">
+                  <i class="fas fa-book-open" style="font-size:48px;margin-bottom:16px;display:block;"></i>
+                  <div style="font-size:16px;margin-bottom:8px;">请选择某一章才可使用编辑器</div>
+                  <div style="font-size:13px;margin-bottom:16px;">请在「命运线」中选择或创建一个章节</div>
+                  <el-button type="primary" @click="editorSection='fate-line'">
+                    <i class="fas fa-stream" style="margin-right:6px;"></i>前往命运线
+                  </el-button>
+                </div>
+              </div>
+              <!-- 编辑器内容 -->
+              <template v-else>
               <!-- 顶部信息栏 -->
               <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 16px;background:rgba(18,18,31,0.7);border:1px solid #1e1e30;border-radius:8px 8px 0 0;">
                 <div style="display:flex;align-items:center;gap:16px;">
+                  <span style="font-size:12px;color:#6b6b85;"><i class="fas fa-scroll" style="margin-right:4px;"></i>{{ fateCurrentVol ? fateCurrentVol.title : '' }}</span>
                   <span style="font-size:13px;color:#c4b5fd;"><i class="fas fa-pen-fancy" style="margin-right:4px;"></i>{{ currentChapter ? currentChapter.title : '未选择章节' }}</span>
                   <span style="font-size:12px;color:#6b6b85;">本章字数：<span style="color:#4ade80;">{{ currentChapterContentWordCount }}</span></span>
                   <span style="font-size:12px;color:#6b6b85;">对话：<span style="color:#60a5fa;">{{ editorChatMessages.length }}</span> 条</span>
                 </div>
                 <div style="display:flex;align-items:center;gap:8px;">
+                  <el-checkbox v-model="editorUseDefaultAi" size="small" style="color:#6b6b85;">
+                    默认AI总结
+                  </el-checkbox>
                   <el-select v-model="currentAiModel" size="small" style="width:140px;" placeholder="选择模型">
                     <el-option v-for="m in aiModels" :key="m.id" :label="m.name" :value="m.id" />
                   </el-select>
                   <el-button size="small" @click="saveChapter()"><i class="fas fa-save" style="margin-right:4px;"></i>保存</el-button>
                 </div>
               </div>
-              
+
               <!-- 主内容区 -->
               <div style="display:flex;flex:1;overflow:hidden;">
-                <!-- 左侧：章节列表 -->
+                <!-- 左侧：当前卷章节列表 -->
                 <div class="editor-left" style="width:180px;flex-shrink:0;">
                   <div class="editor-left-header">
-                    <span><i class="fas fa-list" style="margin-right:6px;"></i>章节</span>
-                    <div style="display:flex;gap:4px;">
-                      <div class="add-btn" @click="addChapter()" title="添加章节"><i class="fas fa-plus"></i></div>
-                    </div>
+                    <span><i class="fas fa-list" style="margin-right:6px;"></i>{{ fateCurrentVol ? fateCurrentVol.title : '章节' }}</span>
                   </div>
                   <div class="chapter-tree">
-                    <div 
-                      v-for="(ch, idx) in chapters" 
-                      :key="ch.id"
+                    <div
+                      v-for="cid in (fateCurrentVol ? fateCurrentVol.chapterIds : [])"
+                      :key="cid"
                       class="chapter-item"
-                      :class="{active: currentChapterId === ch.id}"
-                      @click="selectChapter(ch)"
+                      :class="{active: currentChapterId === cid}"
+                      @click="selectFateCh(cid)"
                     >
                       <i class="far fa-file-alt" style="font-size:11px;opacity:0.6;"></i>
-                      <span style="flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ ch.title }}</span>
-                      <span style="font-size:10px;color:#4a4a6a;">{{ (ch.content || '').length }}</span>
+                      <span style="flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ (chapters.find(c => c.id === cid) || {}).title || '未命名' }}</span>
+                      <span style="font-size:10px;color:#4a4a6a;">{{ ((chapters.find(c => c.id === cid) || {}).content || '').length }}</span>
                     </div>
                   </div>
                 </div>
@@ -3086,8 +3191,9 @@
                   </div>
                 </div>
               </div>
+              </template>
             </div>
-            
+
             <!-- 作家工具 -->
             <div v-if="editorSection === 'tools'">
               <div class="ws-section-header">
@@ -3147,7 +3253,7 @@
                   <el-option v-for="m in aiModels" :key="m.id" :label="m.name" :value="m.id" />
                 </el-select>
               </div>
-              <div style="background:rgba(18,18,31,0.7);border:1px solid #1e1e30;border-radius:12px;padding:20px;min-height:500px;display:flex;flex-direction:column;">
+              <div class="ai-assistant-wrap" style="background:rgba(18,18,31,0.7);border:1px solid #1e1e30;border-radius:12px;padding:20px;min-height:500px;display:flex;flex-direction:column;">
                 <div v-if="aiRole === 'ask'" style="background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.3);border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:13px;color:#93c5fd;">
                   <i class="fas fa-circle-info" style="margin-right:6px;"></i>
                   <strong>Ask 询问助手</strong>：只能查询和分析内容，不能修改或创建数据。适合了解设定、梳理剧情、检查伏笔。
@@ -3397,6 +3503,9 @@
                         </div>
                       </div>
                       <div style="display:flex;gap:6px;">
+                        <el-button size="small" @click="editAiModel(model)">
+                          <i class="fas fa-pen" style="margin-right:2px;"></i>编辑
+                        </el-button>
                         <el-button size="small" @click="testAiModel(model)">
                           测试
                         </el-button>
@@ -3538,13 +3647,13 @@
     </el-dialog>
     
     <!-- Create Novel Dialog -->
-    <el-dialog v-model="createNovelVisible" title="创建小说项目" width="500px">
+    <el-dialog v-model="createNovelVisible" title="创建小说项目" width="500px" append-to-body>
       <el-form :model="novelForm" label-width="100px">
         <el-form-item label="作品名称">
           <el-input v-model="novelForm.title" placeholder="请输入作品名称" />
         </el-form-item>
         <el-form-item label="分类">
-          <el-select v-model="novelForm.category" style="width:100%;" allow-create filterable default-first-option>
+          <el-select v-model="novelForm.category" style="width:100%;" allow-create filterable default-first-option teleported>
             <el-option-group label="女频">
               <el-option label="古代言情" value="古代言情" />
               <el-option label="现代言情" value="现代言情" />
@@ -3594,7 +3703,7 @@
           <el-input v-model="novelForm.description" type="textarea" :rows="3" placeholder="用一句话描述你的作品..." />
         </el-form-item>
         <el-form-item label="目标字数">
-          <el-select v-model="novelForm.targetWords" style="width:100%;" allow-create filterable default-first-option>
+          <el-select v-model="novelForm.targetWords" style="width:100%;" allow-create filterable default-first-option teleported>
             <el-option label="5 万字（短篇）" :value="50000" />
             <el-option label="10 万字（短篇）" :value="100000" />
             <el-option label="20 万字（中篇）" :value="200000" />
@@ -3616,13 +3725,13 @@
     </el-dialog>
     
     <!-- Add AI Model Dialog -->
-    <el-dialog v-model="addAiModelVisible" title="添加 AI API 接入" width="560px">
+    <el-dialog v-model="addAiModelVisible" :title="editingModelId ? '编辑 AI API 接入' : '添加 AI API 接入'" width="560px" append-to-body>
       <el-form :model="aiForm" label-width="110px">
         <el-form-item label="配置名称">
           <el-input v-model="aiForm.name" placeholder="给这个配置起个名字，如：我的 GPT-4o" />
         </el-form-item>
         <el-form-item label="模型提供商">
-          <el-select v-model="aiForm.providerType" style="width:100%;" @change="onProviderChange">
+          <el-select v-model="aiForm.providerType" style="width:100%;" @change="onProviderChange" teleported>
             <el-option label="OpenAI (GPT 系列)" value="openai" />
             <el-option label="Anthropic (Claude 系列)" value="anthropic" />
             <el-option label="DeepSeek" value="deepseek" />
@@ -3649,12 +3758,16 @@
           <el-input v-model="aiForm.apiKey" type="password" show-password placeholder="请输入 API Key" />
         </el-form-item>
         <el-form-item label="模型名称">
-          <el-select v-model="aiForm.modelName" filterable allow-create v-if="presetModels.length > 0" style="width:100%;">
-            <el-option v-for="m in presetModels" :key="m.value" :label="m.label" :value="m.value" />
-          </el-select>
-          <el-input v-else v-model="aiForm.modelName" placeholder="请输入模型名称，如 gpt-4o" />
+          <div style="display:flex;gap:8px;">
+            <el-select v-model="aiForm.modelName" filterable allow-create style="width:100%;" teleported>
+              <el-option v-for="m in availableModels" :key="m.value" :label="m.label" :value="m.value" />
+            </el-select>
+            <el-button size="small" @click="fetchModelsFromApi()" :loading="fetchingModels" title="从API获取模型列表">
+              <i class="fas fa-rotate"></i>
+            </el-button>
+          </div>
           <div style="font-size:11px;color:#6b6b85;margin-top:4px;">
-            可以从下拉列表选择，也可以手动输入自定义模型名称
+            可从下拉列表选择、手动输入，或点击刷新按钮从API地址获取可用模型
           </div>
         </el-form-item>
         <el-form-item label="模型类型">
@@ -3665,7 +3778,7 @@
           </el-checkbox-group>
         </el-form-item>
         <el-form-item label="使用场景">
-          <el-select v-model="aiForm.useCase" style="width:100%;">
+          <el-select v-model="aiForm.useCase" style="width:100%;" teleported>
             <el-option label="主力写作模型" value="primary" />
             <el-option label="辅助写作" value="assistant" />
             <el-option label="仅用于向量检索" value="vector_only" />
@@ -3674,11 +3787,15 @@
         </el-form-item>
         <el-form-item label="设为默认">
           <el-switch v-model="aiForm.isDefault" />
+          <div v-if="aiModels.some(m => m.isDefault && m.id !== editingModelId)" style="font-size:11px;color:#f59e0b;margin-top:4px;">
+            <i class="fas fa-triangle-exclamation" style="margin-right:4px;"></i>
+            已有默认模型：{{ aiModels.find(m => m.isDefault).name }}，勾选后将替换为当前模型
+          </div>
         </el-form-item>
       </el-form>
       <template #footer>
         <el-button @click="addAiModelVisible = false">取消</el-button>
-        <el-button type="primary" @click="saveAiModel()">添加配置</el-button>
+        <el-button type="primary" @click="saveAiModel()">{{ editingModelId ? '保存修改' : '添加配置' }}</el-button>
       </template>
     </el-dialog>
     
@@ -3936,6 +4053,28 @@
         const wsPage = ref('projects'); // projects | tasks | editor | settings
         const editorSection = ref('editor');
         const settingsTab = ref('ai');
+
+        // Fate Line (命运线)
+        const fateVolumes = ref([]); // [{ id, title, chapterIds: [] }]
+        const fateCurrentVolId = ref(null);
+        const fateCurrentChId = ref(null);
+        const fateCurrentVol = computed(() => fateVolumes.value.find(v => v.id === fateCurrentVolId.value) || null);
+        const fateCurrentCh = computed(() => {
+          const ch = chapters.value.find(c => c.id === fateCurrentChId.value);
+          return ch || null;
+        });
+        const fateVolWordCount = computed(() => {
+          const vol = fateCurrentVol.value;
+          if (!vol) return 0;
+          return vol.chapterIds.reduce((sum, cid) => {
+            const ch = chapters.value.find(c => c.id === cid);
+            return sum + (ch && ch.content ? ch.content.length : 0);
+          }, 0);
+        });
+        const fateChWordCount = computed(() => {
+          const ch = fateCurrentCh.value;
+          return ch && ch.content ? ch.content.length : 0;
+        });
         
         // Profile & prefs
         const profileForm = reactive({
@@ -4020,6 +4159,7 @@
         const editorPromptInput = ref('');
         const editorNovelInput = ref('');
         const editorInputMode = ref('both'); // both | prompt | novel
+        const editorUseDefaultAi = ref(false);
         const editorAiCache = ref([]);
         const assistantAiCache = ref([]);
         
@@ -4731,6 +4871,9 @@
         // AI Models
         const aiModels = ref([]);
         const addAiModelVisible = ref(false);
+        const editingModelId = ref(null);
+        const fetchingModels = ref(false);
+        const fetchedModels = ref([]);
         const aiForm = reactive({
           id: null,
           name: '',
@@ -4863,6 +5006,16 @@
         };
         
         const presetModels = computed(() => presetModelsMap[aiForm.providerType] || []);
+
+        const availableModels = computed(() => {
+          const presets = presetModelsMap[aiForm.providerType] || [];
+          const fetched = fetchedModels.value.map(m => ({ label: m.id, value: m.id }));
+          // 合并并去重
+          const map = new Map();
+          presets.forEach(m => map.set(m.value, m));
+          fetched.forEach(m => map.set(m.value, m));
+          return Array.from(map.values());
+        });
         
         // Data loading
         function loadNovels() {
@@ -5100,7 +5253,29 @@
         function openNovel(novel) {
           currentNovel.value = novel;
           chapters.value = loadChapters(novel.id);
-          if (chapters.value.length > 0) {
+          loadFateVolumes();
+          // 如果没有命运线数据，尝试从synopsisVolumes迁移
+          if (fateVolumes.value.length === 0 && synopsisVolumes.value.length > 0) {
+            synopsisVolumes.value.forEach((sv, idx) => {
+              const volChapters = (sv.chapters || []).map((sc, cidx) => {
+                const maxId = chapters.value.length ? Math.max(...chapters.value.map(c => c.id)) : 0;
+                const newCh = { id: maxId + 1, title: sc.title || ('第' + (cidx + 1) + '章'), content: '' };
+                chapters.value.push(newCh);
+                return newCh.id;
+              });
+              fateVolumes.value.push({ id: idx + 1, title: sv.title || ('第' + (idx + 1) + '卷'), chapterIds: volChapters });
+            });
+            if (fateVolumes.value.length > 0) {
+              fateCurrentVolId.value = fateVolumes.value[0].id;
+              const firstVol = fateVolumes.value[0];
+              fateCurrentChId.value = firstVol.chapterIds.length > 0 ? firstVol.chapterIds[0] : null;
+              currentChapterId.value = fateCurrentChId.value;
+              saveFateVolumes();
+            }
+          }
+          if (fateCurrentChId.value) {
+            currentChapterId.value = fateCurrentChId.value;
+          } else if (chapters.value.length > 0) {
             currentChapterId.value = chapters.value[0].id;
           }
           view.value = 'workshop';
@@ -5307,10 +5482,34 @@
           ElementPlus.ElMessage.success('大纲已保存');
         }
         
+        function getDefaultAiModel() {
+          const def = aiModels.value.find(m => m.isDefault);
+          if (!def) {
+            ElementPlus.ElMessage.warning('未设置默认AI模型，请先在「设置-AI接入设置」中配置并设置默认模型');
+            return null;
+          }
+          return def;
+        }
+
         function aiGenSynopsis() {
-          ElementPlus.ElMessage.info('AI 正在生成大纲，请稍候...');
+          const model = getDefaultAiModel();
+          if (!model) return;
+          ElementPlus.ElMessage.info('正在使用默认模型 ' + model.name + ' 生成大纲...');
           setTimeout(() => {
             ElementPlus.ElMessage.success('大纲生成成功');
+          }, 1500);
+        }
+
+        function aiGenSynopsisTitle() {
+          const model = getDefaultAiModel();
+          if (!model) return;
+          ElementPlus.ElMessage.info('正在使用默认模型 ' + model.name + ' 生成标题...');
+          setTimeout(() => {
+            const vol = synopsisVolumes.value[activeSynopsisVol.value];
+            if (vol) {
+              vol.title = '自动生成的卷名示例';
+            }
+            ElementPlus.ElMessage.success('标题生成成功');
           }, 1500);
         }
         
@@ -5347,7 +5546,89 @@
             ElementPlus.ElMessage.success('AI 已生成章节大纲');
           }, 1500);
         }
-        
+
+        // Fate Line functions
+        function loadFateVolumes() {
+          if (!currentNovel.value) return;
+          try {
+            const data = localStorage.getItem('nb_fate_' + currentNovel.value.id);
+            if (data) {
+              const parsed = JSON.parse(data);
+              fateVolumes.value = parsed.volumes || [];
+              fateCurrentVolId.value = parsed.currentVolId || null;
+              fateCurrentChId.value = parsed.currentChId || null;
+            }
+          } catch(e) {}
+        }
+
+        function saveFateVolumes() {
+          if (!currentNovel.value) return;
+          localStorage.setItem('nb_fate_' + currentNovel.value.id, JSON.stringify({
+            volumes: fateVolumes.value,
+            currentVolId: fateCurrentVolId.value,
+            currentChId: fateCurrentChId.value,
+          }));
+        }
+
+        function addFateVolume() {
+          const maxId = fateVolumes.value.length ? Math.max(...fateVolumes.value.map(v => v.id)) : 0;
+          const newVol = { id: maxId + 1, title: '第' + (fateVolumes.value.length + 1) + '卷', chapterIds: [] };
+          fateVolumes.value.push(newVol);
+          fateCurrentVolId.value = newVol.id;
+          saveFateVolumes();
+        }
+
+        function selectFateVol(volId) {
+          fateCurrentVolId.value = volId;
+          // 如果该卷有章节，默认选中第一个
+          const vol = fateVolumes.value.find(v => v.id === volId);
+          if (vol && vol.chapterIds.length > 0) {
+            fateCurrentChId.value = vol.chapterIds[0];
+          } else {
+            fateCurrentChId.value = null;
+          }
+          saveFateVolumes();
+        }
+
+        function addFateChapter() {
+          const vol = fateCurrentVol.value;
+          if (!vol) return;
+          const maxId = chapters.value.length ? Math.max(...chapters.value.map(c => c.id)) : 0;
+          const newCh = {
+            id: maxId + 1,
+            title: '第' + (vol.chapterIds.length + 1) + '章 新章节',
+            content: '',
+          };
+          chapters.value.push(newCh);
+          vol.chapterIds.push(newCh.id);
+          fateCurrentChId.value = newCh.id;
+          saveFateVolumes();
+          saveChaptersLocal();
+        }
+
+        function selectFateCh(chId) {
+          fateCurrentChId.value = chId;
+          currentChapterId.value = chId;
+          saveFateVolumes();
+        }
+
+        function removeFateChapter(chId) {
+          const vol = fateCurrentVol.value;
+          if (!vol) return;
+          const idx = vol.chapterIds.indexOf(chId);
+          if (idx > -1) {
+            vol.chapterIds.splice(idx, 1);
+          }
+          // 同时从chapters中移除
+          chapters.value = chapters.value.filter(c => c.id !== chId);
+          if (fateCurrentChId.value === chId) {
+            fateCurrentChId.value = vol.chapterIds.length > 0 ? vol.chapterIds[0] : null;
+            currentChapterId.value = fateCurrentChId.value;
+          }
+          saveFateVolumes();
+          saveChaptersLocal();
+        }
+
         // Foreshadow functions
         function openAddForeshadow() {
           Object.assign(foreshadowForm, {
@@ -6407,8 +6688,53 @@
             aiForm.modelTypes = ['text'];
           }
         }
-        
+
+        async function fetchModelsFromApi() {
+          if (!aiForm.baseUrl.trim() && aiForm.providerType !== 'custom') {
+            // 使用默认地址
+          }
+          if (!aiForm.apiKey.trim()) {
+            ElementPlus.ElMessage.warning('请先输入 API Key');
+            return;
+          }
+          const baseUrl = aiForm.baseUrl.trim() || getBaseUrlPlaceholder();
+          if (!baseUrl || baseUrl.includes('your-api')) {
+            ElementPlus.ElMessage.warning('请先输入有效的 API 地址');
+            return;
+          }
+          fetchingModels.value = true;
+          try {
+            const url = baseUrl.replace(/\/$/, '') + '/models';
+            const res = await fetch(url, {
+              method: 'GET',
+              headers: {
+                'Authorization': 'Bearer ' + aiForm.apiKey,
+                'Content-Type': 'application/json',
+              },
+            });
+            if (!res.ok) {
+              throw new Error('HTTP ' + res.status);
+            }
+            const data = await res.json();
+            if (data.data && Array.isArray(data.data)) {
+              fetchedModels.value = data.data;
+              ElementPlus.ElMessage.success('成功获取 ' + data.data.length + ' 个模型');
+            } else if (Array.isArray(data)) {
+              fetchedModels.value = data.map(m => typeof m === 'string' ? { id: m } : m);
+              ElementPlus.ElMessage.success('成功获取 ' + fetchedModels.value.length + ' 个模型');
+            } else {
+              throw new Error('返回格式不正确');
+            }
+          } catch (err) {
+            ElementPlus.ElMessage.warning('无法从API获取模型列表（可能是跨域限制），请手动输入模型名称');
+            console.warn('Fetch models failed:', err);
+          } finally {
+            fetchingModels.value = false;
+          }
+        }
+
         function openAddAiModel() {
+          editingModelId.value = null;
           aiForm.id = null;
           aiForm.name = '';
           aiForm.providerType = 'openai';
@@ -6421,7 +6747,25 @@
           aiForm.isDefault = false;
           addAiModelVisible.value = true;
         }
-        
+
+        function editAiModel(model) {
+          editingModelId.value = model.id;
+          aiForm.id = model.id;
+          aiForm.name = model.name;
+          aiForm.providerType = model.providerType;
+          aiForm.provider = model.provider;
+          aiForm.baseUrl = model.baseUrl || '';
+          aiForm.apiKey = model.apiKey;
+          aiForm.modelName = model.modelName;
+          aiForm.modelTypes = [];
+          if (model.supportsText) aiForm.modelTypes.push('text');
+          if (model.supportsVector) aiForm.modelTypes.push('vector');
+          if (model.supportsImage) aiForm.modelTypes.push('image');
+          aiForm.useCase = model.useCase || 'primary';
+          aiForm.isDefault = model.isDefault || false;
+          addAiModelVisible.value = true;
+        }
+
         function saveAiModel() {
           if (!aiForm.name.trim()) {
             ElementPlus.ElMessage.warning('请输入配置名称');
@@ -6443,10 +6787,8 @@
             ElementPlus.ElMessage.warning('请至少选择一种模型类型');
             return;
           }
-          
-          const maxId = aiModels.value.length ? Math.max(...aiModels.value.map(m => m.id)) : 0;
-          const newModel = {
-            id: maxId + 1,
+
+          const modelData = {
             name: aiForm.name,
             providerType: aiForm.providerType,
             provider: aiForm.provider,
@@ -6459,15 +6801,27 @@
             useCase: aiForm.useCase,
             isDefault: aiForm.isDefault,
           };
-          
+
           if (aiForm.isDefault) {
             aiModels.value.forEach(m => m.isDefault = false);
           }
-          
-          aiModels.value.push(newModel);
-          saveAiModels();
-          addAiModelVisible.value = false;
-          ElementPlus.ElMessage.success('AI 配置添加成功');
+
+          if (editingModelId.value) {
+            const idx = aiModels.value.findIndex(m => m.id === editingModelId.value);
+            if (idx > -1) {
+              aiModels.value[idx] = { ...aiModels.value[idx], ...modelData };
+            }
+            saveAiModels();
+            addAiModelVisible.value = false;
+            ElementPlus.ElMessage.success('AI 配置已更新');
+          } else {
+            const maxId = aiModels.value.length ? Math.max(...aiModels.value.map(m => m.id)) : 0;
+            modelData.id = maxId + 1;
+            aiModels.value.push(modelData);
+            saveAiModels();
+            addAiModelVisible.value = false;
+            ElementPlus.ElMessage.success('AI 配置添加成功');
+          }
         }
         
         function testAiModel(model) {
@@ -6527,6 +6881,13 @@
         });
         watch(editorSection, (val) => {
           if (isLoggedIn.value) localStorage.setItem('nb_editorSection', val);
+          if (val === 'synopsis' && fateCurrentVolId.value) {
+            // 根据命运线当前选中的卷索引，同步故事大纲的卷
+            const idx = fateVolumes.value.findIndex(v => v.id === fateCurrentVolId.value);
+            if (idx > -1) {
+              activeSynopsisVol.value = Math.min(idx, synopsisVolumes.value.length - 1);
+            }
+          }
         });
         watch(currentNovel, (val) => {
           if (isLoggedIn.value && val) {
@@ -6571,7 +6932,7 @@
           novels, currentNovel, createNovelVisible, novelForm,
           chapters, currentChapterId, currentChapter,
           aiMessages, aiInput, aiCallCount, currentAiModel, aiRole, agentPermission, aiQuickAction,
-          editorChatMessages, editorPromptInput, editorNovelInput, editorInputMode,
+          editorChatMessages, editorPromptInput, editorNovelInput, editorInputMode, editorUseDefaultAi,
           editorAiCache, assistantAiCache, currentChapterContentWordCount,
           sendEditorChat, toggleEditorInputMode, clearAllAiCache, rollbackEditorChat,
           novelInfoForm,
@@ -6597,15 +6958,18 @@
           taskStats, filteredTasks,
           
           // AI
-          aiModels, addAiModelVisible, aiForm, presetModels,
-          
+          aiModels, addAiModelVisible, aiForm, presetModels, availableModels,
+
+          // Fate Line
+          fateVolumes, fateCurrentVolId, fateCurrentChId, fateCurrentVol, fateCurrentCh, fateVolWordCount, fateChWordCount,
+
           // Computed
           totalWords, totalChapters,
           
           // Methods
           scrollTo, enterWorkshop, handleLogin, handleUserCmd,
           openCreateNovel, createNovel, openNovel,
-          saveNovelInfo, saveSynopsis, aiGenSynopsis,
+          saveNovelInfo, saveSynopsis, aiGenSynopsis, aiGenSynopsisTitle, getDefaultAiModel,
           addSynopsisVolume, addPlotNode, removePlotNode,
           addChapterNode, removeChapterNode, aiGenChapters,
           openAddForeshadow, saveForeshadow, removeForeshadow, toggleForeshadowStatus, aiGenForeshadows,
@@ -6623,7 +6987,9 @@
           openAddTask, openEditTask, saveTaskDialog, deleteTask,
           saveProfile, savePrefs, onThemeChange, applyTheme,
           getProviderIcon, getBaseUrlPlaceholder, onProviderChange,
-          openAddAiModel, saveAiModel, testAiModel, deleteAiModel,
+          openAddAiModel, editAiModel, saveAiModel, testAiModel, deleteAiModel,
+          fetchingModels, fetchedModels, availableModels, fetchModelsFromApi,
+          addFateVolume, selectFateVol, addFateChapter, selectFateCh, removeFateChapter, saveFateVolumes, loadFateVolumes,
           
           // World Settings
           worldSettings,
