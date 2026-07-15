@@ -1720,6 +1720,13 @@
       .settings-layout { flex-direction: column; }
       .settings-sider { width: 100%; }
       .editor-left, .editor-right { display: none; }
+      .editor-layout {
+        height: calc(100vh - 100px);
+        margin: 0;
+      }
+      .editor-layout > div[style*="flex-direction:column"] {
+        height: 100%;
+      }
     }
   </style>
 </head>
@@ -1997,7 +2004,7 @@
       <!-- Main -->
       <main class="ws-main">
         <div class="ws-topbar">
-          <div style="display:flex;align-items:center;gap:8px;margin-right:20px;">
+          <div v-if="currentNovel" style="display:flex;align-items:center;gap:8px;margin-right:20px;">
             <el-button size="small" @click="manualSave()" :loading="saving">
               <i class="fas fa-save" style="margin-right:4px;"></i>保存
             </el-button>
@@ -2013,6 +2020,7 @@
               </template>
             </el-dropdown>
           </div>
+          <div v-else style="margin-right:20px;"></div>
           <div class="ws-breadcrumb">
             <span @click="view='home'" style="cursor:pointer;">首页</span>
             <span style="margin:0 6px;">/</span>
@@ -2761,27 +2769,32 @@
                         </el-button>
                       </div>
                     </div>
-                    <el-input 
-                      v-model="activeWorldCategory.content" 
-                      type="textarea" 
-                      :rows="6"
-                      placeholder="在这里记录该分组的总体设定..."
-                      style="margin-bottom:16px;"
-                    />
-                    <!-- 内容列表 -->
-                    <div style="font-size:13px;color:#c4b5fd;margin-bottom:8px;">设定内容</div>
-                    <div v-if="getWorldSettingItems(activeWorldCategory.id).length === 0" style="color:#4a4a6a;font-size:12px;padding:16px;border:1px dashed #1e1e30;border-radius:8px;">
+                    <!-- 内容列表（只读展示） -->
+                    <div v-if="getWorldSettingItems(activeWorldCategory.id).length === 0" style="color:#4a4a6a;font-size:12px;padding:20px;border:1px dashed #1e1e30;border-radius:8px;text-align:center;">
                       暂无内容，点击上方「新增内容」创建
                     </div>
                     <div v-else>
                       <div v-for="item in getWorldSettingItems(activeWorldCategory.id)" :key="item.id" style="background:rgba(14,14,24,0.8);border:1px solid #1e1e30;border-radius:8px;padding:12px;margin-bottom:8px;">
                         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-                          <input v-model="item.name" style="background:rgba(18,18,31,0.7);border:1px solid #1e1e30;border-radius:6px;padding:4px 8px;color:#e4e4ec;font-size:13px;" />
-                          <el-button size="small" type="danger" link @click="deleteWorldItem(activeWorldCategory.id, item.id)">
-                            <i class="fas fa-trash"></i>
-                          </el-button>
+                          <div style="font-size:14px;font-weight:600;color:#e4e4ec;">{{ item.name || '未命名内容' }}</div>
+                          <div style="display:flex;gap:4px;">
+                            <el-button size="small" link @click="item._editing = !item._editing">
+                              <i :class="item._editing ? 'fas fa-check' : 'fas fa-pen'" style="margin-right:2px;"></i>{{ item._editing ? '完成' : '编辑' }}
+                            </el-button>
+                            <el-button size="small" type="danger" link @click="deleteWorldItem(activeWorldCategory.id, item.id)">
+                              <i class="fas fa-trash"></i>
+                            </el-button>
+                          </div>
                         </div>
-                        <el-input v-model="item.content" type="textarea" :rows="3" placeholder="内容详情..." size="small" />
+                        <!-- 展示模式 -->
+                        <div v-if="!item._editing" style="font-size:13px;color:#9ca3af;line-height:1.6;white-space:pre-wrap;">
+                          {{ item.content || '暂无内容' }}
+                        </div>
+                        <!-- 编辑模式 -->
+                        <div v-else>
+                          <el-input v-model="item.name" placeholder="内容名称" size="small" style="margin-bottom:8px;" />
+                          <el-input v-model="item.content" type="textarea" :rows="4" placeholder="内容详情..." size="small" />
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -2995,6 +3008,12 @@
                       <!-- AI消息 -->
                       <div v-else style="display:flex;justify-content:flex-start;">
                         <div style="max-width:85%;background:rgba(18,18,31,0.7);border:1px solid #1e1e30;border-radius:12px;padding:12px;">
+                          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                            <span style="font-size:11px;color:#6b6b85;">AI 续写</span>
+                            <el-button size="small" type="danger" link style="font-size:11px;padding:2px 6px;" @click="rollbackEditorChat(idx)">
+                              <i class="fas fa-rotate-left" style="margin-right:2px;"></i>回溯
+                            </el-button>
+                          </div>
                           <!-- 思考内容（折叠） -->
                           <template v-if="msg.thinking && msg.thinking.length > 0">
                             <div v-for="(think, ti) in msg.thinking" :key="ti" style="margin-bottom:6px;">
@@ -3053,24 +3072,9 @@
                     <!-- 发送按钮行 -->
                     <div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px;">
                       <div style="display:flex;align-items:center;gap:4px;">
-                        <!-- Ask/Agent 切换（折叠下拉） -->
-                        <el-dropdown @command="cmd => aiRole = cmd" trigger="click">
-                          <el-button size="small" :style="aiRole === 'ask' ? 'border-color:rgba(59,130,246,0.5);color:#60a5fa;' : 'border-color:rgba(139,92,246,0.5);color:#c4b5fd;'">
-                            <i :class="aiRole === 'ask' ? 'fas fa-magnifying-glass' : 'fas fa-wand-magic-sparkles'" style="margin-right:4px;"></i>
-                            {{ aiRole === 'ask' ? 'Ask' : 'Agent' }}
-                            <i class="fas fa-caret-down" style="margin-left:4px;"></i>
-                          </el-button>
-                          <template #dropdown>
-                            <el-dropdown-menu>
-                              <el-dropdown-item command="ask">
-                                <i class="fas fa-magnifying-glass" style="margin-right:6px;color:#60a5fa;"></i>Ask 询问（只读）
-                              </el-dropdown-item>
-                              <el-dropdown-item command="agent">
-                                <i class="fas fa-wand-magic-sparkles" style="margin-right:6px;color:#c4b5fd;"></i>Agent 执行（读写）
-                              </el-dropdown-item>
-                            </el-dropdown-menu>
-                          </template>
-                        </el-dropdown>
+                        <span style="font-size:12px;color:#8b7dd8;background:rgba(139,92,246,0.1);border:1px solid rgba(139,92,246,0.2);border-radius:6px;padding:4px 10px;">
+                          <i class="fas fa-wand-magic-sparkles" style="margin-right:4px;"></i>续写模式
+                        </span>
                       </div>
                       <div style="display:flex;gap:6px;">
                         <el-button size="small" @click="addChapter()"><i class="fas fa-plus" style="margin-right:4px;"></i>新章</el-button>
@@ -3214,6 +3218,24 @@
                           </el-dropdown-item>
                           <el-dropdown-item command="agent">
                             <i class="fas fa-wand-magic-sparkles" style="margin-right:6px;color:#c4b5fd;"></i>Agent 执行（读写）
+                          </el-dropdown-item>
+                        </el-dropdown-menu>
+                      </template>
+                    </el-dropdown>
+                    <!-- Agent 权限控制（仅在Agent模式下显示） -->
+                    <el-dropdown v-if="aiRole === 'agent'" @command="cmd => agentPermission = cmd" trigger="click">
+                      <el-button size="small" :style="agentPermission === 'ask' ? 'border-color:rgba(245,158,11,0.5);color:#f59e0b;flex-shrink:0;' : 'border-color:rgba(34,197,94,0.5);color:#4ade80;flex-shrink:0;'">
+                        <i :class="agentPermission === 'ask' ? 'fas fa-hand' : 'fas fa-bolt'" style="margin-right:4px;"></i>
+                        {{ agentPermission === 'ask' ? '需确认' : '直接执行' }}
+                        <i class="fas fa-caret-down" style="margin-left:4px;"></i>
+                      </el-button>
+                      <template #dropdown>
+                        <el-dropdown-menu>
+                          <el-dropdown-item command="ask">
+                            <i class="fas fa-hand" style="margin-right:6px;color:#f59e0b;"></i>需用户确认（修改前询问）
+                          </el-dropdown-item>
+                          <el-dropdown-item command="direct">
+                            <i class="fas fa-bolt" style="margin-right:6px;color:#4ade80;"></i>AI拥有所有权（直接执行）
                           </el-dropdown-item>
                         </el-dropdown-menu>
                       </template>
@@ -3991,6 +4013,7 @@
         const aiCallCount = ref(0);
         const currentAiModel = ref(null);
         const aiRole = ref('ask'); // ask | agent
+        const agentPermission = ref('direct'); // ask | direct
         
         // Editor chat state
         const editorChatMessages = ref([]);
@@ -5871,6 +5894,64 @@
           }
         }
         
+        const writeTools = ['add_character_memory', 'add_foreshadow', 'update_character', 'add_plotline_node', 'add_world_setting'];
+        
+        function isWriteTool(toolName) {
+          return writeTools.includes(toolName);
+        }
+        
+        function processAiMessage(content) {
+          const detectedTools = detectToolIntent(content);
+          const allowedTools = detectedTools.filter(t => isToolAllowed(t.name));
+          const blockedTools = detectedTools.filter(t => !isToolAllowed(t.name));
+          
+          let toolResults = [];
+          allowedTools.forEach(tool => {
+            try {
+              const result = executeTool(tool.name, tool.args);
+              toolResults.push({ name: tool.name, result });
+            } catch(e) {
+              toolResults.push({ name: tool.name, result: { success: false, error: String(e) } });
+            }
+          });
+          
+          let replyContent = '';
+          
+          if (aiRole.value === 'ask') {
+            if (blockedTools.length > 0) {
+              replyContent += '<div style="background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.3);border-radius:6px;padding:8px 12px;margin-bottom:10px;font-size:13px;color:#93c5fd;">';
+              replyContent += '<i class="fas fa-lock" style="margin-right:4px;"></i>';
+              replyContent += '<strong>提示</strong>：当前是 Ask 模式，以下操作需要切换到 Agent 模式才能执行：';
+              blockedTools.forEach(t => {
+                replyContent += '<br/>• ' + t.name;
+              });
+              replyContent += '</div>';
+            }
+            
+            if (toolResults.length > 0) {
+              replyContent += formatQueryResults(toolResults);
+            } else {
+              replyContent += generateAskReply(content);
+            }
+          } else {
+            if (toolResults.length > 0) {
+              replyContent += formatQueryResults(toolResults);
+            }
+            replyContent += '<br/><br/>' + generateAgentReply(content);
+          }
+          
+          aiMessages.value.push({ 
+            role: 'ai', 
+            content: replyContent,
+            toolCalls: allowedTools.length > 0 ? allowedTools : null
+          });
+          
+          nextTick(() => {
+            const msgs = document.querySelector('.ai-messages');
+            if (msgs) msgs.scrollTop = msgs.scrollHeight;
+          });
+        }
+        
         function sendAi() {
           if (!aiInput.value.trim()) return;
           const content = aiInput.value;
@@ -5879,55 +5960,40 @@
           aiCallCount.value++;
           
           setTimeout(() => {
-            const detectedTools = detectToolIntent(content);
-            const allowedTools = detectedTools.filter(t => isToolAllowed(t.name));
-            const blockedTools = detectedTools.filter(t => !isToolAllowed(t.name));
-            
-            let toolResults = [];
-            allowedTools.forEach(tool => {
-              try {
-                const result = executeTool(tool.name, tool.args);
-                toolResults.push({ name: tool.name, result });
-              } catch(e) {
-                toolResults.push({ name: tool.name, result: { success: false, error: String(e) } });
-              }
-            });
-            
-            let replyContent = '';
-            
-            if (aiRole.value === 'ask') {
-              if (blockedTools.length > 0) {
-                replyContent += '<div style="background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.3);border-radius:6px;padding:8px 12px;margin-bottom:10px;font-size:13px;color:#93c5fd;">';
-                replyContent += '<i class="fas fa-lock" style="margin-right:4px;"></i>';
-                replyContent += '<strong>提示</strong>：当前是 Ask 模式，以下操作需要切换到 Agent 模式才能执行：';
-                blockedTools.forEach(t => {
-                  replyContent += '<br/>• ' + t.name;
-                });
-                replyContent += '</div>';
-              }
+            // Agent 模式下且权限为 ask，检查是否有修改类工具
+            if (aiRole.value === 'agent' && agentPermission.value === 'ask') {
+              const detectedTools = detectToolIntent(content);
+              const writeToolCalls = detectedTools.filter(t => isWriteTool(t.name));
               
-              if (toolResults.length > 0) {
-                replyContent += formatQueryResults(toolResults);
-              } else {
-                replyContent += generateAskReply(content);
+              if (writeToolCalls.length > 0) {
+                // 显示确认提示
+                const toolNames = writeToolCalls.map(t => t.name).join('、');
+                ElementPlus.ElMessageBox.confirm(
+                  `AI 即将执行以下修改操作：<br/><br/><strong>${toolNames}</strong><br/><br/>是否同意执行？`,
+                  '执行确认',
+                  {
+                    confirmButtonText: '同意执行',
+                    cancelButtonText: '取消',
+                    type: 'warning',
+                    dangerouslyUseHTMLString: true,
+                  }
+                ).then(() => {
+                  processAiMessage(content);
+                }).catch(() => {
+                  aiMessages.value.push({ 
+                    role: 'ai', 
+                    content: '<div style="color:#f59e0b;"><i class="fas fa-hand" style="margin-right:4px;"></i>已取消执行操作。您可以切换为「直接执行」模式来跳过确认。</div>' 
+                  });
+                  nextTick(() => {
+                    const msgs = document.querySelector('.ai-messages');
+                    if (msgs) msgs.scrollTop = msgs.scrollHeight;
+                  });
+                });
+                return;
               }
-            } else {
-              if (toolResults.length > 0) {
-                replyContent += formatQueryResults(toolResults);
-              }
-              replyContent += '<br/><br/>' + generateAgentReply(content);
             }
             
-            aiMessages.value.push({ 
-              role: 'ai', 
-              content: replyContent,
-              toolCalls: allowedTools.length > 0 ? allowedTools : null
-            });
-            
-            nextTick(() => {
-              const msgs = document.querySelector('.ai-messages');
-              if (msgs) msgs.scrollTop = msgs.scrollHeight;
-            });
+            processAiMessage(content);
           }, 500);
         }
         
@@ -6062,8 +6128,8 @@
           const novelContent = editorNovelInput.value.trim();
           if (!prompt && !novelContent) return;
           
-          editorChatMessages.value.push({ 
-            role: 'user', 
+          editorChatMessages.value.push({
+            role: 'user',
             prompt: prompt || null,
             novelContent: novelContent || null,
           });
@@ -6071,7 +6137,7 @@
           editorPromptInput.value = '';
           editorNovelInput.value = '';
           
-          // 如果有小说内容，追加到当前章节
+          // 如果有小说内容，先追加到当前章节（用户写入的内容）
           if (novelContent && currentChapter.value) {
             currentChapter.value.content = (currentChapter.value.content || '') + '\n' + novelContent;
             saveChaptersLocal();
@@ -6104,25 +6170,21 @@
               } catch(e) {}
             }
             
-            // 生成正文内容
-            if (aiRole.value === 'agent') {
-              if (novelContent) {
-                content = generateContinuation(novelContent, prompt);
-              } else if (prompt) {
-                content = generateFromPrompt(prompt);
-              }
-            } else {
-              content = '（Ask 模式下不生成正文内容。切换到 Agent 模式可以生成续写内容。）';
+            // 生成正文内容（编辑器直接拥有所有权，直接执行）
+            if (novelContent) {
+              content = generateContinuation(novelContent, prompt);
+            } else if (prompt) {
+              content = generateFromPrompt(prompt);
             }
             
             // 将生成的内容追加到章节
-            if (content && aiRole.value === 'agent' && currentChapter.value) {
+            if (content && currentChapter.value) {
               currentChapter.value.content = (currentChapter.value.content || '') + '\n\n' + content;
               saveChaptersLocal();
             }
             
             // 生成总结
-            if (aiRole.value === 'agent' && content) {
+            if (content) {
               summaries.push({
                 label: '写入 → ' + (currentChapter.value ? currentChapter.value.title : '未知章节'),
                 content: `已将 ${content.length} 字续写内容追加到当前章节。\n\n涉及角色：根据上下文\n伏笔状态：保持一致\n世界观：遵循设定`,
@@ -6135,6 +6197,7 @@
               thinking,
               content,
               summaries,
+              generatedContent: content,
             });
             
             // 记录缓存
@@ -6150,6 +6213,46 @@
               if (container) container.scrollTop = container.scrollHeight;
             });
           }, 800);
+        }
+        
+        function rollbackEditorChat(aiMsgIndex) {
+          if (!currentChapter.value) return;
+          
+          // 确认回溯
+          ElementPlus.ElMessageBox.confirm('回溯将移除该次AI生成及之后的所有对话内容，是否继续？', '回溯确认', {
+            confirmButtonText: '确认回溯',
+            cancelButtonText: '取消',
+            type: 'warning',
+          }).then(() => {
+            // 计算需要移除的生成内容总长度
+            let removedContent = '';
+            for (let i = aiMsgIndex; i < editorChatMessages.value.length; i++) {
+              const msg = editorChatMessages.value[i];
+              if (msg.role === 'ai' && msg.generatedContent) {
+                removedContent += msg.generatedContent + '\n\n';
+              }
+            }
+            
+            // 从章节内容中移除这些AI生成的内容
+            if (removedContent && currentChapter.value.content) {
+              // 移除所有AI生成的段落（通过查找并替换）
+              for (let i = aiMsgIndex; i < editorChatMessages.value.length; i++) {
+                const msg = editorChatMessages.value[i];
+                if (msg.role === 'ai' && msg.generatedContent && currentChapter.value.content) {
+                  currentChapter.value.content = currentChapter.value.content.replace('\n\n' + msg.generatedContent, '');
+                  currentChapter.value.content = currentChapter.value.content.replace(msg.generatedContent, '');
+                }
+              }
+              // 清理多余换行
+              currentChapter.value.content = currentChapter.value.content.replace(/\n{3,}/g, '\n\n').trim();
+              saveChaptersLocal();
+            }
+            
+            // 移除该AI消息及之后的所有消息
+            editorChatMessages.value = editorChatMessages.value.slice(0, aiMsgIndex);
+            
+            ElementPlus.ElMessage.success('已回溯到该对话之前的状态');
+          }).catch(() => {});
         }
         
         function generateContinuation(novelContent, prompt) {
@@ -6467,10 +6570,10 @@
           // Novels
           novels, currentNovel, createNovelVisible, novelForm,
           chapters, currentChapterId, currentChapter,
-          aiMessages, aiInput, aiCallCount, currentAiModel, aiRole, aiQuickAction,
+          aiMessages, aiInput, aiCallCount, currentAiModel, aiRole, agentPermission, aiQuickAction,
           editorChatMessages, editorPromptInput, editorNovelInput, editorInputMode,
           editorAiCache, assistantAiCache, currentChapterContentWordCount,
-          sendEditorChat, toggleEditorInputMode, clearAllAiCache,
+          sendEditorChat, toggleEditorInputMode, clearAllAiCache, rollbackEditorChat,
           novelInfoForm,
           synopsisVolumes, activeSynopsisVol, currentVol,
           synopsisTab, foreshadows, foreshadowFilter, filteredForeshadows,
