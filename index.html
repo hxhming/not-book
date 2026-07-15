@@ -923,6 +923,99 @@
     /* Ensure popper is above dialogs */
     :deep(.el-popper) { z-index: 3000 !important; }
     
+    /* Global el-select dropdown styles */
+    .el-select-dropdown {
+      background: #12121f !important;
+      border: 1px solid #1e1e30 !important;
+      max-height: 500px !important;
+      overflow-y: auto !important;
+      overflow-x: hidden !important;
+      max-width: 600px !important;
+      z-index: 99999 !important;
+      position: fixed !important;
+      display: block !important;
+    }
+    .el-select-dropdown__item { 
+      color: #a0a0b8 !important; 
+      font-size: 13px !important; 
+      min-height: 32px !important; 
+      line-height: 32px !important; 
+      padding: 0 12px !important; 
+      white-space: nowrap !important; 
+      overflow: hidden !important; 
+      text-overflow: ellipsis !important; 
+    }
+    .el-select-dropdown__item:hover { background: rgba(139, 92, 246, 0.1) !important; }
+    .el-select-dropdown__item.selected { color: #c4b5fd !important; background: rgba(139, 92, 246, 0.1) !important; }
+    .el-select-dropdown__wrap { 
+      max-height: 500px !important; 
+      overflow-y: auto !important; 
+      overflow-x: hidden !important;
+      padding: 0 !important;
+      height: auto !important;
+      max-height: calc(100vh - 100px) !important;
+    }
+    .el-scrollbar__wrap { 
+      max-height: 500px !important; 
+      overflow-y: auto !important;
+      overflow-x: hidden !important;
+      height: auto !important;
+      max-height: calc(100vh - 100px) !important;
+    }
+    .el-scrollbar__view { min-height: 100% !important; }
+    .el-select-dropdown__list { padding: 6px 0 !important; }
+    .el-popper { z-index: 99999 !important; }
+    .el-select-dropdown__empty { display: none !important; }
+    .el-scrollbar { height: auto !important; }
+    .el-scrollbar__bar.is-vertical { width: 6px !important; }
+    .el-scrollbar__thumb { background: #2a2a3e !important; border-radius: 3px !important; }
+    
+    /* Ensure dropdowns in dialogs also scroll */
+    .el-dialog .el-select-dropdown,
+    .el-dialog__wrapper .el-select-dropdown {
+      z-index: 100000 !important;
+      position: fixed !important;
+      max-height: 400px !important;
+    }
+    
+    /* Fix for dropdown height calculation */
+    .el-select-dropdown--small {
+      max-height: 500px !important;
+    }
+    .el-select-dropdown__wrap--hidden {
+      overflow: hidden !important;
+    }
+    
+    /* Ensure scrollbar is always visible when needed */
+    .el-select-dropdown__wrap::-webkit-scrollbar {
+      width: 6px !important;
+      height: 6px !important;
+    }
+    .el-select-dropdown__wrap::-webkit-scrollbar-track {
+      background: transparent !important;
+    }
+    .el-select-dropdown__wrap::-webkit-scrollbar-thumb {
+      background: #2a2a3e !important;
+      border-radius: 3px !important;
+    }
+    .el-select-dropdown__wrap::-webkit-scrollbar-thumb:hover {
+      background: #3a3a5e !important;
+    }
+    
+    /* Option group styling */
+    .el-select-dropdown__group { padding: 4px 0 !important; }
+    .el-select-dropdown__group__title { 
+      padding: 6px 12px !important; 
+      font-size: 12px !important; 
+      color: #6b6b85 !important; 
+      background: rgba(139, 92, 246, 0.05) !important;
+      font-weight: 600 !important;
+    }
+    
+    /* Dialog z-index fix */
+    .el-dialog { z-index: 2000 !important; }
+    .el-dialog__wrapper { z-index: 2000 !important; }
+    
     /* AI Model List */
     .ai-model-list { display: flex; flex-direction: column; gap: 10px; }
     .ai-model-card {
@@ -2217,7 +2310,7 @@
                     <el-input v-model="novelInfoForm.title" />
                   </el-form-item>
                   <el-form-item label="作品分类">
-                    <el-select v-model="novelInfoForm.category" style="width:100%;">
+                    <el-select v-model="novelInfoForm.category" style="width:100%;" filterable>
                       <el-option-group label="女频">
                         <el-option label="古代言情" value="古代言情" />
                         <el-option label="现代言情" value="现代言情" />
@@ -2227,6 +2320,30 @@
                         <el-option label="悬疑推理" value="悬疑推理" />
                         <el-option label="玄幻言情" value="玄幻言情" />
                         <el-option label="浪漫青春" value="浪漫青春" />
+                        <el-option label="豪门总裁" value="豪门总裁" />
+                        <el-option label="甜宠文" value="甜宠文" />
+                        <el-option label="快穿" value="快穿" />
+                        <el-option label="穿越重生" value="穿越重生" />
+                        <el-option label="系统文" value="系统文" />
+                        <el-option label="宫斗宅斗" value="宫斗宅斗" />
+                        <el-option label="种田文" value="种田文" />
+                        <el-option label="经商文" value="经商文" />
+                        <el-option label="悬疑灵异" value="悬疑灵异" />
+                        <el-option label="末世重生" value="末世重生" />
+                        <el-option label="星际科幻" value="星际科幻" />
+                        <el-option label="娱乐圈" value="娱乐圈" />
+                        <el-option label="体育竞技" value="体育竞技" />
+                        <el-option label="虐恋" value="虐恋" />
+                        <el-option label="萌宝" value="萌宝" />
+                        <el-option label="重生逆袭" value="重生逆袭" />
+                        <el-option label="军婚" value="军婚" />
+                        <el-option label="师徒恋" value="师徒恋" />
+                        <el-option label="青梅竹马" value="青梅竹马" />
+                        <el-option label="先婚后爱" value="先婚后爱" />
+                        <el-option label="日久生情" value="日久生情" />
+                        <el-option label="破镜重圆" value="破镜重圆" />
+                        <el-option label="暗恋成真" value="暗恋成真" />
+                        <el-option label="女尊" value="女尊" />
                       </el-option-group>
                       <el-option-group label="男频">
                         <el-option label="玄幻奇幻" value="玄幻奇幻" />
@@ -2237,6 +2354,71 @@
                         <el-option label="游戏竞技" value="游戏竞技" />
                         <el-option label="悬疑侦探" value="悬疑侦探" />
                         <el-option label="灵异鬼怪" value="灵异鬼怪" />
+                        <el-option label="都市重生" value="都市重生" />
+                        <el-option label="都市修真" value="都市修真" />
+                        <el-option label="都市系统" value="都市系统" />
+                        <el-option label="玄幻重生" value="玄幻重生" />
+                        <el-option label="玄幻系统" value="玄幻系统" />
+                        <el-option label="玄幻穿越" value="玄幻穿越" />
+                        <el-option label="仙侠重生" value="仙侠重生" />
+                        <el-option label="仙侠系统" value="仙侠系统" />
+                        <el-option label="仙侠穿越" value="仙侠穿越" />
+                        <el-option label="末世重生" value="末世重生" />
+                        <el-option label="末世系统" value="末世系统" />
+                        <el-option label="末世进化" value="末世进化" />
+                        <el-option label="科幻重生" value="科幻重生" />
+                        <el-option label="星际科幻" value="星际科幻" />
+                        <el-option label="星际穿越" value="星际穿越" />
+                        <el-option label="历史穿越" value="历史穿越" />
+                        <el-option label="历史争霸" value="历史争霸" />
+                        <el-option label="历史种田" value="历史种田" />
+                        <el-option label="军事战争" value="军事战争" />
+                        <el-option label="游戏重生" value="游戏重生" />
+                        <el-option label="游戏系统" value="游戏系统" />
+                        <el-option label="游戏竞技" value="游戏竞技" />
+                        <el-option label="网游" value="网游" />
+                        <el-option label="电竞" value="电竞" />
+                        <el-option label="悬疑惊悚" value="悬疑惊悚" />
+                        <el-option label="悬疑探险" value="悬疑探险" />
+                        <el-option label="灵异恐怖" value="灵异恐怖" />
+                        <el-option label="盗墓" value="盗墓" />
+                        <el-option label="无限流" value="无限流" />
+                        <el-option label="综漫" value="综漫" />
+                        <el-option label="诸天" value="诸天" />
+                        <el-option label="洪荒" value="洪荒" />
+                        <el-option label="封神" value="封神" />
+                        <el-option label="西游" value="西游" />
+                        <el-option label="三国" value="三国" />
+                        <el-option label="水浒" value="水浒" />
+                        <el-option label="海贼" value="海贼" />
+                        <el-option label="火影" value="火影" />
+                        <el-option label="死神" value="死神" />
+                        <el-option label="漫威" value="漫威" />
+                        <el-option label="DC" value="DC" />
+                        <el-option label="诸天流" value="诸天流" />
+                        <el-option label="综漫流" value="综漫流" />
+                        <el-option label="无敌流" value="无敌流" />
+                        <el-option label="轻松流" value="轻松流" />
+                        <el-option label="搞笑流" value="搞笑流" />
+                        <el-option label="智斗流" value="智斗流" />
+                        <el-option label="杀伐果断" value="杀伐果断" />
+                        <el-option label="凡人流" value="凡人流" />
+                        <el-option label="天才流" value="天才流" />
+                        <el-option label="废柴流" value="废柴流" />
+                        <el-option label="奶爸流" value="奶爸流" />
+                        <el-option label="赘婿" value="赘婿" />
+                        <el-option label="兵王" value="兵王" />
+                        <el-option label="神医" value="神医" />
+                        <el-option label="神豪" value="神豪" />
+                        <el-option label="鉴宝" value="鉴宝" />
+                        <el-option label="直播" value="直播" />
+                        <el-option label="娱乐圈" value="娱乐圈" />
+                        <el-option label="体育" value="体育" />
+                        <el-option label="足球" value="足球" />
+                        <el-option label="篮球" value="篮球" />
+                        <el-option label="网球" value="网球" />
+                        <el-option label="赛车" value="赛车" />
+                        <el-option label="钓鱼" value="钓鱼" />
                       </el-option-group>
                       <el-option-group label="其他">
                         <el-option label="二次元" value="二次元" />
@@ -2244,6 +2426,110 @@
                         <el-option label="同人衍生" value="同人衍生" />
                         <el-option label="现实题材" value="现实题材" />
                         <el-option label="儿童文学" value="儿童文学" />
+                        <el-option label="文学名著" value="文学名著" />
+                        <el-option label="散文随笔" value="散文随笔" />
+                        <el-option label="诗歌词曲" value="诗歌词曲" />
+                        <el-option label="剧本" value="剧本" />
+                        <el-option label="传记" value="传记" />
+                        <el-option label="纪实文学" value="纪实文学" />
+                        <el-option label="网络文学" value="网络文学" />
+                        <el-option label="短篇故事" value="短篇故事" />
+                        <el-option label="长篇小说" value="长篇小说" />
+                        <el-option label="中篇小说" value="中篇小说" />
+                        <el-option label="短篇小说" value="短篇小说" />
+                        <el-option label="微小说" value="微小说" />
+                        <el-option label="童话" value="童话" />
+                        <el-option label="寓言" value="寓言" />
+                        <el-option label="神话" value="神话" />
+                        <el-option label="民间故事" value="民间故事" />
+                        <el-option label="武侠" value="武侠" />
+                        <el-option label="侦探" value="侦探" />
+                        <el-option label="推理" value="推理" />
+                        <el-option label="恐怖" value="恐怖" />
+                        <el-option label="惊悚" value="惊悚" />
+                        <el-option label="悬疑" value="悬疑" />
+                        <el-option label="科幻" value="科幻" />
+                        <el-option label="奇幻" value="奇幻" />
+                        <el-option label="玄幻" value="玄幻" />
+                        <el-option label="仙侠" value="仙侠" />
+                        <el-option label="修真" value="修真" />
+                        <el-option label="都市" value="都市" />
+                        <el-option label="历史" value="历史" />
+                        <el-option label="军事" value="军事" />
+                        <el-option label="游戏" value="游戏" />
+                        <el-option label="竞技" value="竞技" />
+                        <el-option label="体育" value="体育" />
+                        <el-option label="娱乐圈" value="娱乐圈" />
+                        <el-option label="职场" value="职场" />
+                        <el-option label="校园" value="校园" />
+                        <el-option label="婚恋" value="婚恋" />
+                        <el-option label="家庭" value="家庭" />
+                        <el-option label="情感" value="情感" />
+                        <el-option label="励志" value="励志" />
+                        <el-option label="成长" value="成长" />
+                        <el-option label="青春" value="青春" />
+                        <el-option label="怀旧" value="怀旧" />
+                        <el-option label="乡土" value="乡土" />
+                        <el-option label="西部" value="西部" />
+                        <el-option label="探险" value="探险" />
+                        <el-option label="冒险" value="冒险" />
+                        <el-option label="旅行" value="旅行" />
+                        <el-option label="美食" value="美食" />
+                        <el-option label="养生" value="养生" />
+                        <el-option label="宠物" value="宠物" />
+                        <el-option label="萌宠" value="萌宠" />
+                        <el-option label="动物" value="动物" />
+                        <el-option label="自然" value="自然" />
+                        <el-option label="环保" value="环保" />
+                        <el-option label="科技" value="科技" />
+                        <el-option label="互联网" value="互联网" />
+                        <el-option label="创业" value="创业" />
+                        <el-option label="商战" value="商战" />
+                        <el-option label="金融" value="金融" />
+                        <el-option label="财经" value="财经" />
+                        <el-option label="政治" value="政治" />
+                        <el-option label="法律" value="法律" />
+                        <el-option label="教育" value="教育" />
+                        <el-option label="医疗" value="医疗" />
+                        <el-option label="职场" value="职场" />
+                        <el-option label="官场" value="官场" />
+                        <el-option label="权谋" value="权谋" />
+                        <el-option label="宫斗" value="宫斗" />
+                        <el-option label="宅斗" value="宅斗" />
+                        <el-option label="江湖" value="江湖" />
+                        <el-option label="武侠" value="武侠" />
+                        <el-option label="仙侠" value="仙侠" />
+                        <el-option label="玄幻" value="玄幻" />
+                        <el-option label="奇幻" value="奇幻" />
+                        <el-option label="科幻" value="科幻" />
+                        <el-option label="末世" value="末世" />
+                        <el-option label="星际" value="星际" />
+                        <el-option label="未来" value="未来" />
+                        <el-option label="古代" value="古代" />
+                        <el-option label="现代" value="现代" />
+                        <el-option label="架空" value="架空" />
+                        <el-option label="重生" value="重生" />
+                        <el-option label="穿越" value="穿越" />
+                        <el-option label="重生穿越" value="重生穿越" />
+                        <el-option label="系统" value="系统" />
+                        <el-option label="快穿" value="快穿" />
+                        <el-option label="无限流" value="无限流" />
+                        <el-option label="诸天" value="诸天" />
+                        <el-option label="综漫" value="综漫" />
+                        <el-option label="同人" value="同人" />
+                        <el-option label="衍生" value="衍生" />
+                        <el-option label="原创" value="原创" />
+                        <el-option label="耽美" value="耽美" />
+                        <el-option label="百合" value="百合" />
+                        <el-option label="纯爱" value="纯爱" />
+                        <el-option label="无CP" value="无CP" />
+                        <el-option label="多CP" value="多CP" />
+                        <el-option label="单女主" value="单女主" />
+                        <el-option label="多女主" value="多女主" />
+                        <el-option label="单男主" value="单男主" />
+                        <el-option label="多男主" value="多男主" />
+                        <el-option label="双男主" value="双男主" />
+                        <el-option label="双女主" value="双女主" />
                       </el-option-group>
                     </el-select>
                   </el-form-item>
@@ -2254,12 +2540,36 @@
                     <el-input v-model="novelInfoForm.sellingPoint" type="textarea" :rows="3" placeholder="用一句话概括你的书最吸引人的地方..." />
                   </el-form-item>
                   <el-form-item label="目标字数">
-                    <el-select v-model="novelInfoForm.targetWords" style="width:100%;">
-                      <el-option label="10 万字（短篇）" :value="100000" />
-                      <el-option label="30 万字（中篇）" :value="300000" />
+                    <el-select v-model="novelInfoForm.targetWords" style="width:100%;" allow-create filterable>
+                      <el-option label="1 万字（微型）" :value="10000" />
+                      <el-option label="2 万字（短篇）" :value="20000" />
+                      <el-option label="3 万字（短篇）" :value="30000" />
+                      <el-option label="5 万字（短篇）" :value="50000" />
+                      <el-option label="8 万字（短篇）" :value="80000" />
+                      <el-option label="10 万字（中篇）" :value="100000" />
+                      <el-option label="15 万字（中篇）" :value="150000" />
+                      <el-option label="20 万字（中篇）" :value="200000" />
+                      <el-option label="25 万字（中篇）" :value="250000" />
+                      <el-option label="30 万字（长篇）" :value="300000" />
+                      <el-option label="35 万字（长篇）" :value="350000" />
+                      <el-option label="40 万字（长篇）" :value="400000" />
                       <el-option label="50 万字（长篇）" :value="500000" />
-                      <el-option label="100 万字（超长篇）" :value="1000000" />
-                      <el-option label="200 万字（超大长篇）" :value="2000000" />
+                      <el-option label="60 万字（超长篇）" :value="600000" />
+                      <el-option label="70 万字（超长篇）" :value="700000" />
+                      <el-option label="80 万字（超长篇）" :value="800000" />
+                      <el-option label="90 万字（超长篇）" :value="900000" />
+                      <el-option label="100 万字（巨长篇）" :value="1000000" />
+                      <el-option label="120 万字（巨长篇）" :value="1200000" />
+                      <el-option label="150 万字（巨长篇）" :value="1500000" />
+                      <el-option label="180 万字（巨长篇）" :value="1800000" />
+                      <el-option label="200 万字（史诗级）" :value="2000000" />
+                      <el-option label="250 万字（史诗级）" :value="2500000" />
+                      <el-option label="300 万字（史诗级）" :value="3000000" />
+                      <el-option label="400 万字（超史诗）" :value="4000000" />
+                      <el-option label="500 万字（超史诗）" :value="5000000" />
+                      <el-option label="600 万字（超史诗）" :value="6000000" />
+                      <el-option label="800 万字（超史诗）" :value="8000000" />
+                      <el-option label="1000 万字（神话级）" :value="10000000" />
                     </el-select>
                   </el-form-item>
                   <el-form-item label="预计卷数">
@@ -2282,6 +2592,12 @@
             <div v-if="editorSection === 'synopsis'">
               <div class="ws-section-header">
                 <div class="ws-section-title"><i class="fas fa-scroll" style="margin-right:8px;color:#c4b5fd;"></i>故事大纲</div>
+                <div style="display:flex;gap:8px;">
+                  <span style="font-size:12px;color:#6b6b85;margin-top:4px;">当前卷：</span>
+                  <el-select v-model="fateCurrentVolId" size="small" style="width:150px;" @change="onSynopsisVolChange">
+                    <el-option v-for="vol in fateVolumes" :key="vol.id" :label="vol.title || '未命名卷'" :value="vol.id" />
+                  </el-select>
+                </div>
                 <el-button size="small" type="primary" @click="saveSynopsis()">
                   <i class="fas fa-save" style="margin-right:6px;"></i>保存
                 </el-button>
@@ -3176,13 +3492,19 @@
                     </div>
                     <!-- 发送按钮行 -->
                     <div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px;">
-                      <div style="display:flex;align-items:center;gap:4px;">
+                      <div style="display:flex;align-items:center;gap:8px;">
                         <span style="font-size:12px;color:#8b7dd8;background:rgba(139,92,246,0.1);border:1px solid rgba(139,92,246,0.2);border-radius:6px;padding:4px 10px;">
                           <i class="fas fa-wand-magic-sparkles" style="margin-right:4px;"></i>续写模式
                         </span>
                       </div>
-                      <div style="display:flex;gap:6px;">
+                      <div style="display:flex;gap:6px;align-items:center;">
                         <el-button size="small" @click="addChapter()"><i class="fas fa-plus" style="margin-right:4px;"></i>新章</el-button>
+                        <el-select v-model="currentAiModel" size="small" style="width:150px;">
+                          <el-option v-for="m in aiModels" :key="m.id" :label="m.name" :value="m.id" />
+                        </el-select>
+                        <el-checkbox v-model="editorUseDefaultAi" size="small">
+                          <span style="font-size:12px;">默认AI总结</span>
+                        </el-checkbox>
                         <el-button size="small" type="primary" @click="sendEditorChat()">
                           <i class="fas fa-paper-plane" style="margin-right:4px;"></i>发送
                         </el-button>
@@ -3249,9 +3571,6 @@
             <div v-if="editorSection === 'ai'">
               <div class="ws-section-header">
                 <div class="ws-section-title"><i class="fas fa-robot" style="margin-right:8px;color:#c4b5fd;"></i>AI 助手</div>
-                <el-select v-model="currentAiModel" size="small" style="width:160px;">
-                  <el-option v-for="m in aiModels" :key="m.id" :label="m.name" :value="m.id" />
-                </el-select>
               </div>
               <div class="ai-assistant-wrap" style="background:rgba(18,18,31,0.7);border:1px solid #1e1e30;border-radius:12px;padding:20px;min-height:500px;display:flex;flex-direction:column;">
                 <div v-if="aiRole === 'ask'" style="background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.3);border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:13px;color:#93c5fd;">
@@ -3353,6 +3672,9 @@
                       style="min-height:60px;flex:1;"
                       @keydown.enter.exact="sendAi()"
                     ></textarea>
+                    <el-select v-model="currentAiModel" size="small" style="width:150px;margin-right:6px;" teleported>
+                      <el-option v-for="m in aiModels" :key="m.id" :label="m.name" :value="m.id" />
+                    </el-select>
                     <button class="ai-send-btn" @click="sendAi()" style="flex-shrink:0;">
                       <i class="fas fa-paper-plane"></i>
                     </button>
@@ -3653,7 +3975,7 @@
           <el-input v-model="novelForm.title" placeholder="请输入作品名称" />
         </el-form-item>
         <el-form-item label="分类">
-          <el-select v-model="novelForm.category" style="width:100%;" allow-create filterable default-first-option teleported>
+          <el-select v-model="novelForm.category" style="width:100%;" allow-create filterable default-first-option>
             <el-option-group label="女频">
               <el-option label="古代言情" value="古代言情" />
               <el-option label="现代言情" value="现代言情" />
@@ -3667,6 +3989,25 @@
               <el-option label="宫斗宅斗" value="宫斗宅斗" />
               <el-option label="女尊天下" value="女尊天下" />
               <el-option label="种田经商" value="种田经商" />
+              <el-option label="豪门总裁" value="豪门总裁" />
+              <el-option label="虐恋情深" value="虐恋情深" />
+              <el-option label="甜宠文" value="甜宠文" />
+              <el-option label="快穿" value="快穿" />
+              <el-option label="系统文" value="系统文" />
+              <el-option label="重生逆袭" value="重生逆袭" />
+              <el-option label="重生宠文" value="重生宠文" />
+              <el-option label="古言种田" value="古言种田" />
+              <el-option label="玄幻女强" value="玄幻女强" />
+              <el-option label="仙侠女强" value="仙侠女强" />
+              <el-option label="娱乐圈文" value="娱乐圈文" />
+              <el-option label="婚恋" value="婚恋" />
+              <el-option label="军婚" value="军婚" />
+              <el-option label="耽美" value="耽美" />
+              <el-option label="百合" value="百合" />
+              <el-option label="灵异言情" value="灵异言情" />
+              <el-option label="惊悚悬疑" value="惊悚悬疑" />
+              <el-option label="科幻言情" value="科幻言情" />
+              <el-option label="未来架空" value="未来架空" />
             </el-option-group>
             <el-option-group label="男频">
               <el-option label="玄幻奇幻" value="玄幻奇幻" />
@@ -3684,6 +4025,62 @@
               <el-option label="西方奇幻" value="西方奇幻" />
               <el-option label="末世求生" value="末世求生" />
               <el-option label="恐怖惊悚" value="恐怖惊悚" />
+              <el-option label="都市重生" value="都市重生" />
+              <el-option label="都市无敌" value="都市无敌" />
+              <el-option label="都市神医" value="都市神医" />
+              <el-option label="都市战神" value="都市战神" />
+              <el-option label="都市赘婿" value="都市赘婿" />
+              <el-option label="都市修仙" value="都市修仙" />
+              <el-option label="重生都市" value="重生都市" />
+              <el-option label="重生过去" value="重生过去" />
+              <el-option label="重生学霸" value="重生学霸" />
+              <el-option label="异界大陆" value="异界大陆" />
+              <el-option label="异界重生" value="异界重生" />
+              <el-option label="异界召唤" value="异界召唤" />
+              <el-option label="异界种田" value="异界种田" />
+              <el-option label="网游重生" value="网游重生" />
+              <el-option label="网游之神" value="网游之神" />
+              <el-option label="电竞" value="电竞" />
+              <el-option label="LOL" value="LOL" />
+              <el-option label="王者荣耀" value="王者荣耀" />
+              <el-option label="足球" value="足球" />
+              <el-option label="篮球" value="篮球" />
+              <el-option label="三国" value="三国" />
+              <el-option label="秦汉" value="秦汉" />
+              <el-option label="隋唐" value="隋唐" />
+              <el-option label="宋朝" value="宋朝" />
+              <el-option label="明朝" value="明朝" />
+              <el-option label="清朝" value="清朝" />
+              <el-option label="抗战" value="抗战" />
+              <el-option label="星际争霸" value="星际争霸" />
+              <el-option label="末世重生" value="末世重生" />
+              <el-option label="末日丧尸" value="末日丧尸" />
+              <el-option label="末日求生" value="末日求生" />
+              <el-option label="无限流" value="无限流" />
+              <el-option label="恐怖流" value="恐怖流" />
+              <el-option label="惊悚流" value="惊悚流" />
+              <el-option label="盗墓" value="盗墓" />
+              <el-option label="探险" value="探险" />
+              <el-option label="寻宝" value="寻宝" />
+              <el-option label="权谋" value="权谋" />
+              <el-option label="官场" value="官场" />
+              <el-option label="商战" value="商战" />
+              <el-option label="重生经商" value="重生经商" />
+              <el-option label="重生创业" value="重生创业" />
+              <el-option label="娱乐圈" value="娱乐圈" />
+              <el-option label="明星" value="明星" />
+              <el-option label="导演" value="导演" />
+              <el-option label="编剧" value="编剧" />
+              <el-option label="变身" value="变身" />
+              <el-option label="伪娘" value="伪娘" />
+              <el-option label="性转" value="性转" />
+              <el-option label="耽美" value="耽美" />
+              <el-option label="BL" value="BL" />
+              <el-option label="NP" value="NP" />
+              <el-option label="后宫" value="后宫" />
+              <el-option label="多女主" value="多女主" />
+              <el-option label="单女主" value="单女主" />
+              <el-option label="无女主" value="无女主" />
             </el-option-group>
             <el-option-group label="其他">
               <el-option label="二次元" value="二次元" />
@@ -3696,6 +4093,62 @@
               <el-option label="游戏小说" value="游戏小说" />
               <el-option label="体育竞技" value="体育竞技" />
               <el-option label="职场商战" value="职场商战" />
+              <el-option label="生活随笔" value="生活随笔" />
+              <el-option label="散文随笔" value="散文随笔" />
+              <el-option label="杂文评论" value="杂文评论" />
+              <el-option label="人物传记" value="人物传记" />
+              <el-option label="纪实文学" value="纪实文学" />
+              <el-option label="报告文学" value="报告文学" />
+              <el-option label="童话寓言" value="童话寓言" />
+              <el-option label="神话传说" value="神话传说" />
+              <el-option label="民间故事" value="民间故事" />
+              <el-option label="网络段子" value="网络段子" />
+              <el-option label="幽默搞笑" value="幽默搞笑" />
+              <el-option label="恐怖故事" value="恐怖故事" />
+              <el-option label="悬疑故事" value="悬疑故事" />
+              <el-option label="科幻故事" value="科幻故事" />
+              <el-option label="奇幻故事" value="奇幻故事" />
+              <el-option label="爱情故事" value="爱情故事" />
+              <el-option label="友情故事" value="友情故事" />
+              <el-option label="亲情故事" value="亲情故事" />
+              <el-option label="成长故事" value="成长故事" />
+              <el-option label="励志故事" value="励志故事" />
+              <el-option label="校园故事" value="校园故事" />
+              <el-option label="职场故事" value="职场故事" />
+              <el-option label="历史故事" value="历史故事" />
+              <el-option label="军事故事" value="军事故事" />
+              <el-option label="冒险故事" value="冒险故事" />
+              <el-option label="探险故事" value="探险故事" />
+              <el-option label="旅行故事" value="旅行故事" />
+              <el-option label="美食故事" value="美食故事" />
+              <el-option label="宠物故事" value="宠物故事" />
+              <el-option label="婚恋故事" value="婚恋故事" />
+              <el-option label="家庭故事" value="家庭故事" />
+              <el-option label="校园小说" value="校园小说" />
+              <el-option label="青春小说" value="青春小说" />
+              <el-option label="言情小说" value="言情小说" />
+              <el-option label="武侠小说" value="武侠小说" />
+              <el-option label="侦探小说" value="侦探小说" />
+              <el-option label="推理小说" value="推理小说" />
+              <el-option label="科幻小说" value="科幻小说" />
+              <el-option label="奇幻小说" value="奇幻小说" />
+              <el-option label="玄幻小说" value="玄幻小说" />
+              <el-option label="恐怖小说" value="恐怖小说" />
+              <el-option label="悬疑小说" value="悬疑小说" />
+              <el-option label="历史小说" value="历史小说" />
+              <el-option label="军事小说" value="军事小说" />
+              <el-option label="游戏小说" value="游戏小说" />
+              <el-option label="体育小说" value="体育小说" />
+              <el-option label="职场小说" value="职场小说" />
+              <el-option label="商战小说" value="商战小说" />
+              <el-option label="官场小说" value="官场小说" />
+              <el-option label="网络小说" value="网络小说" />
+              <el-option label="原创小说" value="原创小说" />
+              <el-option label="短篇" value="短篇" />
+              <el-option label="中篇" value="中篇" />
+              <el-option label="长篇" value="长篇" />
+              <el-option label="连载" value="连载" />
+              <el-option label="完结" value="完结" />
             </el-option-group>
           </el-select>
         </el-form-item>
@@ -3703,18 +4156,42 @@
           <el-input v-model="novelForm.description" type="textarea" :rows="3" placeholder="用一句话描述你的作品..." />
         </el-form-item>
         <el-form-item label="目标字数">
-          <el-select v-model="novelForm.targetWords" style="width:100%;" allow-create filterable default-first-option teleported>
+          <el-select v-model="novelForm.targetWords" style="width:100%;" allow-create filterable default-first-option>
+            <el-option label="1 万字（微型）" :value="10000" />
+            <el-option label="2 万字（短篇）" :value="20000" />
+            <el-option label="3 万字（短篇）" :value="30000" />
             <el-option label="5 万字（短篇）" :value="50000" />
-            <el-option label="10 万字（短篇）" :value="100000" />
+            <el-option label="8 万字（短篇）" :value="80000" />
+            <el-option label="10 万字（中篇）" :value="100000" />
+            <el-option label="15 万字（中篇）" :value="150000" />
             <el-option label="20 万字（中篇）" :value="200000" />
-            <el-option label="30 万字（中篇）" :value="300000" />
+            <el-option label="25 万字（中篇）" :value="250000" />
+            <el-option label="30 万字（长篇）" :value="300000" />
+            <el-option label="35 万字（长篇）" :value="350000" />
+            <el-option label="40 万字（长篇）" :value="400000" />
             <el-option label="50 万字（长篇）" :value="500000" />
+            <el-option label="60 万字（超长篇）" :value="600000" />
+            <el-option label="70 万字（超长篇）" :value="700000" />
             <el-option label="80 万字（超长篇）" :value="800000" />
-            <el-option label="100 万字（超长篇）" :value="1000000" />
+            <el-option label="90 万字（超长篇）" :value="900000" />
+            <el-option label="100 万字（巨长篇）" :value="1000000" />
+            <el-option label="120 万字（巨长篇）" :value="1200000" />
             <el-option label="150 万字（巨长篇）" :value="1500000" />
-            <el-option label="200 万字（巨长篇）" :value="2000000" />
+            <el-option label="180 万字（巨长篇）" :value="1800000" />
+            <el-option label="200 万字（史诗级）" :value="2000000" />
+            <el-option label="250 万字（史诗级）" :value="2500000" />
             <el-option label="300 万字（史诗级）" :value="3000000" />
+            <el-option label="400 万字（超史诗）" :value="4000000" />
             <el-option label="500 万字（超史诗）" :value="5000000" />
+            <el-option label="600 万字（超史诗）" :value="6000000" />
+            <el-option label="800 万字（超史诗）" :value="8000000" />
+            <el-option label="1000 万字（神话级）" :value="10000000" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="存储位置">
+          <el-select v-model="novelForm.storageType" style="width:100%;">
+            <el-option label="本地存储" value="local" />
+            <el-option label="云端存储（开发中）" value="cloud" />
           </el-select>
         </el-form-item>
       </el-form>
@@ -4142,6 +4619,7 @@
           category: '古代言情',
           description: '',
           targetWords: 500000,
+          storageType: 'local',
         });
         
         // Chapters / Editor
@@ -5244,6 +5722,7 @@
             chapterCount: 0,
             wordCount: 0,
             targetWords: novelForm.targetWords,
+            storageType: novelForm.storageType,
           });
           saveNovels();
           createNovelVisible.value = false;
@@ -5580,8 +6059,21 @@
 
         function selectFateVol(volId) {
           fateCurrentVolId.value = volId;
-          // 如果该卷有章节，默认选中第一个
           const vol = fateVolumes.value.find(v => v.id === volId);
+          if (vol && vol.chapterIds.length > 0) {
+            fateCurrentChId.value = vol.chapterIds[0];
+          } else {
+            fateCurrentChId.value = null;
+          }
+          const idx = fateVolumes.value.findIndex(v => v.id === volId);
+          if (idx > -1) {
+            activeSynopsisVol.value = Math.min(idx, synopsisVolumes.value.length - 1);
+          }
+          saveFateVolumes();
+        }
+
+        function onSynopsisVolChange() {
+          const vol = fateVolumes.value.find(v => v.id === fateCurrentVolId.value);
           if (vol && vol.chapterIds.length > 0) {
             fateCurrentChId.value = vol.chapterIds[0];
           } else {
@@ -5607,9 +6099,27 @@
         }
 
         function selectFateCh(chId) {
+          if (currentChapterId.value && currentChapterId.value !== chId) {
+            const oldCh = chapters.value.find(c => c.id === currentChapterId.value);
+            if (oldCh) {
+              oldCh.editorChatMessages = JSON.parse(JSON.stringify(editorChatMessages.value));
+              oldCh.content = currentChapter.value.content;
+            }
+          }
           fateCurrentChId.value = chId;
           currentChapterId.value = chId;
+          const newCh = chapters.value.find(c => c.id === chId);
+          if (newCh) {
+            if (newCh.editorChatMessages) {
+              editorChatMessages.value = JSON.parse(JSON.stringify(newCh.editorChatMessages));
+            } else {
+              editorChatMessages.value = [];
+            }
+          } else {
+            editorChatMessages.value = [];
+          }
           saveFateVolumes();
+          saveChaptersLocal();
         }
 
         function removeFateChapter(chId) {
@@ -6824,11 +7334,65 @@
           }
         }
         
-        function testAiModel(model) {
+        async function testAiModel(model) {
           ElementPlus.ElMessage.info('正在测试连接...');
-          setTimeout(() => {
-            ElementPlus.ElMessage.success('连接测试成功！模型 ' + model.modelName + ' 响应正常。');
-          }, 1000);
+          const startTime = Date.now();
+          const timeoutPromise = new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('请求超时')), 15000)
+          );
+          
+          try {
+            let baseUrl = model.baseUrl;
+            if (!baseUrl) {
+              baseUrl = getBaseUrlPlaceholder(model.providerType);
+            }
+            
+            if (!baseUrl) {
+              ElementPlus.ElMessage.error('请先配置 API 地址');
+              return;
+            }
+            
+            if (!baseUrl.startsWith('http://') && !baseUrl.startsWith('https://')) {
+              ElementPlus.ElMessage.error('API 地址格式错误，请输入完整的 http/https 地址');
+              return;
+            }
+            
+            const apiUrl = baseUrl.replace(/\/$/, '') + '/models';
+            
+            const response = await Promise.race([
+              fetch(apiUrl, {
+                method: 'GET',
+                headers: {
+                  'Authorization': 'Bearer ' + model.apiKey,
+                  'Content-Type': 'application/json',
+                },
+              }),
+              timeoutPromise
+            ]);
+            
+            const endTime = Date.now();
+            const latency = endTime - startTime;
+            
+            if (response.ok) {
+              const data = await response.json();
+              const modelList = data.data || data;
+              const modelNames = Array.isArray(modelList) ? modelList.slice(0, 5).map(m => m.id || m).join(', ') : '多个模型';
+              ElementPlus.ElMessage.success(`连接测试成功！延迟 ${latency}ms，可用模型数：${Array.isArray(modelList) ? modelList.length : '未知'}\n前5个模型：${modelNames}${Array.isArray(modelList) && modelList.length > 5 ? '...' : ''}`);
+            } else {
+              const errorData = await response.json().catch(() => ({}));
+              ElementPlus.ElMessage.error(`连接失败！状态码：${response.status}，耗时 ${latency}ms\n错误：${errorData.error?.message || errorData.message || '未知错误'}`);
+            }
+          } catch (error) {
+            const endTime = Date.now();
+            const latency = endTime - startTime;
+            let errorMsg = error.message || '未知错误';
+            if (errorMsg === '请求超时') {
+              errorMsg = '请求超时（超过15秒），请检查网络连接或API地址是否正确';
+            } else if (errorMsg.includes('Failed to fetch')) {
+              errorMsg = '网络请求失败，请检查API地址是否可达或是否存在跨域限制';
+            }
+            ElementPlus.ElMessage.error(`连接测试失败！耗时 ${latency}ms，错误：${errorMsg}`);
+          }
         }
         
         function deleteAiModel(model) {
