@@ -889,39 +889,43 @@
       margin-bottom: 22px;
     }
     
-    /* Deep form styles for dark mode */
-    :deep(.el-form-item__label) { color: #a0a0b8 !important; font-size: 13px !important; }
-    :deep(.el-input__wrapper), :deep(.el-textarea__inner) {
+    /* Element Plus overrides for dark mode (global, teleported poppers included) */
+    .el-form-item__label { color: #a0a0b8 !important; font-size: 13px !important; }
+    .el-input__wrapper, .el-textarea__inner {
       background: rgba(10, 10, 18, 0.6) !important;
       border: 1px solid #1e1e30 !important;
       box-shadow: none !important;
     }
-    :deep(.el-input__inner), :deep(.el-textarea__inner) {
+    .el-input__inner, .el-textarea__inner {
       color: #e4e4ec !important;
       font-size: 13px !important;
     }
-    :deep(.el-input__wrapper.is-focus) {
+    .el-input__wrapper.is-focus {
       border-color: rgba(139, 92, 246, 0.5) !important;
     }
-    :deep(.el-select .el-select__wrapper) {
+    .el-select .el-select__wrapper {
       background: rgba(10, 10, 18, 0.6) !important;
       border: 1px solid #1e1e30 !important;
       box-shadow: none !important;
     }
-    :deep(.el-select-dropdown) {
+    /* 下拉浮层：确保在对话框之上、可滚动、显示全部选项 */
+    .el-select-dropdown {
       background: #12121f !important;
       border: 1px solid #1e1e30 !important;
-      max-height: 500px !important;
-      overflow-y: auto !important;
+      max-height: 320px !important;
+      overflow: hidden !important;
     }
-    :deep(.el-select-dropdown__item) { color: #a0a0b8 !important; font-size: 13px !important; }
-    :deep(.el-select-dropdown__item:hover) { background: rgba(139, 92, 246, 0.1) !important; }
-    :deep(.el-select-dropdown__item.selected) { color: #c4b5fd !important; }
-    :deep(.el-select-dropdown__wrap) { max-height: 500px !important; overflow-y: auto !important; }
-    :deep(.el-scrollbar__wrap) { max-height: 500px !important; }
-    :deep(.el-select-dropdown__list) { padding: 6px 0 !important; }
+    .el-select-dropdown__item { color: #a0a0b8 !important; font-size: 13px !important; }
+    .el-select-dropdown__item:hover { background: rgba(139, 92, 246, 0.1) !important; }
+    .el-select-dropdown__item.selected { color: #c4b5fd !important; }
+    .el-select-dropdown__wrap { max-height: 320px !important; }
+    .el-select-dropdown .el-scrollbar__wrap { max-height: 320px !important; overflow-y: auto !important; overflow-x: hidden !important; }
+    .el-select-dropdown .el-scrollbar__view { max-height: none !important; }
+    .el-select-dropdown__list { padding: 6px 0 !important; }
     /* Ensure popper is above dialogs */
-    :deep(.el-popper) { z-index: 3000 !important; }
+    .el-popper { z-index: 3000 !important; }
+    /* 让对话框体在小屏可滚动，避免内容被裁切 */
+    .el-dialog__body { max-height: calc(100vh - 200px); overflow-y: auto; }
     
     /* AI Model List */
     .ai-model-list { display: flex; flex-direction: column; gap: 10px; }
@@ -932,7 +936,15 @@
       padding: 14px 16px;
       display: flex;
       align-items: center;
+      flex-wrap: wrap;
       gap: 14px;
+    }
+    .ai-model-card .ai-model-actions {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      flex-shrink: 0;
     }
     .ai-model-icon {
       width: 40px; height: 40px;
@@ -988,22 +1000,22 @@
     .ai-model-tag.image { background: rgba(236, 72, 153, 0.12); color: #f472b6; }
     
     /* Dialog */
-    :deep(.el-dialog) {
+    .el-dialog {
       background: #12121f !important;
       border: 1px solid #1e1e30 !important;
       border-radius: 12px !important;
     }
-    :deep(.el-dialog__title) { color: #e4e4ec !important; font-size: 16px !important; }
-    :deep(.el-dialog__headerbtn .el-dialog__close) { color: #6b6b85 !important; }
-    :deep(.el-message-box) {
+    .el-dialog__title { color: #e4e4ec !important; font-size: 16px !important; }
+    .el-dialog__headerbtn .el-dialog__close { color: #6b6b85 !important; }
+    .el-message-box {
       background: #12121f !important;
       border: 1px solid #1e1e30 !important;
     }
-    :deep(.el-message-box__title) { color: #e4e4ec !important; }
-    :deep(.el-message-box__message) { color: #a0a0b8 !important; }
-    :deep(.el-button) { font-size: 13px !important; }
-    :deep(.el-checkbox__label) { color: #a0a0b8 !important; font-size: 13px !important; }
-    :deep(.el-switch__label) { color: #a0a0b8 !important; }
+    .el-message-box__title { color: #e4e4ec !important; }
+    .el-message-box__message { color: #a0a0b8 !important; }
+    .el-button { font-size: 13px !important; }
+    .el-checkbox__label { color: #a0a0b8 !important; font-size: 13px !important; }
+    .el-switch__label { color: #a0a0b8 !important; }
     
     .empty-state {
       text-align: center;
@@ -1208,16 +1220,16 @@
       font-size: 13px;
       color: #6b6b85;
     }
-    .char-tabs :deep(.el-tabs__item) {
+    .char-tabs .el-tabs__item {
       color: #6b6b85;
     }
-    .char-tabs :deep(.el-tabs__item.is-active) {
+    .char-tabs .el-tabs__item.is-active {
       color: #c4b5fd;
     }
-    .char-tabs :deep(.el-tabs__active-bar) {
+    .char-tabs .el-tabs__active-bar {
       background: #8b5cf6;
     }
-    .char-tabs :deep(.el-tabs__nav-wrap::after) {
+    .char-tabs .el-tabs__nav-wrap::after {
       background: #1e1e30;
     }
     
@@ -2217,33 +2229,9 @@
                     <el-input v-model="novelInfoForm.title" />
                   </el-form-item>
                   <el-form-item label="作品分类">
-                    <el-select v-model="novelInfoForm.category" style="width:100%;">
-                      <el-option-group label="女频">
-                        <el-option label="古代言情" value="古代言情" />
-                        <el-option label="现代言情" value="现代言情" />
-                        <el-option label="幻想言情" value="幻想言情" />
-                        <el-option label="青春校园" value="青春校园" />
-                        <el-option label="仙侠奇缘" value="仙侠奇缘" />
-                        <el-option label="悬疑推理" value="悬疑推理" />
-                        <el-option label="玄幻言情" value="玄幻言情" />
-                        <el-option label="浪漫青春" value="浪漫青春" />
-                      </el-option-group>
-                      <el-option-group label="男频">
-                        <el-option label="玄幻奇幻" value="玄幻奇幻" />
-                        <el-option label="武侠仙侠" value="武侠仙侠" />
-                        <el-option label="都市异能" value="都市异能" />
-                        <el-option label="历史军事" value="历史军事" />
-                        <el-option label="科幻末世" value="科幻末世" />
-                        <el-option label="游戏竞技" value="游戏竞技" />
-                        <el-option label="悬疑侦探" value="悬疑侦探" />
-                        <el-option label="灵异鬼怪" value="灵异鬼怪" />
-                      </el-option-group>
-                      <el-option-group label="其他">
-                        <el-option label="二次元" value="二次元" />
-                        <el-option label="轻小说" value="轻小说" />
-                        <el-option label="同人衍生" value="同人衍生" />
-                        <el-option label="现实题材" value="现实题材" />
-                        <el-option label="儿童文学" value="儿童文学" />
+                    <el-select v-model="novelInfoForm.category" style="width:100%;" allow-create filterable default-first-option teleported>
+                      <el-option-group v-for="g in categoryGroups" :key="g.label" :label="g.label">
+                        <el-option v-for="c in g.options" :key="c" :label="c" :value="c" />
                       </el-option-group>
                     </el-select>
                   </el-form-item>
@@ -2254,12 +2242,8 @@
                     <el-input v-model="novelInfoForm.sellingPoint" type="textarea" :rows="3" placeholder="用一句话概括你的书最吸引人的地方..." />
                   </el-form-item>
                   <el-form-item label="目标字数">
-                    <el-select v-model="novelInfoForm.targetWords" style="width:100%;">
-                      <el-option label="10 万字（短篇）" :value="100000" />
-                      <el-option label="30 万字（中篇）" :value="300000" />
-                      <el-option label="50 万字（长篇）" :value="500000" />
-                      <el-option label="100 万字（超长篇）" :value="1000000" />
-                      <el-option label="200 万字（超大长篇）" :value="2000000" />
+                    <el-select v-model="novelInfoForm.targetWords" style="width:100%;" allow-create filterable default-first-option teleported>
+                      <el-option v-for="w in targetWordOptions" :key="w.value" :label="w.label" :value="w.value" />
                     </el-select>
                   </el-form-item>
                   <el-form-item label="预计卷数">
@@ -3493,7 +3477,8 @@
                       <div class="ai-model-info">
                         <div class="ai-model-name">
                           {{ model.name }}
-                          <span v-if="model.isDefault" class="default-tag">默认</span>
+                          <span v-if="model.defaultFor && model.defaultFor.length" class="default-tag">默认·{{ model.defaultFor.map(typeLabel).join('/') }}</span>
+                          <span v-else-if="model.isDefault" class="default-tag">默认</span>
                         </div>
                         <div class="ai-model-desc">{{ model.provider }} · {{ model.modelName }}</div>
                         <div class="ai-model-tags">
@@ -3502,7 +3487,7 @@
                           <span class="ai-model-tag image" v-if="model.supportsImage">🎨 绘图模型</span>
                         </div>
                       </div>
-                      <div style="display:flex;gap:6px;">
+                      <div class="ai-model-actions">
                         <el-button size="small" @click="editAiModel(model)">
                           <i class="fas fa-pen" style="margin-right:2px;"></i>编辑
                         </el-button>
@@ -3654,48 +3639,8 @@
         </el-form-item>
         <el-form-item label="分类">
           <el-select v-model="novelForm.category" style="width:100%;" allow-create filterable default-first-option teleported>
-            <el-option-group label="女频">
-              <el-option label="古代言情" value="古代言情" />
-              <el-option label="现代言情" value="现代言情" />
-              <el-option label="幻想言情" value="幻想言情" />
-              <el-option label="青春校园" value="青春校园" />
-              <el-option label="仙侠奇缘" value="仙侠奇缘" />
-              <el-option label="悬疑推理" value="悬疑推理" />
-              <el-option label="玄幻言情" value="玄幻言情" />
-              <el-option label="浪漫青春" value="浪漫青春" />
-              <el-option label="穿越重生" value="穿越重生" />
-              <el-option label="宫斗宅斗" value="宫斗宅斗" />
-              <el-option label="女尊天下" value="女尊天下" />
-              <el-option label="种田经商" value="种田经商" />
-            </el-option-group>
-            <el-option-group label="男频">
-              <el-option label="玄幻奇幻" value="玄幻奇幻" />
-              <el-option label="武侠仙侠" value="武侠仙侠" />
-              <el-option label="都市异能" value="都市异能" />
-              <el-option label="历史军事" value="历史军事" />
-              <el-option label="科幻末世" value="科幻末世" />
-              <el-option label="游戏竞技" value="游戏竞技" />
-              <el-option label="悬疑侦探" value="悬疑侦探" />
-              <el-option label="灵异鬼怪" value="灵异鬼怪" />
-              <el-option label="仙侠修真" value="仙侠修真" />
-              <el-option label="都市重生" value="都市重生" />
-              <el-option label="星际科幻" value="星际科幻" />
-              <el-option label="东方玄幻" value="东方玄幻" />
-              <el-option label="西方奇幻" value="西方奇幻" />
-              <el-option label="末世求生" value="末世求生" />
-              <el-option label="恐怖惊悚" value="恐怖惊悚" />
-            </el-option-group>
-            <el-option-group label="其他">
-              <el-option label="二次元" value="二次元" />
-              <el-option label="轻小说" value="轻小说" />
-              <el-option label="同人衍生" value="同人衍生" />
-              <el-option label="现实题材" value="现实题材" />
-              <el-option label="儿童文学" value="儿童文学" />
-              <el-option label="诗歌散文" value="诗歌散文" />
-              <el-option label="剧本影视" value="剧本影视" />
-              <el-option label="游戏小说" value="游戏小说" />
-              <el-option label="体育竞技" value="体育竞技" />
-              <el-option label="职场商战" value="职场商战" />
+            <el-option-group v-for="g in categoryGroups" :key="g.label" :label="g.label">
+              <el-option v-for="c in g.options" :key="c" :label="c" :value="c" />
             </el-option-group>
           </el-select>
         </el-form-item>
@@ -3704,17 +3649,7 @@
         </el-form-item>
         <el-form-item label="目标字数">
           <el-select v-model="novelForm.targetWords" style="width:100%;" allow-create filterable default-first-option teleported>
-            <el-option label="5 万字（短篇）" :value="50000" />
-            <el-option label="10 万字（短篇）" :value="100000" />
-            <el-option label="20 万字（中篇）" :value="200000" />
-            <el-option label="30 万字（中篇）" :value="300000" />
-            <el-option label="50 万字（长篇）" :value="500000" />
-            <el-option label="80 万字（超长篇）" :value="800000" />
-            <el-option label="100 万字（超长篇）" :value="1000000" />
-            <el-option label="150 万字（巨长篇）" :value="1500000" />
-            <el-option label="200 万字（巨长篇）" :value="2000000" />
-            <el-option label="300 万字（史诗级）" :value="3000000" />
-            <el-option label="500 万字（超史诗）" :value="5000000" />
+            <el-option v-for="w in targetWordOptions" :key="w.value" :label="w.label" :value="w.value" />
           </el-select>
         </el-form-item>
       </el-form>
@@ -3759,7 +3694,7 @@
         </el-form-item>
         <el-form-item label="模型名称">
           <div style="display:flex;gap:8px;">
-            <el-select v-model="aiForm.modelName" filterable allow-create style="width:100%;" teleported>
+            <el-select v-model="aiForm.modelName" filterable allow-create style="width:100%;" teleported @visible-change="onModelDropdownToggle">
               <el-option v-for="m in availableModels" :key="m.value" :label="m.label" :value="m.value" />
             </el-select>
             <el-button size="small" @click="fetchModelsFromApi()" :loading="fetchingModels" title="从API获取模型列表">
@@ -3786,10 +3721,22 @@
           </el-select>
         </el-form-item>
         <el-form-item label="设为默认">
-          <el-switch v-model="aiForm.isDefault" />
-          <div v-if="aiModels.some(m => m.isDefault && m.id !== editingModelId)" style="font-size:11px;color:#f59e0b;margin-top:4px;">
-            <i class="fas fa-triangle-exclamation" style="margin-right:4px;"></i>
-            已有默认模型：{{ aiModels.find(m => m.isDefault).name }}，勾选后将替换为当前模型
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <el-checkbox-group v-model="aiForm.defaultFor" :disabled="aiForm.modelTypes.length === 0">
+              <el-checkbox value="text" :disabled="!aiForm.modelTypes.includes('text') || isTypeDefaultHeldByOther('text')">
+                默认·文本模型
+              </el-checkbox>
+              <el-checkbox value="vector" :disabled="!aiForm.modelTypes.includes('vector') || isTypeDefaultHeldByOther('vector')">
+                默认·向量模型
+              </el-checkbox>
+              <el-checkbox value="image" :disabled="!aiForm.modelTypes.includes('image') || isTypeDefaultHeldByOther('image')">
+                默认·绘图模型
+              </el-checkbox>
+            </el-checkbox-group>
+            <div v-for="h in defaultHolders" :key="h.type" style="font-size:11px;color:#f59e0b;">
+              <i class="fas fa-triangle-exclamation" style="margin-right:4px;"></i>{{ h.label }}默认已由「{{ h.name }}」担任，需先在其上取消方可转移
+            </div>
+            <div v-if="aiForm.modelTypes.length === 0" style="font-size:11px;color:#6b6b85;">请先选择模型类型</div>
           </div>
         </el-form-item>
       </el-form>
@@ -4874,6 +4821,7 @@
         const editingModelId = ref(null);
         const fetchingModels = ref(false);
         const fetchedModels = ref([]);
+        const modelsFetched = ref(false); // 本轮编辑会话是否已自动拉取过模型列表
         const aiForm = reactive({
           id: null,
           name: '',
@@ -4884,7 +4832,24 @@
           modelName: 'gpt-4o',
           modelTypes: ['text'],
           useCase: 'primary',
-          isDefault: false,
+          defaultFor: [], // 该模型担任默认的类型子集：text/vector/image
+        });
+
+        const typeLabelMap = { text: '文本', vector: '向量', image: '绘图' };
+        const typeLabel = (t) => typeLabelMap[t] || t;
+        // 返回某类型的默认模型（若该模型 defaultFor 含该类型）
+        const typeDefaultModel = (type) => aiModels.value.find(m => Array.isArray(m.defaultFor) ? m.defaultFor.includes(type) : false);
+        // 返回某类型当前默认持有者名称（排除正在编辑的当前模型）
+        const typeDefaultHolderName = (type) => {
+          const m = aiModels.value.find(x => x.id !== editingModelId.value && Array.isArray(x.defaultFor) && x.defaultFor.includes(type));
+          return m ? m.name : '';
+        };
+        const isTypeDefaultHeldByOther = (type) => !!typeDefaultHolderName(type);
+        // 表单中展示“已被其他模型担任默认”的提示列表
+        const defaultHolders = computed(() => {
+          return ['text','vector','image']
+            .map(t => ({ type: t, label: typeLabel(t), name: typeDefaultHolderName(t) }))
+            .filter(h => h.name);
         });
         
         const statusMap = { todo: '待办', in_progress: '进行中', done: '已完成' };
@@ -5006,6 +4971,28 @@
         };
         
         const presetModels = computed(() => presetModelsMap[aiForm.providerType] || []);
+
+        // 作品分类（统一来源，两处表单共用；可自定义输入）
+        const categoryGroups = [
+          { label: '女频', options: ['古代言情','现代言情','幻想言情','青春校园','仙侠奇缘','悬疑推理','玄幻言情','浪漫青春','穿越重生','宫斗宅斗','女尊天下','种田经商','豪门世家','虐恋情深','青梅竹马','破镜重圆','先婚后爱'] },
+          { label: '男频', options: ['玄幻奇幻','武侠仙侠','都市异能','历史军事','科幻末世','游戏竞技','悬疑侦探','灵异鬼怪','仙侠修真','都市重生','星际科幻','东方玄幻','西方奇幻','末世求生','恐怖惊悚','诸天无限','系统流','无敌流','诸神争霸','科技修真'] },
+          { label: '其他', options: ['二次元','轻小说','同人衍生','现实题材','儿童文学','诗歌散文','剧本影视','游戏小说','体育竞技','职场商战','纪实文学','历史传记','悬疑惊悚','童话寓言','散文随笔','短篇集'] },
+        ];
+
+        // 目标字数（统一来源，两处表单共用；可自定义输入）
+        const targetWordOptions = [
+          { label: '5 万字（短篇）', value: 50000 },
+          { label: '10 万字（短篇）', value: 100000 },
+          { label: '20 万字（中篇）', value: 200000 },
+          { label: '30 万字（中篇）', value: 300000 },
+          { label: '50 万字（长篇）', value: 500000 },
+          { label: '80 万字（超长篇）', value: 800000 },
+          { label: '100 万字（超长篇）', value: 1000000 },
+          { label: '150 万字（巨长篇）', value: 1500000 },
+          { label: '200 万字（巨长篇）', value: 2000000 },
+          { label: '300 万字（史诗级）', value: 3000000 },
+          { label: '500 万字（超史诗）', value: 5000000 },
+        ];
 
         const availableModels = computed(() => {
           const presets = presetModelsMap[aiForm.providerType] || [];
@@ -5482,17 +5469,22 @@
           ElementPlus.ElMessage.success('大纲已保存');
         }
         
-        function getDefaultAiModel() {
-          const def = aiModels.value.find(m => m.isDefault);
+        function getDefaultAiModel(type) {
+          const t = type || 'text';
+          let def = aiModels.value.find(m => Array.isArray(m.defaultFor) && m.defaultFor.includes(t));
           if (!def) {
-            ElementPlus.ElMessage.warning('未设置默认AI模型，请先在「设置-AI接入设置」中配置并设置默认模型');
+            // 兼容旧数据：仅有 isDefault 的模型
+            def = aiModels.value.find(m => t === 'text' && m.isDefault);
+          }
+          if (!def) {
+            ElementPlus.ElMessage.warning('未设置默认' + typeLabel(t) + '模型，请先在「设置-AI接入设置」中配置并设置默认模型');
             return null;
           }
           return def;
         }
 
         function aiGenSynopsis() {
-          const model = getDefaultAiModel();
+          const model = getDefaultAiModel('text');
           if (!model) return;
           ElementPlus.ElMessage.info('正在使用默认模型 ' + model.name + ' 生成大纲...');
           setTimeout(() => {
@@ -5501,7 +5493,7 @@
         }
 
         function aiGenSynopsisTitle() {
-          const model = getDefaultAiModel();
+          const model = getDefaultAiModel('text');
           if (!model) return;
           ElementPlus.ElMessage.info('正在使用默认模型 ' + model.name + ' 生成标题...');
           setTimeout(() => {
@@ -6687,22 +6679,39 @@
           if (val === 'custom') {
             aiForm.modelTypes = ['text'];
           }
+          // 提供商或地址变化后，重置自动拉取状态，便于下次展开时重新获取
+          fetchedModels.value = [];
+          modelsFetched.value = false;
         }
 
-        async function fetchModelsFromApi() {
-          if (!aiForm.baseUrl.trim() && aiForm.providerType !== 'custom') {
-            // 使用默认地址
-          }
+        // 判断当前是否具备从 API 拉取模型列表的条件
+        function canFetchModels() {
+          if (!aiForm.apiKey.trim()) return false;
+          if (aiForm.providerType === 'custom') return !!aiForm.baseUrl.trim();
+          return true;
+        }
+
+        // 模型下拉框展开时：若已有凭据且本轮尚未拉取，则自动从 API 地址获取可用模型
+        function onModelDropdownToggle(visible) {
+          if (!visible) return;
+          if (modelsFetched.value || fetchingModels.value) return;
+          if (!canFetchModels()) return;
+          modelsFetched.value = true;
+          fetchModelsFromApi(true);
+        }
+
+        async function fetchModelsFromApi(silent) {
           if (!aiForm.apiKey.trim()) {
-            ElementPlus.ElMessage.warning('请先输入 API Key');
+            if (!silent) ElementPlus.ElMessage.warning('请先输入 API Key');
             return;
           }
           const baseUrl = aiForm.baseUrl.trim() || getBaseUrlPlaceholder();
           if (!baseUrl || baseUrl.includes('your-api')) {
-            ElementPlus.ElMessage.warning('请先输入有效的 API 地址');
+            if (!silent) ElementPlus.ElMessage.warning('请先输入有效的 API 地址');
             return;
           }
           fetchingModels.value = true;
+          modelsFetched.value = true;
           try {
             const url = baseUrl.replace(/\/$/, '') + '/models';
             const res = await fetch(url, {
@@ -6718,15 +6727,15 @@
             const data = await res.json();
             if (data.data && Array.isArray(data.data)) {
               fetchedModels.value = data.data;
-              ElementPlus.ElMessage.success('成功获取 ' + data.data.length + ' 个模型');
+              if (!silent) ElementPlus.ElMessage.success('成功获取 ' + data.data.length + ' 个模型');
             } else if (Array.isArray(data)) {
               fetchedModels.value = data.map(m => typeof m === 'string' ? { id: m } : m);
-              ElementPlus.ElMessage.success('成功获取 ' + fetchedModels.value.length + ' 个模型');
+              if (!silent) ElementPlus.ElMessage.success('成功获取 ' + fetchedModels.value.length + ' 个模型');
             } else {
               throw new Error('返回格式不正确');
             }
           } catch (err) {
-            ElementPlus.ElMessage.warning('无法从API获取模型列表（可能是跨域限制），请手动输入模型名称');
+            if (!silent) ElementPlus.ElMessage.warning('无法从API获取模型列表（可能是跨域限制），请手动输入模型名称');
             console.warn('Fetch models failed:', err);
           } finally {
             fetchingModels.value = false;
@@ -6744,7 +6753,9 @@
           aiForm.modelName = 'gpt-4o';
           aiForm.modelTypes = ['text'];
           aiForm.useCase = 'primary';
-          aiForm.isDefault = false;
+          aiForm.defaultFor = [];
+          fetchedModels.value = [];
+          modelsFetched.value = false;
           addAiModelVisible.value = true;
         }
 
@@ -6762,7 +6773,16 @@
           if (model.supportsVector) aiForm.modelTypes.push('vector');
           if (model.supportsImage) aiForm.modelTypes.push('image');
           aiForm.useCase = model.useCase || 'primary';
-          aiForm.isDefault = model.isDefault || false;
+          // 兼容旧数据：仅有 isDefault 的模型视为文本默认
+          if (Array.isArray(model.defaultFor)) {
+            aiForm.defaultFor = model.defaultFor.filter(t => aiForm.modelTypes.includes(t));
+          } else if (model.isDefault && aiForm.modelTypes.includes('text')) {
+            aiForm.defaultFor = ['text'];
+          } else {
+            aiForm.defaultFor = [];
+          }
+          fetchedModels.value = [];
+          modelsFetched.value = false;
           addAiModelVisible.value = true;
         }
 
@@ -6788,6 +6808,9 @@
             return;
           }
 
+          // 仅保留当前模型所支持类型的默认设定
+          const defaultFor = (aiForm.defaultFor || []).filter(t => aiForm.modelTypes.includes(t));
+
           const modelData = {
             name: aiForm.name,
             providerType: aiForm.providerType,
@@ -6799,11 +6822,19 @@
             supportsVector: aiForm.modelTypes.includes('vector'),
             supportsImage: aiForm.modelTypes.includes('image'),
             useCase: aiForm.useCase,
-            isDefault: aiForm.isDefault,
+            defaultFor,
+            isDefault: defaultFor.includes('text'), // 兼容旧逻辑
           };
 
-          if (aiForm.isDefault) {
-            aiModels.value.forEach(m => m.isDefault = false);
+          // 每种类型仅允许一个默认模型：把当前模型声明的默认类型从其他模型上移除
+          if (defaultFor.length) {
+            aiModels.value.forEach(m => {
+              if (m.id === editingModelId.value) return;
+              if (Array.isArray(m.defaultFor) && m.defaultFor.length) {
+                m.defaultFor = m.defaultFor.filter(t => !defaultFor.includes(t));
+                m.isDefault = m.defaultFor.includes('text');
+              }
+            });
           }
 
           if (editingModelId.value) {
@@ -6959,6 +6990,7 @@
           
           // AI
           aiModels, addAiModelVisible, aiForm, presetModels, availableModels,
+          categoryGroups, targetWordOptions,
 
           // Fate Line
           fateVolumes, fateCurrentVolId, fateCurrentChId, fateCurrentVol, fateCurrentCh, fateVolWordCount, fateChWordCount,
@@ -6989,6 +7021,8 @@
           getProviderIcon, getBaseUrlPlaceholder, onProviderChange,
           openAddAiModel, editAiModel, saveAiModel, testAiModel, deleteAiModel,
           fetchingModels, fetchedModels, availableModels, fetchModelsFromApi,
+          modelsFetched, onModelDropdownToggle,
+          typeLabel, typeDefaultHolderName, isTypeDefaultHeldByOther, defaultHolders,
           addFateVolume, selectFateVol, addFateChapter, selectFateCh, removeFateChapter, saveFateVolumes, loadFateVolumes,
           
           // World Settings
