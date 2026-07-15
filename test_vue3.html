@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vue 3 Test</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <script src="https://unpkg.com/element-plus"></script>
+  <link rel="stylesheet" href="https://unpkg.com/element-plus/dist/index.css" />
+  <style>
+    body { margin: 0; padding: 20px; background: #f0f0f0; }
+    #app { border: 2px solid #000; padding: 20px; }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <h1>{{ message }}</h1>
+    <p>Current year: {{ currentYear }}</p>
+    <el-button @click="showMessage">Click me</el-button>
+    <el-dialog v-model="showDialog" title="Test">
+      <p>This is a test dialog</p>
+    </el-dialog>
+  </div>
+  
+  <script>
+    const { createApp, ref, onMounted } = Vue;
+    
+    const app = createApp({
+      setup() {
+        const message = ref('Hello Vue 3!');
+        const currentYear = ref(new Date().getFullYear());
+        const showDialog = ref(false);
+        
+        function showMessage() {
+          ElementPlus.ElMessage.success('Button clicked!');
+          showDialog.value = true;
+        }
+        
+        onMounted(() => {
+          console.log('App mounted successfully');
+        });
+        
+        return { message, currentYear, showDialog, showMessage };
+      }
+    });
+    
+    app.use(ElementPlus);
+    app.mount('#app');
+    console.log('App setup completed');
+  </script>
+</body>
+</html>

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Test Simple</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <script src="https://unpkg.com/element-plus"></script>
+  <link rel="stylesheet" href="https://unpkg.com/element-plus/dist/index.css" />
+  <link rel="stylesheet" href="https://unpkg.com/@fortawesome/fontawesome-free@6.2.0/css/all.min.css" />
+  <style>
+    body { background: #0a0a12; color: #e4e4ec; }
+    .home-wrap { min-height: 100%; }
+    .home-nav { padding: 20px; }
+    .hero-section { padding: 40px; text-align: center; }
+    .btn-primary { padding: 10px 20px; background: #8b5cf6; border: none; color: white; border-radius: 8px; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div v-if="view === 'home'" class="home-wrap">
+      <nav class="home-nav">
+        <div>not-book</div>
+        <div v-if="isLoggedIn">
+          <button class="btn-primary" @click="enterWorkshop()">AI 创作</button>
+        </div>
+        <div v-else>
+          <button @click="showLogin = true">登录</button>
+        </div>
+      </nav>
+      <div class="hero-section">
+        <h1>用 not-book 写出你的鸿篇巨制</h1>
+        <button class="btn-primary" @click="enterWorkshop()">开始 AI 创作</button>
+      </div>
+    </div>
+    
+    <el-dialog v-model="showLogin" title="登录">
+      <el-input v-model="loginForm.username" placeholder="用户名" />
+      <el-input v-model="loginForm.password" type="password" placeholder="密码" />
+    </el-dialog>
+  </div>
+  
+  <script>
+    const { createApp, ref, reactive } = Vue;
+    
+    const app = createApp({
+      setup() {
+        const view = ref('home');
+        const isLoggedIn = ref(false);
+        const showLogin = ref(false);
+        const loginForm = reactive({ username: '', password: '' });
+        
+        function enterWorkshop() {
+          view.value = 'workshop';
+        }
+        
+        return { view, isLoggedIn, showLogin, loginForm, enterWorkshop };
+      }
+    });
+    
+    app.use(ElementPlus);
+    app.mount('#app');
+    console.log('App mounted');
+  </script>
+</body>
+</html>

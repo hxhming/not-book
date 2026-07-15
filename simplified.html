@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>not-book - Simplified</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <script src="https://unpkg.com/element-plus"></script>
+  <link rel="stylesheet" href="https://unpkg.com/element-plus/dist/index.css" />
+  <link rel="stylesheet" href="https://unpkg.com/@fortawesome/fontawesome-free@6.2.0/css/all.min.css" />
+  <style>
+    body { margin: 0; padding: 0; background: #0a0a12; color: #e4e4ec; }
+    #app { min-height: 100vh; }
+    .home-wrap { padding: 20px; }
+    .home-nav { display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; }
+    .hero-section { text-align: center; padding: 50px 20px; }
+    .btn-primary { padding: 10px 20px; background: #8b5cf6; border: none; color: white; border-radius: 8px; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div v-if="view === 'home'" class="home-wrap">
+      <nav class="home-nav">
+        <div>not-book</div>
+        <button class="btn-primary" @click="enterWorkshop()">AI 创作</button>
+      </nav>
+      <div class="hero-section">
+        <h1>用 not-book 写出你的鸿篇巨制</h1>
+        <p>Current year: {{ currentYear }}</p>
+        <button class="btn-primary" @click="enterWorkshop()">开始 AI 创作</button>
+      </div>
+    </div>
+    
+    <div v-else-if="view === 'workshop'">
+      <h1>Workshop</h1>
+      <button @click="view = 'home'">Back to home</button>
+    </div>
+  </div>
+  
+  <script>
+    const { createApp, ref, onMounted } = Vue;
+    
+    const app = createApp({
+      setup() {
+        const view = ref('home');
+        const currentYear = ref(new Date().getFullYear());
+        
+        function enterWorkshop() {
+          view.value = 'workshop';
+        }
+        
+        onMounted(() => {
+          console.log('App mounted');
+        });
+        
+        return { view, currentYear, enterWorkshop };
+      }
+    });
+    
+    app.use(ElementPlus);
+    app.mount('#app');
+    console.log('App setup completed');
+  </script>
+</body>
+</html>

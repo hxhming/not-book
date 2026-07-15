@@ -2762,7 +2762,7 @@
                       </div>
                     </div>
                     <el-input 
-                      v-model="getWorldSettingContent(activeWorldCategory.id)" 
+                      v-model="activeWorldCategory.content" 
                       type="textarea" 
                       :rows="6"
                       placeholder="在这里记录该分组的总体设定..."
@@ -4001,8 +4001,9 @@
         const assistantAiCache = ref([]);
         
         const currentChapterContentWordCount = computed(() => {
-          if (!currentChapter.value) return 0;
-          return (currentChapter.value.content || '').length;
+          const chapter = chapters.value.find(c => c.id === currentChapterId.value);
+          if (!chapter) return 0;
+          return (chapter.content || '').length;
         });
         
         // ==================== Tool Calling System ====================
@@ -4447,7 +4448,7 @@
         });
         
         const sortedPlotlineNodes = computed(() => {
-          const pl = activePlotlineObj.value;
+          const pl = plotlines.value.find(p => p.id === activePlotline.value);
           if (!pl || !pl.nodes) return [];
           return [...pl.nodes].sort((a, b) => {
             const va = (a.volume || 0) * 1000 + (a.chapter || 0);
@@ -4555,8 +4556,9 @@
         });
         
         const filteredMemories = computed(() => {
-          if (!activeChar.value || !activeChar.value.memories) return [];
-          let mems = activeChar.value.memories || [];
+          const char = characters.value.find(c => c.id === activeCharacter.value);
+          if (!char || !char.memories) return [];
+          let mems = char.memories || [];
           if (memoryFilterVolume.value) {
             mems = mems.filter(m => m.volume === memoryFilterVolume.value);
           }
@@ -5167,15 +5169,22 @@
           worldCategories.value = loadNovelData('worldCategories', []);
           if (worldCategories.value.length === 0) {
             worldCategories.value = [
-              { id: 'geography', name: '地理环境', icon: 'mountain' },
-              { id: 'history', name: '历史背景', icon: 'scroll' },
-              { id: 'culture', name: '文化风俗', icon: 'music' },
-              { id: 'power', name: '力量体系', icon: 'zap' },
-              { id: 'politics', name: '政治势力', icon: 'crown' },
-              { id: 'economy', name: '经济体系', icon: 'coins' },
-              { id: 'religion', name: '宗教信仰', icon: 'pray' },
-              { id: 'tech', name: '科技水平', icon: 'flask' },
+              { id: 'geography', name: '地理环境', icon: 'fas fa-mountain', content: '', children: [], expanded: true },
+              { id: 'history', name: '历史背景', icon: 'fas fa-landmark', content: '', children: [], expanded: true },
+              { id: 'culture', name: '文化风俗', icon: 'fas fa-theater-masks', content: '', children: [], expanded: true },
+              { id: 'power', name: '力量体系', icon: 'fas fa-fire', content: '', children: [], expanded: true },
+              { id: 'politics', name: '政治势力', icon: 'fas fa-crown', content: '', children: [], expanded: true },
+              { id: 'economy', name: '经济体系', icon: 'fas fa-coins', content: '', children: [], expanded: true },
+              { id: 'religion', name: '宗教信仰', icon: 'fas fa-pray', content: '', children: [], expanded: true },
+              { id: 'technology', name: '科技水平', icon: 'fas fa-microchip', content: '', children: [], expanded: true },
             ];
+          } else {
+            worldCategories.value = worldCategories.value.map(cat => ({
+              ...cat,
+              content: cat.content || '',
+              children: cat.children || [],
+              expanded: cat.expanded !== undefined ? cat.expanded : true,
+            }));
           }
           worldSettings.value = loadNovelData('worldSettings', {});
           
@@ -6512,6 +6521,24 @@
           saveProfile, savePrefs, onThemeChange, applyTheme,
           getProviderIcon, getBaseUrlPlaceholder, onProviderChange,
           openAddAiModel, saveAiModel, testAiModel, deleteAiModel,
+          
+          // World Settings
+          worldSettings,
+          selectWorldCategory, toggleWorldGroup, addWorldGroup, addSubGroup,
+          findWorldCategory, deleteWorldCategory, removeWorldCategory,
+          addWorldItem, getWorldSettingContent, getWorldSettingItems, deleteWorldItem,
+          
+          // Perspectives
+          perspectives, activePerspective, activePerspectiveData,
+          addPerspective, selectPerspective, deletePerspective,
+          addTimelineEvent, removeTimelineEvent,
+          
+          // History
+          historyVersions, historyDialogVisible, saving,
+          manualSave, handleHistoryCommand, viewHistoryVersion, restoreHistoryVersion,
+          
+          // Storage
+          onStorageTypeChange,
         };
       }
     });
