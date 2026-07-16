@@ -965,17 +965,96 @@
     .el-scrollbar__view { min-height: 100% !important; }
     .el-select-dropdown__list { padding: 6px 0 !important; }
     .el-popper { z-index: 99999 !important; }
-    .el-select-dropdown__empty { display: none !important; }
     .el-scrollbar { height: auto !important; }
-    .el-scrollbar__bar.is-vertical { width: 6px !important; }
+    .el-scrollbar__bar.is-vertical { width: 6px !important; opacity: 1 !important; }
     .el-scrollbar__thumb { background: #2a2a3e !important; border-radius: 3px !important; }
+    .el-select-group__title {
+      color: #8b7dd8 !important;
+      font-size: 12px !important;
+      padding: 8px 12px 4px !important;
+      font-weight: 600 !important;
+    }
+    .el-select-group__wrap:not(:last-child)::after {
+      background: #1e1e30 !important;
+    }
     
+    /* Storage option buttons */
+    .storage-option {
+      transition: all 0.2s ease;
+    }
+    .storage-option:hover {
+      border-color: rgba(139, 92, 246, 0.4) !important;
+      background: rgba(139, 92, 246, 0.08) !important;
+    }
+    .storage-option.active {
+      border-color: #8b7dd8 !important;
+      background: rgba(139, 92, 246, 0.15) !important;
+      box-shadow: 0 0 0 1px #8b7dd8 inset !important;
+    }
+    .storage-option.active i {
+      color: #c4b5fd !important;
+    }
+    
+    /* Option button group for settings/dropdown replacement */
+    .option-button-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .option-button {
+      flex: 1 1 auto;
+      min-width: 80px;
+      padding: 8px 12px;
+      border: 1px solid #1e1e30;
+      border-radius: 8px;
+      background: rgba(14,14,24,0.6);
+      color: #a0a0b8;
+      font-size: 13px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      user-select: none;
+    }
+    .option-button:hover {
+      border-color: rgba(139, 92, 246, 0.4);
+      background: rgba(139, 92, 246, 0.08);
+    }
+    .option-button.active {
+      border-color: #8b7dd8;
+      background: rgba(139, 92, 246, 0.15);
+      color: #e4e4ec;
+      box-shadow: 0 0 0 1px #8b7dd8 inset;
+    }
+    .category-button-group {
+      max-height: 280px;
+      overflow-y: auto;
+      padding-right: 6px;
+    }
+    .model-button-group {
+      flex-wrap: nowrap !important;
+      overflow-x: auto;
+      max-width: 320px;
+      padding-bottom: 4px;
+    }
+    .model-button-group .option-button {
+      flex: 0 0 auto;
+      min-width: auto;
+      padding: 5px 10px;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
     /* Ensure dropdowns in dialogs also scroll */
     .el-dialog .el-select-dropdown,
     .el-dialog__wrapper .el-select-dropdown {
       z-index: 100000 !important;
       position: fixed !important;
-      max-height: 400px !important;
+      max-height: 500px !important;
+    }
+    .el-dialog .el-select-dropdown__wrap,
+    .el-dialog__wrapper .el-select-dropdown__wrap {
+      max-height: 500px !important;
+      overflow-y: auto !important;
     }
     
     /* Fix for dropdown height calculation */
@@ -2310,228 +2389,14 @@
                     <el-input v-model="novelInfoForm.title" />
                   </el-form-item>
                   <el-form-item label="作品分类">
-                    <el-select v-model="novelInfoForm.category" style="width:100%;" filterable>
-                      <el-option-group label="女频">
-                        <el-option label="古代言情" value="古代言情" />
-                        <el-option label="现代言情" value="现代言情" />
-                        <el-option label="幻想言情" value="幻想言情" />
-                        <el-option label="青春校园" value="青春校园" />
-                        <el-option label="仙侠奇缘" value="仙侠奇缘" />
-                        <el-option label="悬疑推理" value="悬疑推理" />
-                        <el-option label="玄幻言情" value="玄幻言情" />
-                        <el-option label="浪漫青春" value="浪漫青春" />
-                        <el-option label="豪门总裁" value="豪门总裁" />
-                        <el-option label="甜宠文" value="甜宠文" />
-                        <el-option label="快穿" value="快穿" />
-                        <el-option label="穿越重生" value="穿越重生" />
-                        <el-option label="系统文" value="系统文" />
-                        <el-option label="宫斗宅斗" value="宫斗宅斗" />
-                        <el-option label="种田文" value="种田文" />
-                        <el-option label="经商文" value="经商文" />
-                        <el-option label="悬疑灵异" value="悬疑灵异" />
-                        <el-option label="末世重生" value="末世重生" />
-                        <el-option label="星际科幻" value="星际科幻" />
-                        <el-option label="娱乐圈" value="娱乐圈" />
-                        <el-option label="体育竞技" value="体育竞技" />
-                        <el-option label="虐恋" value="虐恋" />
-                        <el-option label="萌宝" value="萌宝" />
-                        <el-option label="重生逆袭" value="重生逆袭" />
-                        <el-option label="军婚" value="军婚" />
-                        <el-option label="师徒恋" value="师徒恋" />
-                        <el-option label="青梅竹马" value="青梅竹马" />
-                        <el-option label="先婚后爱" value="先婚后爱" />
-                        <el-option label="日久生情" value="日久生情" />
-                        <el-option label="破镜重圆" value="破镜重圆" />
-                        <el-option label="暗恋成真" value="暗恋成真" />
-                        <el-option label="女尊" value="女尊" />
-                      </el-option-group>
-                      <el-option-group label="男频">
-                        <el-option label="玄幻奇幻" value="玄幻奇幻" />
-                        <el-option label="武侠仙侠" value="武侠仙侠" />
-                        <el-option label="都市异能" value="都市异能" />
-                        <el-option label="历史军事" value="历史军事" />
-                        <el-option label="科幻末世" value="科幻末世" />
-                        <el-option label="游戏竞技" value="游戏竞技" />
-                        <el-option label="悬疑侦探" value="悬疑侦探" />
-                        <el-option label="灵异鬼怪" value="灵异鬼怪" />
-                        <el-option label="都市重生" value="都市重生" />
-                        <el-option label="都市修真" value="都市修真" />
-                        <el-option label="都市系统" value="都市系统" />
-                        <el-option label="玄幻重生" value="玄幻重生" />
-                        <el-option label="玄幻系统" value="玄幻系统" />
-                        <el-option label="玄幻穿越" value="玄幻穿越" />
-                        <el-option label="仙侠重生" value="仙侠重生" />
-                        <el-option label="仙侠系统" value="仙侠系统" />
-                        <el-option label="仙侠穿越" value="仙侠穿越" />
-                        <el-option label="末世重生" value="末世重生" />
-                        <el-option label="末世系统" value="末世系统" />
-                        <el-option label="末世进化" value="末世进化" />
-                        <el-option label="科幻重生" value="科幻重生" />
-                        <el-option label="星际科幻" value="星际科幻" />
-                        <el-option label="星际穿越" value="星际穿越" />
-                        <el-option label="历史穿越" value="历史穿越" />
-                        <el-option label="历史争霸" value="历史争霸" />
-                        <el-option label="历史种田" value="历史种田" />
-                        <el-option label="军事战争" value="军事战争" />
-                        <el-option label="游戏重生" value="游戏重生" />
-                        <el-option label="游戏系统" value="游戏系统" />
-                        <el-option label="游戏竞技" value="游戏竞技" />
-                        <el-option label="网游" value="网游" />
-                        <el-option label="电竞" value="电竞" />
-                        <el-option label="悬疑惊悚" value="悬疑惊悚" />
-                        <el-option label="悬疑探险" value="悬疑探险" />
-                        <el-option label="灵异恐怖" value="灵异恐怖" />
-                        <el-option label="盗墓" value="盗墓" />
-                        <el-option label="无限流" value="无限流" />
-                        <el-option label="综漫" value="综漫" />
-                        <el-option label="诸天" value="诸天" />
-                        <el-option label="洪荒" value="洪荒" />
-                        <el-option label="封神" value="封神" />
-                        <el-option label="西游" value="西游" />
-                        <el-option label="三国" value="三国" />
-                        <el-option label="水浒" value="水浒" />
-                        <el-option label="海贼" value="海贼" />
-                        <el-option label="火影" value="火影" />
-                        <el-option label="死神" value="死神" />
-                        <el-option label="漫威" value="漫威" />
-                        <el-option label="DC" value="DC" />
-                        <el-option label="诸天流" value="诸天流" />
-                        <el-option label="综漫流" value="综漫流" />
-                        <el-option label="无敌流" value="无敌流" />
-                        <el-option label="轻松流" value="轻松流" />
-                        <el-option label="搞笑流" value="搞笑流" />
-                        <el-option label="智斗流" value="智斗流" />
-                        <el-option label="杀伐果断" value="杀伐果断" />
-                        <el-option label="凡人流" value="凡人流" />
-                        <el-option label="天才流" value="天才流" />
-                        <el-option label="废柴流" value="废柴流" />
-                        <el-option label="奶爸流" value="奶爸流" />
-                        <el-option label="赘婿" value="赘婿" />
-                        <el-option label="兵王" value="兵王" />
-                        <el-option label="神医" value="神医" />
-                        <el-option label="神豪" value="神豪" />
-                        <el-option label="鉴宝" value="鉴宝" />
-                        <el-option label="直播" value="直播" />
-                        <el-option label="娱乐圈" value="娱乐圈" />
-                        <el-option label="体育" value="体育" />
-                        <el-option label="足球" value="足球" />
-                        <el-option label="篮球" value="篮球" />
-                        <el-option label="网球" value="网球" />
-                        <el-option label="赛车" value="赛车" />
-                        <el-option label="钓鱼" value="钓鱼" />
-                      </el-option-group>
-                      <el-option-group label="其他">
-                        <el-option label="二次元" value="二次元" />
-                        <el-option label="轻小说" value="轻小说" />
-                        <el-option label="同人衍生" value="同人衍生" />
-                        <el-option label="现实题材" value="现实题材" />
-                        <el-option label="儿童文学" value="儿童文学" />
-                        <el-option label="文学名著" value="文学名著" />
-                        <el-option label="散文随笔" value="散文随笔" />
-                        <el-option label="诗歌词曲" value="诗歌词曲" />
-                        <el-option label="剧本" value="剧本" />
-                        <el-option label="传记" value="传记" />
-                        <el-option label="纪实文学" value="纪实文学" />
-                        <el-option label="网络文学" value="网络文学" />
-                        <el-option label="短篇故事" value="短篇故事" />
-                        <el-option label="长篇小说" value="长篇小说" />
-                        <el-option label="中篇小说" value="中篇小说" />
-                        <el-option label="短篇小说" value="短篇小说" />
-                        <el-option label="微小说" value="微小说" />
-                        <el-option label="童话" value="童话" />
-                        <el-option label="寓言" value="寓言" />
-                        <el-option label="神话" value="神话" />
-                        <el-option label="民间故事" value="民间故事" />
-                        <el-option label="武侠" value="武侠" />
-                        <el-option label="侦探" value="侦探" />
-                        <el-option label="推理" value="推理" />
-                        <el-option label="恐怖" value="恐怖" />
-                        <el-option label="惊悚" value="惊悚" />
-                        <el-option label="悬疑" value="悬疑" />
-                        <el-option label="科幻" value="科幻" />
-                        <el-option label="奇幻" value="奇幻" />
-                        <el-option label="玄幻" value="玄幻" />
-                        <el-option label="仙侠" value="仙侠" />
-                        <el-option label="修真" value="修真" />
-                        <el-option label="都市" value="都市" />
-                        <el-option label="历史" value="历史" />
-                        <el-option label="军事" value="军事" />
-                        <el-option label="游戏" value="游戏" />
-                        <el-option label="竞技" value="竞技" />
-                        <el-option label="体育" value="体育" />
-                        <el-option label="娱乐圈" value="娱乐圈" />
-                        <el-option label="职场" value="职场" />
-                        <el-option label="校园" value="校园" />
-                        <el-option label="婚恋" value="婚恋" />
-                        <el-option label="家庭" value="家庭" />
-                        <el-option label="情感" value="情感" />
-                        <el-option label="励志" value="励志" />
-                        <el-option label="成长" value="成长" />
-                        <el-option label="青春" value="青春" />
-                        <el-option label="怀旧" value="怀旧" />
-                        <el-option label="乡土" value="乡土" />
-                        <el-option label="西部" value="西部" />
-                        <el-option label="探险" value="探险" />
-                        <el-option label="冒险" value="冒险" />
-                        <el-option label="旅行" value="旅行" />
-                        <el-option label="美食" value="美食" />
-                        <el-option label="养生" value="养生" />
-                        <el-option label="宠物" value="宠物" />
-                        <el-option label="萌宠" value="萌宠" />
-                        <el-option label="动物" value="动物" />
-                        <el-option label="自然" value="自然" />
-                        <el-option label="环保" value="环保" />
-                        <el-option label="科技" value="科技" />
-                        <el-option label="互联网" value="互联网" />
-                        <el-option label="创业" value="创业" />
-                        <el-option label="商战" value="商战" />
-                        <el-option label="金融" value="金融" />
-                        <el-option label="财经" value="财经" />
-                        <el-option label="政治" value="政治" />
-                        <el-option label="法律" value="法律" />
-                        <el-option label="教育" value="教育" />
-                        <el-option label="医疗" value="医疗" />
-                        <el-option label="职场" value="职场" />
-                        <el-option label="官场" value="官场" />
-                        <el-option label="权谋" value="权谋" />
-                        <el-option label="宫斗" value="宫斗" />
-                        <el-option label="宅斗" value="宅斗" />
-                        <el-option label="江湖" value="江湖" />
-                        <el-option label="武侠" value="武侠" />
-                        <el-option label="仙侠" value="仙侠" />
-                        <el-option label="玄幻" value="玄幻" />
-                        <el-option label="奇幻" value="奇幻" />
-                        <el-option label="科幻" value="科幻" />
-                        <el-option label="末世" value="末世" />
-                        <el-option label="星际" value="星际" />
-                        <el-option label="未来" value="未来" />
-                        <el-option label="古代" value="古代" />
-                        <el-option label="现代" value="现代" />
-                        <el-option label="架空" value="架空" />
-                        <el-option label="重生" value="重生" />
-                        <el-option label="穿越" value="穿越" />
-                        <el-option label="重生穿越" value="重生穿越" />
-                        <el-option label="系统" value="系统" />
-                        <el-option label="快穿" value="快穿" />
-                        <el-option label="无限流" value="无限流" />
-                        <el-option label="诸天" value="诸天" />
-                        <el-option label="综漫" value="综漫" />
-                        <el-option label="同人" value="同人" />
-                        <el-option label="衍生" value="衍生" />
-                        <el-option label="原创" value="原创" />
-                        <el-option label="耽美" value="耽美" />
-                        <el-option label="百合" value="百合" />
-                        <el-option label="纯爱" value="纯爱" />
-                        <el-option label="无CP" value="无CP" />
-                        <el-option label="多CP" value="多CP" />
-                        <el-option label="单女主" value="单女主" />
-                        <el-option label="多女主" value="多女主" />
-                        <el-option label="单男主" value="单男主" />
-                        <el-option label="多男主" value="多男主" />
-                        <el-option label="双男主" value="双男主" />
-                        <el-option label="双女主" value="双女主" />
-                      </el-option-group>
-                    </el-select>
+                    <div>
+                      <div class="option-button-group" style="margin-bottom:10px;">
+                        <div v-for="g in Object.keys(categoryGroups)" :key="g" class="option-button" :class="{active: novelInfoForm.categoryGroup === g}" @click="novelInfoForm.categoryGroup = g">{{ g }}</div>
+                      </div>
+                      <div class="option-button-group category-button-group">
+                        <div v-for="c in categoryGroups[novelInfoForm.categoryGroup]" :key="c" class="option-button" :class="{active: novelInfoForm.category === c}" @click="novelInfoForm.category = c">{{ c }}</div>
+                      </div>
+                    </div>
                   </el-form-item>
                   <el-form-item label="一句话简介">
                     <el-input v-model="novelInfoForm.description" type="textarea" :rows="2" />
@@ -2540,37 +2405,9 @@
                     <el-input v-model="novelInfoForm.sellingPoint" type="textarea" :rows="3" placeholder="用一句话概括你的书最吸引人的地方..." />
                   </el-form-item>
                   <el-form-item label="目标字数">
-                    <el-select v-model="novelInfoForm.targetWords" style="width:100%;" allow-create filterable>
-                      <el-option label="1 万字（微型）" :value="10000" />
-                      <el-option label="2 万字（短篇）" :value="20000" />
-                      <el-option label="3 万字（短篇）" :value="30000" />
-                      <el-option label="5 万字（短篇）" :value="50000" />
-                      <el-option label="8 万字（短篇）" :value="80000" />
-                      <el-option label="10 万字（中篇）" :value="100000" />
-                      <el-option label="15 万字（中篇）" :value="150000" />
-                      <el-option label="20 万字（中篇）" :value="200000" />
-                      <el-option label="25 万字（中篇）" :value="250000" />
-                      <el-option label="30 万字（长篇）" :value="300000" />
-                      <el-option label="35 万字（长篇）" :value="350000" />
-                      <el-option label="40 万字（长篇）" :value="400000" />
-                      <el-option label="50 万字（长篇）" :value="500000" />
-                      <el-option label="60 万字（超长篇）" :value="600000" />
-                      <el-option label="70 万字（超长篇）" :value="700000" />
-                      <el-option label="80 万字（超长篇）" :value="800000" />
-                      <el-option label="90 万字（超长篇）" :value="900000" />
-                      <el-option label="100 万字（巨长篇）" :value="1000000" />
-                      <el-option label="120 万字（巨长篇）" :value="1200000" />
-                      <el-option label="150 万字（巨长篇）" :value="1500000" />
-                      <el-option label="180 万字（巨长篇）" :value="1800000" />
-                      <el-option label="200 万字（史诗级）" :value="2000000" />
-                      <el-option label="250 万字（史诗级）" :value="2500000" />
-                      <el-option label="300 万字（史诗级）" :value="3000000" />
-                      <el-option label="400 万字（超史诗）" :value="4000000" />
-                      <el-option label="500 万字（超史诗）" :value="5000000" />
-                      <el-option label="600 万字（超史诗）" :value="6000000" />
-                      <el-option label="800 万字（超史诗）" :value="8000000" />
-                      <el-option label="1000 万字（神话级）" :value="10000000" />
-                    </el-select>
+                    <div class="option-button-group category-button-group">
+                      <div v-for="v in targetWordOptions" :key="v" class="option-button" :class="{active: novelInfoForm.targetWords === v}" @click="novelInfoForm.targetWords = v">{{ targetWordLabel(v) }}</div>
+                    </div>
                   </el-form-item>
                   <el-form-item label="预计卷数">
                     <el-input-number v-model="novelInfoForm.volumes" :min="1" :max="20" />
@@ -2592,64 +2429,32 @@
             <div v-if="editorSection === 'synopsis'">
               <div class="ws-section-header">
                 <div class="ws-section-title"><i class="fas fa-scroll" style="margin-right:8px;color:#c4b5fd;"></i>故事大纲</div>
+                <div v-if="fateCurrentVol" style="display:flex;align-items:center;gap:8px;font-size:13px;color:#6b6b85;">
+                  <span>当前卷：</span>
+                  <span style="color:#c4b5fd;">{{ fateCurrentVol.title || '未命名卷' }}</span>
+                  <span style="margin-left:8px;">共 {{ (currentVol && currentVol.chapters) ? currentVol.chapters.length : 0 }} 章</span>
+                </div>
                 <div style="display:flex;gap:8px;">
-                  <span style="font-size:12px;color:#6b6b85;margin-top:4px;">当前卷：</span>
-                  <el-select v-model="fateCurrentVolId" size="small" style="width:150px;" @change="onSynopsisVolChange">
-                    <el-option v-for="vol in fateVolumes" :key="vol.id" :label="vol.title || '未命名卷'" :value="vol.id" />
-                  </el-select>
+                  <el-button size="small" type="primary" @click="saveSynopsis()">
+                    <i class="fas fa-save" style="margin-right:6px;"></i>保存
+                  </el-button>
+                  <el-button size="small" @click="aiGenSynopsisTitle()">
+                    <i class="fas fa-heading" style="margin-right:6px;"></i>AI 生成标题
+                  </el-button>
+                  <el-button size="small" @click="aiGenSynopsis()">
+                    <i class="fas fa-wand-magic-sparkles" style="margin-right:6px;"></i>AI 生成大纲
+                  </el-button>
+                  <el-button size="small" type="primary" @click="addChapterNode()">
+                    <i class="fas fa-plus" style="margin-right:4px;"></i>新增章节
+                  </el-button>
                 </div>
-                <el-button size="small" type="primary" @click="saveSynopsis()">
-                  <i class="fas fa-save" style="margin-right:6px;"></i>保存
-                </el-button>
-                <el-button size="small" @click="aiGenSynopsisTitle()">
-                  <i class="fas fa-heading" style="margin-right:6px;"></i>AI 生成标题
-                </el-button>
-                <el-button size="small" @click="aiGenSynopsis()">
-                  <i class="fas fa-wand-magic-sparkles" style="margin-right:6px;"></i>AI 生成大纲
-                </el-button>
               </div>
-              <div class="synopsis-layout">
-                <div class="synopsis-volumes">
-                  <div 
-                    v-for="(vol, idx) in synopsisVolumes" 
-                    :key="idx"
-                    class="synopsis-volume-item"
-                    :class="{active: activeSynopsisVol === idx}"
-                    @click="activeSynopsisVol = idx"
-                  >
-                    <div class="vol-num">第{{ idx + 1 }}卷</div>
-                    <div class="vol-title">{{ vol.title || '未命名' }}</div>
-                    <div class="vol-chapter-count">{{ (vol.chapters || []).length }} 章</div>
-                  </div>
-                  <div class="synopsis-volume-add" @click="addSynopsisVolume()">
-                    <i class="fas fa-plus"></i> 新增卷
-                  </div>
-                </div>
+              <div class="synopsis-layout" style="grid-template-columns:1fr;">
                 <div class="synopsis-detail">
-                  <div v-if="currentVol" style="height:100%;display:flex;flex-direction:column;">
-                    <el-input 
-                      v-model="currentVol.title" 
-                      placeholder="卷名，如：孤身赴边"
-                      size="large"
-                      style="margin-bottom:12px;flex-shrink:0;"
-                    ></el-input>
-                    <el-input 
-                      v-model="currentVol.summary" 
-                      type="textarea" 
-                      :rows="4"
-                      placeholder="本卷主要内容概述..."
-                      style="margin-bottom:16px;flex-shrink:0;"
-                    ></el-input>
+                  <div v-if="currentVol && fateCurrentVol" style="height:100%;display:flex;flex-direction:column;">
                     <div class="synopsis-sub-header" style="flex-shrink:0;">
-                      <span>章节列表</span>
-                      <div>
-                        <el-button size="small" @click="aiGenChapters()">
-                          <i class="fas fa-robot" style="margin-right:4px;"></i>AI 生成章节
-                        </el-button>
-                        <el-button size="small" type="primary" @click="addChapterNode()">
-                          <i class="fas fa-plus" style="margin-right:4px;"></i>新增章节
-                        </el-button>
-                      </div>
+                      <span><i class="fas fa-list" style="margin-right:6px;"></i>章节列表</span>
+                      <span style="font-size:12px;color:#6b6b85;">卷/章请在「命运线」中创建与管理</span>
                     </div>
                     <div class="chapter-outline-list" style="flex:1;overflow-y:auto;">
                       <div 
@@ -2659,10 +2464,13 @@
                       >
                         <div class="chapter-num">第{{ cidx + 1 }}章</div>
                         <div class="chapter-outline-content">
-                          <el-input v-model="ch.title" placeholder="章节标题" size="small" style="margin-bottom:6px;"></el-input>
-                          <el-input v-model="ch.summary" type="textarea" :rows="2" placeholder="本章内容摘要..." size="small"></el-input>
+                          <el-input v-model="ch.title" placeholder="章节标题" size="small" style="margin-bottom:6px;" @blur="syncChapterTitleFromSynopsis(cidx)"></el-input>
+                          <el-input v-model="ch.summary" type="textarea" :rows="3" placeholder="本章内容摘要..." size="small"></el-input>
                         </div>
                         <div class="chapter-outline-actions">
+                          <el-button size="small" type="primary" link @click="goToFateChapter(cidx)">
+                            <i class="fas fa-pen"></i>
+                          </el-button>
                           <el-button size="small" type="danger" link @click="removeChapterNode(cidx)">
                             <i class="fas fa-trash"></i>
                           </el-button>
@@ -2671,9 +2479,20 @@
                       <div v-if="!(currentVol.chapters || []).length" class="empty-state" style="padding:30px 20px;">
                         <i class="fas fa-file-alt" style="font-size:32px;margin-bottom:8px;"></i>
                         <div class="text">暂无章节</div>
-                        <div style="font-size:12px;color:#4a4a6a;margin-top:4px;">点击「新增章节」开始创建章节目录</div>
+                        <div style="font-size:12px;color:#4a4a6a;margin-top:4px;">请先在「命运线」中创建章节</div>
+                        <el-button size="small" type="primary" style="margin-top:12px;" @click="editorSection='fate-line'">
+                          <i class="fas fa-stream" style="margin-right:6px;"></i>前往命运线
+                        </el-button>
                       </div>
                     </div>
+                  </div>
+                  <div v-else style="text-align:center;padding:80px 20px;color:#4a4a6a;">
+                    <i class="fas fa-stream" style="font-size:42px;margin-bottom:12px;display:block;"></i>
+                    <div style="font-size:15px;margin-bottom:8px;">暂无卷</div>
+                    <div style="font-size:13px;margin-bottom:16px;">请先在「命运线」中创建卷，才能在这里编写故事大纲</div>
+                    <el-button type="primary" @click="editorSection='fate-line'">
+                      <i class="fas fa-stream" style="margin-right:6px;"></i>前往命运线
+                    </el-button>
                   </div>
                 </div>
               </div>
@@ -3378,9 +3197,13 @@
                   <el-checkbox v-model="editorUseDefaultAi" size="small" style="color:#6b6b85;">
                     默认AI总结
                   </el-checkbox>
-                  <el-select v-model="currentAiModel" size="small" style="width:140px;" placeholder="选择模型">
-                    <el-option v-for="m in aiModels" :key="m.id" :label="m.name" :value="m.id" />
-                  </el-select>
+                  <div style="display:flex;align-items:center;gap:6px;">
+                    <span style="font-size:12px;color:#6b6b85;">模型：</span>
+                    <div class="option-button-group model-button-group" v-if="aiModels.length > 0">
+                      <div v-for="m in aiModels" :key="m.id" class="option-button" :class="{active: currentAiModel === m.id}" @click="currentAiModel = m.id" :title="m.name">{{ m.name }}</div>
+                    </div>
+                    <span v-else style="font-size:12px;color:#6b6b85;">未配置模型</span>
+                  </div>
                   <el-button size="small" @click="saveChapter()"><i class="fas fa-save" style="margin-right:4px;"></i>保存</el-button>
                 </div>
               </div>
@@ -3499,9 +3322,10 @@
                       </div>
                       <div style="display:flex;gap:6px;align-items:center;">
                         <el-button size="small" @click="addChapter()"><i class="fas fa-plus" style="margin-right:4px;"></i>新章</el-button>
-                        <el-select v-model="currentAiModel" size="small" style="width:150px;">
-                          <el-option v-for="m in aiModels" :key="m.id" :label="m.name" :value="m.id" />
-                        </el-select>
+                        <div class="option-button-group model-button-group" v-if="aiModels.length > 0">
+                          <div v-for="m in aiModels" :key="m.id" class="option-button" :class="{active: currentAiModel === m.id}" @click="currentAiModel = m.id" :title="m.name">{{ m.name }}</div>
+                        </div>
+                        <span v-else style="font-size:12px;color:#6b6b85;">未配置模型</span>
                         <el-checkbox v-model="editorUseDefaultAi" size="small">
                           <span style="font-size:12px;">默认AI总结</span>
                         </el-checkbox>
@@ -3672,9 +3496,10 @@
                       style="min-height:60px;flex:1;"
                       @keydown.enter.exact="sendAi()"
                     ></textarea>
-                    <el-select v-model="currentAiModel" size="small" style="width:150px;margin-right:6px;" teleported>
-                      <el-option v-for="m in aiModels" :key="m.id" :label="m.name" :value="m.id" />
-                    </el-select>
+                    <div class="option-button-group model-button-group" v-if="aiModels.length > 0">
+                      <div v-for="m in aiModels" :key="m.id" class="option-button" :class="{active: currentAiModel === m.id}" @click="currentAiModel = m.id" :title="m.name">{{ m.name }}</div>
+                    </div>
+                    <span v-else style="font-size:12px;color:#6b6b85;margin-right:6px;">未配置模型</span>
                     <button class="ai-send-btn" @click="sendAi()" style="flex-shrink:0;">
                       <i class="fas fa-paper-plane"></i>
                     </button>
@@ -3734,6 +3559,9 @@
                 <div class="settings-menu-item" :class="{active: settingsTab==='tools'}" @click="settingsTab='tools'">
                   <i class="fas fa-tools"></i>工具调用
                 </div>
+                <div class="settings-menu-item" :class="{active: settingsTab==='cloud'}" @click="settingsTab='cloud'">
+                  <i class="fas fa-cloud"></i>云端同步
+                </div>
               </div>
               <div class="settings-content">
                 <!-- Profile -->
@@ -3765,27 +3593,33 @@
                   <div class="settings-subtitle">自定义编辑器和界面显示</div>
                   <el-form :model="prefsForm" label-width="100px" style="max-width:460px;">
                     <el-form-item label="主题">
-                      <el-select v-model="prefsForm.theme" style="width:100%;" @change="onThemeChange">
-                        <el-option label="深邃紫（默认深色）" value="dark" />
-                        <el-option label="纯白（浅色主题）" value="light" />
-                        <el-option label="纯黑（OLED 深色）" value="pure-black" />
-                      </el-select>
+                      <div class="option-button-group">
+                        <div class="option-button" :class="{active: prefsForm.theme === 'dark'}" @click="prefsForm.theme = 'dark'; onThemeChange('dark')">
+                          <i class="fas fa-moon" style="margin-right:4px;"></i>深邃紫（默认深色）
+                        </div>
+                        <div class="option-button" :class="{active: prefsForm.theme === 'light'}" @click="prefsForm.theme = 'light'; onThemeChange('light')">
+                          <i class="fas fa-sun" style="margin-right:4px;"></i>纯白（浅色主题）
+                        </div>
+                        <div class="option-button" :class="{active: prefsForm.theme === 'pure-black'}" @click="prefsForm.theme = 'pure-black'; onThemeChange('pure-black')">
+                          <i class="fas fa-circle" style="margin-right:4px;"></i>纯黑（OLED 深色）
+                        </div>
+                      </div>
                     </el-form-item>
                     <el-form-item label="编辑器字号">
-                      <el-select v-model="prefsForm.fontSize" style="width:100%;">
-                        <el-option label="小 (13px)" value="13px" />
-                        <el-option label="中 (15px)" value="15px" />
-                        <el-option label="大 (17px)" value="17px" />
-                      </el-select>
+                      <div class="option-button-group">
+                        <div class="option-button" :class="{active: prefsForm.fontSize === '13px'}" @click="prefsForm.fontSize = '13px'">小 (13px)</div>
+                        <div class="option-button" :class="{active: prefsForm.fontSize === '15px'}" @click="prefsForm.fontSize = '15px'">中 (15px)</div>
+                        <div class="option-button" :class="{active: prefsForm.fontSize === '17px'}" @click="prefsForm.fontSize = '17px'">大 (17px)</div>
+                      </div>
                     </el-form-item>
                     <el-form-item label="自动保存">
                       <el-switch v-model="prefsForm.autoSave" />
                     </el-form-item>
-                    <el-form-item label="存储方式">
-                      <el-select v-model="prefsForm.storageType" style="width:100%;" @change="onStorageTypeChange">
-                        <el-option label="本地存储（LocalStorage）" value="local" />
-                        <el-option label="云端存储（模拟）" value="cloud" />
-                      </el-select>
+                    <el-form-item label="平台存储">
+                      <div style="color:#a0a0b8;font-size:13px;">
+                        <i class="fas fa-cloud" style="margin-right:6px;color:#8b7dd8;"></i>
+                        平台设置、API 配置等所有账号级数据均自动同步到云端（配置云端同步后）。项目数据可在创建时选择本地或云端。
+                      </div>
                     </el-form-item>
                     <el-form-item label="显示 AI 助手">
                       <el-switch v-model="prefsForm.showAiAssistant" />
@@ -3902,6 +3736,36 @@
                     </div>
                   </div>
                 </div>
+                
+                <!-- Cloud Sync -->
+                <div v-if="settingsTab==='cloud'">
+                  <div class="settings-title">云端同步</div>
+                  <div class="settings-subtitle">配置云端存储服务。开启后，平台设置、API 配置、个人资料、任务等账号级数据会自动同步到云端，换设备登录可恢复。</div>
+                  <el-form :model="cloudConfig" label-width="100px" style="max-width:520px;">
+                    <el-form-item label="启用同步">
+                      <el-switch v-model="cloudConfig.enabled" />
+                    </el-form-item>
+                    <el-form-item label="服务地址">
+                      <el-input v-model="cloudConfig.endpoint" placeholder="例如：https://your-cloud-server.com/api" />
+                    </el-form-item>
+                    <el-form-item label="访问令牌">
+                      <el-input v-model="cloudConfig.token" type="password" placeholder="输入访问令牌 / Token" />
+                    </el-form-item>
+                    <el-form-item>
+                      <el-button type="primary" @click="testCloudConnection">测试连接</el-button>
+                      <el-button @click="saveCloudConfig">保存配置</el-button>
+                      <el-button v-if="cloudConfig.enabled && cloudConfig.endpoint && cloudConfig.token" @click="initCloudSync">立即同步</el-button>
+                    </el-form-item>
+                    <el-form-item label="说明">
+                      <div style="color:#4a4a6a;font-size:12px;line-height:1.6;">
+                        • 平台数据（设置、API、资料、任务等）默认通过本服务云端同步。<br>
+                        • 项目数据可在创建项目时选择「本地存储」或「云端存储」。<br>
+                        • 换设备登录时，只需配置相同的云端服务地址和令牌即可恢复数据。<br>
+                        • 请妥善保管访问令牌，不要分享给他人。
+                      </div>
+                    </el-form-item>
+                  </el-form>
+                </div>
               </div>
             </div>
           </div>
@@ -3975,224 +3839,44 @@
           <el-input v-model="novelForm.title" placeholder="请输入作品名称" />
         </el-form-item>
         <el-form-item label="分类">
-          <el-select v-model="novelForm.category" style="width:100%;" allow-create filterable default-first-option>
-            <el-option-group label="女频">
-              <el-option label="古代言情" value="古代言情" />
-              <el-option label="现代言情" value="现代言情" />
-              <el-option label="幻想言情" value="幻想言情" />
-              <el-option label="青春校园" value="青春校园" />
-              <el-option label="仙侠奇缘" value="仙侠奇缘" />
-              <el-option label="悬疑推理" value="悬疑推理" />
-              <el-option label="玄幻言情" value="玄幻言情" />
-              <el-option label="浪漫青春" value="浪漫青春" />
-              <el-option label="穿越重生" value="穿越重生" />
-              <el-option label="宫斗宅斗" value="宫斗宅斗" />
-              <el-option label="女尊天下" value="女尊天下" />
-              <el-option label="种田经商" value="种田经商" />
-              <el-option label="豪门总裁" value="豪门总裁" />
-              <el-option label="虐恋情深" value="虐恋情深" />
-              <el-option label="甜宠文" value="甜宠文" />
-              <el-option label="快穿" value="快穿" />
-              <el-option label="系统文" value="系统文" />
-              <el-option label="重生逆袭" value="重生逆袭" />
-              <el-option label="重生宠文" value="重生宠文" />
-              <el-option label="古言种田" value="古言种田" />
-              <el-option label="玄幻女强" value="玄幻女强" />
-              <el-option label="仙侠女强" value="仙侠女强" />
-              <el-option label="娱乐圈文" value="娱乐圈文" />
-              <el-option label="婚恋" value="婚恋" />
-              <el-option label="军婚" value="军婚" />
-              <el-option label="耽美" value="耽美" />
-              <el-option label="百合" value="百合" />
-              <el-option label="灵异言情" value="灵异言情" />
-              <el-option label="惊悚悬疑" value="惊悚悬疑" />
-              <el-option label="科幻言情" value="科幻言情" />
-              <el-option label="未来架空" value="未来架空" />
-            </el-option-group>
-            <el-option-group label="男频">
-              <el-option label="玄幻奇幻" value="玄幻奇幻" />
-              <el-option label="武侠仙侠" value="武侠仙侠" />
-              <el-option label="都市异能" value="都市异能" />
-              <el-option label="历史军事" value="历史军事" />
-              <el-option label="科幻末世" value="科幻末世" />
-              <el-option label="游戏竞技" value="游戏竞技" />
-              <el-option label="悬疑侦探" value="悬疑侦探" />
-              <el-option label="灵异鬼怪" value="灵异鬼怪" />
-              <el-option label="仙侠修真" value="仙侠修真" />
-              <el-option label="都市重生" value="都市重生" />
-              <el-option label="星际科幻" value="星际科幻" />
-              <el-option label="东方玄幻" value="东方玄幻" />
-              <el-option label="西方奇幻" value="西方奇幻" />
-              <el-option label="末世求生" value="末世求生" />
-              <el-option label="恐怖惊悚" value="恐怖惊悚" />
-              <el-option label="都市重生" value="都市重生" />
-              <el-option label="都市无敌" value="都市无敌" />
-              <el-option label="都市神医" value="都市神医" />
-              <el-option label="都市战神" value="都市战神" />
-              <el-option label="都市赘婿" value="都市赘婿" />
-              <el-option label="都市修仙" value="都市修仙" />
-              <el-option label="重生都市" value="重生都市" />
-              <el-option label="重生过去" value="重生过去" />
-              <el-option label="重生学霸" value="重生学霸" />
-              <el-option label="异界大陆" value="异界大陆" />
-              <el-option label="异界重生" value="异界重生" />
-              <el-option label="异界召唤" value="异界召唤" />
-              <el-option label="异界种田" value="异界种田" />
-              <el-option label="网游重生" value="网游重生" />
-              <el-option label="网游之神" value="网游之神" />
-              <el-option label="电竞" value="电竞" />
-              <el-option label="LOL" value="LOL" />
-              <el-option label="王者荣耀" value="王者荣耀" />
-              <el-option label="足球" value="足球" />
-              <el-option label="篮球" value="篮球" />
-              <el-option label="三国" value="三国" />
-              <el-option label="秦汉" value="秦汉" />
-              <el-option label="隋唐" value="隋唐" />
-              <el-option label="宋朝" value="宋朝" />
-              <el-option label="明朝" value="明朝" />
-              <el-option label="清朝" value="清朝" />
-              <el-option label="抗战" value="抗战" />
-              <el-option label="星际争霸" value="星际争霸" />
-              <el-option label="末世重生" value="末世重生" />
-              <el-option label="末日丧尸" value="末日丧尸" />
-              <el-option label="末日求生" value="末日求生" />
-              <el-option label="无限流" value="无限流" />
-              <el-option label="恐怖流" value="恐怖流" />
-              <el-option label="惊悚流" value="惊悚流" />
-              <el-option label="盗墓" value="盗墓" />
-              <el-option label="探险" value="探险" />
-              <el-option label="寻宝" value="寻宝" />
-              <el-option label="权谋" value="权谋" />
-              <el-option label="官场" value="官场" />
-              <el-option label="商战" value="商战" />
-              <el-option label="重生经商" value="重生经商" />
-              <el-option label="重生创业" value="重生创业" />
-              <el-option label="娱乐圈" value="娱乐圈" />
-              <el-option label="明星" value="明星" />
-              <el-option label="导演" value="导演" />
-              <el-option label="编剧" value="编剧" />
-              <el-option label="变身" value="变身" />
-              <el-option label="伪娘" value="伪娘" />
-              <el-option label="性转" value="性转" />
-              <el-option label="耽美" value="耽美" />
-              <el-option label="BL" value="BL" />
-              <el-option label="NP" value="NP" />
-              <el-option label="后宫" value="后宫" />
-              <el-option label="多女主" value="多女主" />
-              <el-option label="单女主" value="单女主" />
-              <el-option label="无女主" value="无女主" />
-            </el-option-group>
-            <el-option-group label="其他">
-              <el-option label="二次元" value="二次元" />
-              <el-option label="轻小说" value="轻小说" />
-              <el-option label="同人衍生" value="同人衍生" />
-              <el-option label="现实题材" value="现实题材" />
-              <el-option label="儿童文学" value="儿童文学" />
-              <el-option label="诗歌散文" value="诗歌散文" />
-              <el-option label="剧本影视" value="剧本影视" />
-              <el-option label="游戏小说" value="游戏小说" />
-              <el-option label="体育竞技" value="体育竞技" />
-              <el-option label="职场商战" value="职场商战" />
-              <el-option label="生活随笔" value="生活随笔" />
-              <el-option label="散文随笔" value="散文随笔" />
-              <el-option label="杂文评论" value="杂文评论" />
-              <el-option label="人物传记" value="人物传记" />
-              <el-option label="纪实文学" value="纪实文学" />
-              <el-option label="报告文学" value="报告文学" />
-              <el-option label="童话寓言" value="童话寓言" />
-              <el-option label="神话传说" value="神话传说" />
-              <el-option label="民间故事" value="民间故事" />
-              <el-option label="网络段子" value="网络段子" />
-              <el-option label="幽默搞笑" value="幽默搞笑" />
-              <el-option label="恐怖故事" value="恐怖故事" />
-              <el-option label="悬疑故事" value="悬疑故事" />
-              <el-option label="科幻故事" value="科幻故事" />
-              <el-option label="奇幻故事" value="奇幻故事" />
-              <el-option label="爱情故事" value="爱情故事" />
-              <el-option label="友情故事" value="友情故事" />
-              <el-option label="亲情故事" value="亲情故事" />
-              <el-option label="成长故事" value="成长故事" />
-              <el-option label="励志故事" value="励志故事" />
-              <el-option label="校园故事" value="校园故事" />
-              <el-option label="职场故事" value="职场故事" />
-              <el-option label="历史故事" value="历史故事" />
-              <el-option label="军事故事" value="军事故事" />
-              <el-option label="冒险故事" value="冒险故事" />
-              <el-option label="探险故事" value="探险故事" />
-              <el-option label="旅行故事" value="旅行故事" />
-              <el-option label="美食故事" value="美食故事" />
-              <el-option label="宠物故事" value="宠物故事" />
-              <el-option label="婚恋故事" value="婚恋故事" />
-              <el-option label="家庭故事" value="家庭故事" />
-              <el-option label="校园小说" value="校园小说" />
-              <el-option label="青春小说" value="青春小说" />
-              <el-option label="言情小说" value="言情小说" />
-              <el-option label="武侠小说" value="武侠小说" />
-              <el-option label="侦探小说" value="侦探小说" />
-              <el-option label="推理小说" value="推理小说" />
-              <el-option label="科幻小说" value="科幻小说" />
-              <el-option label="奇幻小说" value="奇幻小说" />
-              <el-option label="玄幻小说" value="玄幻小说" />
-              <el-option label="恐怖小说" value="恐怖小说" />
-              <el-option label="悬疑小说" value="悬疑小说" />
-              <el-option label="历史小说" value="历史小说" />
-              <el-option label="军事小说" value="军事小说" />
-              <el-option label="游戏小说" value="游戏小说" />
-              <el-option label="体育小说" value="体育小说" />
-              <el-option label="职场小说" value="职场小说" />
-              <el-option label="商战小说" value="商战小说" />
-              <el-option label="官场小说" value="官场小说" />
-              <el-option label="网络小说" value="网络小说" />
-              <el-option label="原创小说" value="原创小说" />
-              <el-option label="短篇" value="短篇" />
-              <el-option label="中篇" value="中篇" />
-              <el-option label="长篇" value="长篇" />
-              <el-option label="连载" value="连载" />
-              <el-option label="完结" value="完结" />
-            </el-option-group>
-          </el-select>
+          <div>
+            <div class="option-button-group" style="margin-bottom:10px;">
+              <div v-for="g in Object.keys(categoryGroups)" :key="g" class="option-button" :class="{active: novelForm.categoryGroup === g}" @click="novelForm.categoryGroup = g">{{ g }}</div>
+            </div>
+            <div class="option-button-group category-button-group">
+              <div v-for="c in categoryGroups[novelForm.categoryGroup]" :key="c" class="option-button" :class="{active: novelForm.category === c}" @click="novelForm.category = c">{{ c }}</div>
+            </div>
+          </div>
         </el-form-item>
         <el-form-item label="一句话简介">
           <el-input v-model="novelForm.description" type="textarea" :rows="3" placeholder="用一句话描述你的作品..." />
         </el-form-item>
         <el-form-item label="目标字数">
-          <el-select v-model="novelForm.targetWords" style="width:100%;" allow-create filterable default-first-option>
-            <el-option label="1 万字（微型）" :value="10000" />
-            <el-option label="2 万字（短篇）" :value="20000" />
-            <el-option label="3 万字（短篇）" :value="30000" />
-            <el-option label="5 万字（短篇）" :value="50000" />
-            <el-option label="8 万字（短篇）" :value="80000" />
-            <el-option label="10 万字（中篇）" :value="100000" />
-            <el-option label="15 万字（中篇）" :value="150000" />
-            <el-option label="20 万字（中篇）" :value="200000" />
-            <el-option label="25 万字（中篇）" :value="250000" />
-            <el-option label="30 万字（长篇）" :value="300000" />
-            <el-option label="35 万字（长篇）" :value="350000" />
-            <el-option label="40 万字（长篇）" :value="400000" />
-            <el-option label="50 万字（长篇）" :value="500000" />
-            <el-option label="60 万字（超长篇）" :value="600000" />
-            <el-option label="70 万字（超长篇）" :value="700000" />
-            <el-option label="80 万字（超长篇）" :value="800000" />
-            <el-option label="90 万字（超长篇）" :value="900000" />
-            <el-option label="100 万字（巨长篇）" :value="1000000" />
-            <el-option label="120 万字（巨长篇）" :value="1200000" />
-            <el-option label="150 万字（巨长篇）" :value="1500000" />
-            <el-option label="180 万字（巨长篇）" :value="1800000" />
-            <el-option label="200 万字（史诗级）" :value="2000000" />
-            <el-option label="250 万字（史诗级）" :value="2500000" />
-            <el-option label="300 万字（史诗级）" :value="3000000" />
-            <el-option label="400 万字（超史诗）" :value="4000000" />
-            <el-option label="500 万字（超史诗）" :value="5000000" />
-            <el-option label="600 万字（超史诗）" :value="6000000" />
-            <el-option label="800 万字（超史诗）" :value="8000000" />
-            <el-option label="1000 万字（神话级）" :value="10000000" />
-          </el-select>
+          <div class="option-button-group category-button-group">
+            <div v-for="v in targetWordOptions" :key="v" class="option-button" :class="{active: novelForm.targetWords === v}" @click="novelForm.targetWords = v">{{ targetWordLabel(v) }}</div>
+          </div>
         </el-form-item>
         <el-form-item label="存储位置">
-          <el-select v-model="novelForm.storageType" style="width:100%;">
-            <el-option label="本地存储" value="local" />
-            <el-option label="云端存储（开发中）" value="cloud" />
-          </el-select>
+          <div style="display:flex;gap:10px;">
+            <div
+              @click="novelForm.storageType = 'local'"
+              :class="['storage-option', novelForm.storageType === 'local' ? 'active' : '']"
+              style="flex:1;border:1px solid #1e1e30;border-radius:8px;padding:12px;cursor:pointer;text-align:center;background:rgba(14,14,24,0.6);"
+            >
+              <i class="fas fa-desktop" style="font-size:20px;margin-bottom:6px;display:block;color:#9ca3af;"></i>
+              <div style="font-size:14px;color:#e4e4ec;font-weight:500;">本地存储</div>
+              <div style="font-size:12px;color:#6b6b85;margin-top:4px;">仅保存在本设备</div>
+            </div>
+            <div
+              @click="novelForm.storageType = 'cloud'"
+              :class="['storage-option', novelForm.storageType === 'cloud' ? 'active' : '']"
+              style="flex:1;border:1px solid #1e1e30;border-radius:8px;padding:12px;cursor:pointer;text-align:center;background:rgba(14,14,24,0.6);"
+            >
+              <i class="fas fa-cloud" style="font-size:20px;margin-bottom:6px;display:block;color:#8b7dd8;"></i>
+              <div style="font-size:14px;color:#e4e4ec;font-weight:500;">云端存储</div>
+              <div style="font-size:12px;color:#6b6b85;margin-top:4px;">换设备登录可同步</div>
+            </div>
+          </div>
         </el-form-item>
       </el-form>
       <template #footer>
@@ -4208,17 +3892,9 @@
           <el-input v-model="aiForm.name" placeholder="给这个配置起个名字，如：我的 GPT-4o" />
         </el-form-item>
         <el-form-item label="模型提供商">
-          <el-select v-model="aiForm.providerType" style="width:100%;" @change="onProviderChange" teleported>
-            <el-option label="OpenAI (GPT 系列)" value="openai" />
-            <el-option label="Anthropic (Claude 系列)" value="anthropic" />
-            <el-option label="DeepSeek" value="deepseek" />
-            <el-option label="月之暗面 (Moonshot)" value="moonshot" />
-            <el-option label="百度文心一言" value="baidu" />
-            <el-option label="阿里通义千问" value="alibaba" />
-            <el-option label="腾讯混元" value="tencent" />
-            <el-option label="智谱 AI (GLM)" value="zhipu" />
-            <el-option label="自定义兼容 OpenAI 协议" value="custom" />
-          </el-select>
+          <div class="option-button-group category-button-group">
+            <div v-for="opt in providerTypeOptions" :key="opt.value" class="option-button" :class="{active: aiForm.providerType === opt.value}" @click="onProviderChange(opt.value)">{{ opt.label }}</div>
+          </div>
         </el-form-item>
         <el-form-item label="API 地址" :required="aiForm.providerType === 'custom'">
           <el-input v-model="aiForm.baseUrl" :placeholder="getBaseUrlPlaceholder()" />
@@ -4235,32 +3911,29 @@
           <el-input v-model="aiForm.apiKey" type="password" show-password placeholder="请输入 API Key" />
         </el-form-item>
         <el-form-item label="模型名称">
-          <div style="display:flex;gap:8px;">
-            <el-select v-model="aiForm.modelName" filterable allow-create style="width:100%;" teleported>
-              <el-option v-for="m in availableModels" :key="m.value" :label="m.label" :value="m.value" />
-            </el-select>
+          <div style="display:flex;gap:8px;margin-bottom:8px;">
+            <el-input v-model="aiForm.modelName" placeholder="请选择下方模型或手动输入模型名称" />
             <el-button size="small" @click="fetchModelsFromApi()" :loading="fetchingModels" title="从API获取模型列表">
               <i class="fas fa-rotate"></i>
             </el-button>
           </div>
+          <div class="option-button-group category-button-group" v-if="availableModels.length > 0">
+            <div v-for="m in availableModels" :key="m.value" class="option-button" :class="{active: aiForm.modelName === m.value}" @click="aiForm.modelName = m.value" :title="m.label">{{ m.label }}</div>
+          </div>
+          <div v-else style="font-size:12px;color:#6b6b85;">暂无可用模型，请手动输入或点击刷新从API获取</div>
           <div style="font-size:11px;color:#6b6b85;margin-top:4px;">
-            可从下拉列表选择、手动输入，或点击刷新按钮从API地址获取可用模型
+            可从上方按钮选择、手动输入，或点击刷新按钮从API地址获取可用模型
           </div>
         </el-form-item>
         <el-form-item label="模型类型">
-          <el-checkbox-group v-model="aiForm.modelTypes">
-            <el-checkbox value="text">文本生成</el-checkbox>
-            <el-checkbox value="vector">向量模型</el-checkbox>
-            <el-checkbox value="image">绘图模型</el-checkbox>
-          </el-checkbox-group>
+          <div class="option-button-group category-button-group">
+            <div v-for="opt in modelTypeOptions" :key="opt.value" class="option-button" :class="{active: aiForm.modelTypes.includes(opt.value)}" @click="aiForm.modelTypes = aiForm.modelTypes.includes(opt.value) ? aiForm.modelTypes.filter(t => t !== opt.value) : [...aiForm.modelTypes, opt.value]">{{ opt.label }}</div>
+          </div>
         </el-form-item>
         <el-form-item label="使用场景">
-          <el-select v-model="aiForm.useCase" style="width:100%;" teleported>
-            <el-option label="主力写作模型" value="primary" />
-            <el-option label="辅助写作" value="assistant" />
-            <el-option label="仅用于向量检索" value="vector_only" />
-            <el-option label="仅用于绘图" value="image_only" />
-          </el-select>
+          <div class="option-button-group category-button-group">
+            <div v-for="opt in useCaseOptions" :key="opt.value" class="option-button" :class="{active: aiForm.useCase === opt.value}" @click="aiForm.useCase = opt.value">{{ opt.label }}</div>
+          </div>
         </el-form-item>
         <el-form-item label="设为默认">
           <el-switch v-model="aiForm.isDefault" />
@@ -4525,6 +4198,160 @@
         const showLogin = ref(false);
         const loggingIn = ref(false);
         const loginForm = reactive({ username: '', password: '' });
+
+        // Cloud storage config & abstraction
+        const cloudConfig = reactive({
+          enabled: false,
+          endpoint: '',
+          token: '',
+        });
+        try {
+          const savedCloud = localStorage.getItem('nb_cloud_config');
+          if (savedCloud) {
+            const parsed = JSON.parse(savedCloud);
+            cloudConfig.enabled = parsed.enabled || false;
+            cloudConfig.endpoint = parsed.endpoint || '';
+            cloudConfig.token = parsed.token || '';
+          }
+        } catch (e) {}
+
+        async function syncToCloud(key, value) {
+          if (!cloudConfig.enabled || !cloudConfig.endpoint || !cloudConfig.token) return;
+          try {
+            const url = cloudConfig.endpoint.replace(/\/$/, '') + '/data/' + encodeURIComponent(key);
+            await fetch(url, {
+              method: 'POST',
+              headers: {
+                'Authorization': 'Bearer ' + cloudConfig.token,
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ value }),
+            });
+          } catch (err) {
+            console.warn('Cloud sync failed:', err);
+          }
+        }
+
+        async function syncFromCloud(key) {
+          if (!cloudConfig.enabled || !cloudConfig.endpoint || !cloudConfig.token) return null;
+          try {
+            const url = cloudConfig.endpoint.replace(/\/$/, '') + '/data/' + encodeURIComponent(key);
+            const res = await fetch(url, {
+              method: 'GET',
+              headers: {
+                'Authorization': 'Bearer ' + cloudConfig.token,
+              },
+            });
+            if (res.ok) {
+              const data = await res.json();
+              if (data && data.value !== undefined) {
+                // cloudStorage.set 已经将所有值序列化为字符串后上传，
+                // 因此云端返回的 value 应为可直接存入 localStorage 的字符串，避免二次 JSON.stringify
+                const storedValue = typeof data.value === 'string' ? data.value : JSON.stringify(data.value);
+                localStorage.setItem(key, storedValue);
+                return data.value;
+              }
+            }
+          } catch (err) {
+            console.warn('Cloud fetch failed:', err);
+          }
+          return null;
+        }
+
+        async function deleteFromCloud(key) {
+          if (!cloudConfig.enabled || !cloudConfig.endpoint || !cloudConfig.token) return;
+          try {
+            const url = cloudConfig.endpoint.replace(/\/$/, '') + '/data/' + encodeURIComponent(key);
+            await fetch(url, {
+              method: 'DELETE',
+              headers: {
+                'Authorization': 'Bearer ' + cloudConfig.token,
+              },
+            });
+          } catch (err) {
+            console.warn('Cloud delete failed:', err);
+          }
+        }
+
+        const cloudStorage = {
+          get(key) {
+            if (cloudConfig.enabled && cloudConfig.endpoint && cloudConfig.token) {
+              syncFromCloud(key); // async refresh in background
+            }
+            return localStorage.getItem(key);
+          },
+          set(key, value) {
+            const str = typeof value === 'string' ? value : JSON.stringify(value);
+            localStorage.setItem(key, str);
+            if (cloudConfig.enabled && cloudConfig.endpoint && cloudConfig.token) {
+              syncToCloud(key, value);
+            }
+          },
+          remove(key) {
+            localStorage.removeItem(key);
+            if (cloudConfig.enabled && cloudConfig.endpoint && cloudConfig.token) {
+              deleteFromCloud(key);
+            }
+          },
+        };
+
+        const PLATFORM_CLOUD_KEYS = ['nb_cloud_config', 'nb_aimodels', 'nb_profile', 'nb_prefs', 'nb_tasks', 'users'];
+
+        async function initCloudSync() {
+          if (!cloudConfig.enabled || !cloudConfig.endpoint || !cloudConfig.token) return;
+          ElementPlus.ElMessage.info('正在从云端同步平台数据...');
+          for (const key of PLATFORM_CLOUD_KEYS) {
+            try {
+              await syncFromCloud(key);
+            } catch (e) {}
+          }
+          // 重新读取云端配置（换设备登录场景）
+          try {
+            const refreshed = localStorage.getItem('nb_cloud_config');
+            if (refreshed) {
+              const parsed = JSON.parse(refreshed);
+              cloudConfig.enabled = parsed.enabled || false;
+              cloudConfig.endpoint = parsed.endpoint || '';
+              cloudConfig.token = parsed.token || '';
+            }
+          } catch (e) {}
+          ElementPlus.ElMessage.success('云端同步完成');
+        }
+
+        async function testCloudConnection() {
+          if (!cloudConfig.endpoint) {
+            ElementPlus.ElMessage.warning('请输入云端服务地址');
+            return;
+          }
+          ElementPlus.ElMessage.info('正在测试云端连接...');
+          try {
+            const url = cloudConfig.endpoint.replace(/\/$/, '') + '/data/__ping__';
+            const res = await fetch(url, {
+              method: 'POST',
+              headers: {
+                'Authorization': 'Bearer ' + (cloudConfig.token || ''),
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ value: 'ping' }),
+            });
+            if (res.ok) {
+              ElementPlus.ElMessage.success('云端连接测试成功');
+            } else {
+              ElementPlus.ElMessage.error('云端连接失败，状态码：' + res.status);
+            }
+          } catch (err) {
+            ElementPlus.ElMessage.error('连接失败：' + (err.message || '网络错误'));
+          }
+        }
+
+        function saveCloudConfig() {
+          cloudStorage.set('nb_cloud_config', {
+            enabled: cloudConfig.enabled,
+            endpoint: cloudConfig.endpoint,
+            token: cloudConfig.token,
+          });
+          ElementPlus.ElMessage.success('云端配置已保存并已同步到云端');
+        }
         
         // Workshop state
         const wsPage = ref('projects'); // projects | tasks | editor | settings
@@ -4552,6 +4379,45 @@
           const ch = fateCurrentCh.value;
           return ch && ch.content ? ch.content.length : 0;
         });
+
+        // Option groups for visible button selectors
+        const categoryGroups = {
+          '女频': ['古代言情','现代言情','幻想言情','青春校园','仙侠奇缘','悬疑推理','玄幻言情','浪漫青春','豪门总裁','甜宠文','快穿','穿越重生','系统文','宫斗宅斗','种田文','经商文','悬疑灵异','末世重生','星际科幻','娱乐圈','体育竞技','虐恋','萌宝','重生逆袭','军婚','师徒恋','青梅竹马','先婚后爱','日久生情','破镜重圆','暗恋成真','女尊'],
+          '男频': ['玄幻奇幻','武侠仙侠','都市异能','历史军事','科幻末世','游戏竞技','悬疑侦探','灵异鬼怪','都市重生','都市修真','都市系统','玄幻重生','玄幻系统','玄幻穿越','仙侠重生','仙侠系统','仙侠穿越','末世重生','末世系统','末世进化','科幻重生','星际科幻','星际穿越','历史穿越','历史争霸','历史种田','军事战争','游戏重生','游戏系统','网游','电竞','悬疑惊悚','悬疑探险','灵异恐怖','盗墓','无限流','综漫','诸天','洪荒','封神','西游','三国','水浒','海贼','火影','死神','漫威','DC','诸天流','综漫流','无敌流','轻松流','搞笑流','智斗流','杀伐果断','凡人流','天才流','废柴流','奶爸流','赘婿','兵王','神医','神豪','鉴宝','直播','娱乐圈','体育','足球','篮球','网球','赛车','钓鱼'],
+          '其他': ['二次元','轻小说','同人衍生','现实题材','儿童文学','文学名著','散文随笔','诗歌词曲','剧本','传记','纪实文学','网络文学','短篇故事','长篇小说','中篇小说','短篇小说','微小说','童话','寓言','神话','民间故事','武侠','侦探','推理','恐怖','惊悚','悬疑','科幻','奇幻','玄幻','仙侠','修真','都市','历史','军事','游戏','竞技','体育','娱乐圈','职场','校园','婚恋','家庭','情感','励志','成长','青春','怀旧','乡土','西部','探险','冒险','旅行','美食','养生','宠物','萌宠','动物','自然','环保','科技','互联网','创业','商战','金融','财经','政治','法律','教育','医疗','职场','官场','权谋','宫斗','宅斗','江湖','耽美','百合','纯爱','无CP','多CP','单女主','多女主','单男主','多男主','双男主','双女主','原创']
+        };
+        const categoryOptions = Object.entries(categoryGroups).flatMap(([group, items]) => items.map(v => ({ label: '[' + group + '] ' + v, value: v, group })));
+        const targetWordOptions = [10000, 20000, 30000, 50000, 80000, 100000, 150000, 200000, 250000, 300000, 350000, 400000, 500000, 600000, 700000, 800000, 900000, 1000000, 1200000, 1500000, 1800000, 2000000, 2500000, 3000000, 4000000, 5000000, 6000000, 8000000, 10000000];
+        const targetWordLabel = (v) => {
+          const map = { 10000:'1万字（微型）', 20000:'2万字（短篇）', 30000:'3万字（短篇）', 50000:'5万字（短篇）', 80000:'8万字（短篇）', 100000:'10万字（中篇）', 150000:'15万字（中篇）', 200000:'20万字（中篇）', 250000:'25万字（中篇）', 300000:'30万字（长篇）', 350000:'35万字（长篇）', 400000:'40万字（长篇）', 500000:'50万字（长篇）', 600000:'60万字（超长篇）', 700000:'70万字（超长篇）', 800000:'80万字（超长篇）', 900000:'90万字（超长篇）', 1000000:'100万字（巨长篇）', 1200000:'120万字（巨长篇）', 1500000:'150万字（巨长篇）', 1800000:'180万字（巨长篇）', 2000000:'200万字（史诗级）', 2500000:'250万字（史诗级）', 3000000:'300万字（史诗级）', 4000000:'400万字（超史诗）', 5000000:'500万字（超史诗）', 6000000:'600万字（超史诗）', 8000000:'800万字（超史诗）', 10000000:'1000万字（神话级）' };
+          return map[v] || (v + '字');
+        };
+        const providerTypeOptions = [
+          { label: 'OpenAI (GPT 系列)', value: 'openai' },
+          { label: 'Anthropic (Claude 系列)', value: 'anthropic' },
+          { label: 'DeepSeek', value: 'deepseek' },
+          { label: '月之暗面 (Moonshot)', value: 'moonshot' },
+          { label: '百度文心一言', value: 'baidu' },
+          { label: '阿里通义千问', value: 'alibaba' },
+          { label: '腾讯混元', value: 'tencent' },
+          { label: '智谱 AI (GLM)', value: 'zhipu' },
+          { label: '自定义兼容 OpenAI 协议', value: 'custom' },
+        ];
+        const useCaseOptions = [
+          { label: '主要创作模型', value: 'primary' },
+          { label: '辅助/备用模型', value: 'secondary' },
+          { label: '标题生成', value: 'title' },
+          { label: '大纲生成', value: 'synopsis' },
+          { label: '章节续写', value: 'continuation' },
+          { label: '润色/改写', value: 'polish' },
+          { label: '对话生成', value: 'dialogue' },
+          { label: '总结/分析', value: 'summary' },
+        ];
+        const modelTypeOptions = [
+          { label: '📝 文本生成', value: 'text' },
+          { label: '🔢 向量模型', value: 'vector' },
+          { label: '🎨 绘图模型', value: 'image' },
+        ];
         
         // Profile & prefs
         const profileForm = reactive({
@@ -4565,16 +4431,12 @@
           fontSize: '15px',
           autoSave: true,
           showAiAssistant: true,
-          storageType: 'local',
         });
         
         const selectedTool = ref(null);
         
         function onStorageTypeChange(val) {
-          if (val === 'cloud') {
-            ElementPlus.ElMessage.info('云端存储功能正在开发中，当前仍使用本地存储');
-            prefsForm.storageType = 'local';
-          }
+          // 平台存储统一云端同步，此处仅作兼容性保留
         }
         
         function getToolDef(name) {
@@ -4617,6 +4479,7 @@
         const novelForm = reactive({
           title: '',
           category: '古代言情',
+          categoryGroup: '女频',
           description: '',
           targetWords: 500000,
           storageType: 'local',
@@ -5036,6 +4899,7 @@
         const novelInfoForm = reactive({
           title: '',
           category: '',
+          categoryGroup: '女频',
           description: '',
           sellingPoint: '',
           targetWords: 500000,
@@ -5045,7 +4909,13 @@
         // Synopsis
         const synopsisVolumes = ref([]);
         const activeSynopsisVol = ref(0);
-        const currentVol = computed(() => synopsisVolumes.value[activeSynopsisVol.value]);
+        const currentVol = computed(() => {
+          const idx = fateVolumes.value.findIndex(v => v.id === fateCurrentVolId.value);
+          if (idx > -1 && idx < synopsisVolumes.value.length) {
+            return synopsisVolumes.value[idx];
+          }
+          return synopsisVolumes.value[activeSynopsisVol.value] || null;
+        });
         const synopsisTab = ref('volumes');
         const foreshadows = ref([]);
         const foreshadowFilter = ref('all');
@@ -5498,7 +5368,7 @@
         // Data loading
         function loadNovels() {
           try {
-            const data = localStorage.getItem('nb_novels');
+            const data = cloudStorage.get('nb_novels');
             if (data) return JSON.parse(data);
           } catch(e) {}
           return [
@@ -5524,12 +5394,12 @@
         }
         
         function saveNovels() {
-          localStorage.setItem('nb_novels', JSON.stringify(novels.value));
+          cloudStorage.set('nb_novels', novels.value);
         }
         
         function loadTasks() {
           try {
-            const data = localStorage.getItem('nb_tasks');
+            const data = cloudStorage.get('nb_tasks');
             if (data) return JSON.parse(data);
           } catch(e) {}
           return [
@@ -5541,24 +5411,24 @@
         }
         
         function saveTasksData() {
-          localStorage.setItem('nb_tasks', JSON.stringify(tasks.value));
+          cloudStorage.set('nb_tasks', tasks.value);
         }
         
         function loadAiModels() {
           try {
-            const data = localStorage.getItem('nb_aimodels');
+            const data = cloudStorage.get('nb_aimodels');
             if (data) return JSON.parse(data);
           } catch(e) {}
           return [];
         }
         
         function saveAiModels() {
-          localStorage.setItem('nb_aimodels', JSON.stringify(aiModels.value));
+          cloudStorage.set('nb_aimodels', aiModels.value);
         }
         
         function loadChapters(novelId) {
           try {
-            const data = localStorage.getItem('nb_chapters_' + novelId);
+            const data = cloudStorage.get('nb_chapters_' + novelId);
             if (data) return JSON.parse(data);
           } catch(e) {}
           return [
@@ -5571,20 +5441,20 @@
         
         function saveChaptersLocal() {
           if (currentNovel.value) {
-            localStorage.setItem('nb_chapters_' + currentNovel.value.id, JSON.stringify(chapters.value));
+            cloudStorage.set('nb_chapters_' + currentNovel.value.id, chapters.value);
           }
         }
         
         function saveNovelData(key, data) {
           if (currentNovel.value) {
-            localStorage.setItem('nb_' + key + '_' + currentNovel.value.id, JSON.stringify(data));
+            cloudStorage.set('nb_' + key + '_' + currentNovel.value.id, data);
           }
         }
         
         function loadNovelData(key, defaultValue) {
           if (!currentNovel.value) return defaultValue;
           try {
-            const data = localStorage.getItem('nb_' + key + '_' + currentNovel.value.id);
+            const data = cloudStorage.get('nb_' + key + '_' + currentNovel.value.id);
             if (data) return JSON.parse(data);
           } catch(e) {}
           return defaultValue;
@@ -5603,7 +5473,7 @@
         
         function loadUsers() {
           try {
-            const data = localStorage.getItem('users');
+            const data = cloudStorage.get('users');
             if (data) return JSON.parse(data);
           } catch(e) {}
           return [
@@ -5628,7 +5498,7 @@
           wsPage.value = 'projects';
         }
         
-        function handleLogin() {
+        async function handleLogin() {
           if (!loginForm.username.trim()) {
             ElementPlus.ElMessage.warning('请输入用户名');
             return;
@@ -5638,7 +5508,7 @@
             return;
           }
           loggingIn.value = true;
-          setTimeout(() => {
+          setTimeout(async () => {
             const users = loadUsers();
             const matched = users.find(u => u.username === loginForm.username && u.password === loginForm.password);
             if (matched) {
@@ -5658,6 +5528,12 @@
               profileForm.nickname = matched.username;
               localStorage.setItem('userLoggedIn', '1');
               localStorage.setItem('userUsername', matched.username);
+              // 登录成功后从云端拉取最新平台数据
+              await initCloudSync();
+              tasks.value = loadTasks();
+              aiModels.value = loadAiModels();
+              loadProfile();
+              loadPrefs();
               showLogin.value = false;
               view.value = 'workshop';
               wsPage.value = 'projects';
@@ -5703,6 +5579,7 @@
         function openCreateNovel() {
           novelForm.title = '';
           novelForm.category = '古代言情';
+          novelForm.categoryGroup = '女频';
           novelForm.description = '';
           novelForm.targetWords = 500000;
           createNovelVisible.value = true;
@@ -5761,6 +5638,7 @@
           
           novelInfoForm.title = novel.title;
           novelInfoForm.category = novel.category;
+          novelInfoForm.categoryGroup = categoryOptions.find(opt => opt.value === novel.category)?.group || '女频';
           novelInfoForm.description = novel.description;
           novelInfoForm.targetWords = novel.targetWords || 500000;
           
@@ -5866,7 +5744,7 @@
           worldSettings.value = loadNovelData('worldSettings', {});
           
           try {
-            const historyData = localStorage.getItem('nb_history_' + novel.id);
+            const historyData = cloudStorage.get('nb_history_' + novel.id);
             if (historyData) {
               historyVersions.value = JSON.parse(historyData);
             } else {
@@ -5919,7 +5797,7 @@
             if (historyVersions.value.length > 50) {
               historyVersions.value.pop();
             }
-            localStorage.setItem('nb_history_' + currentNovel.value.id, JSON.stringify(historyVersions.value));
+            cloudStorage.set('nb_history_' + currentNovel.value.id, historyVersions.value);
             autoSaveAll();
             saving.value = false;
             ElementPlus.ElMessage.success('已保存到历史记录');
@@ -5958,79 +5836,333 @@
         }
         
         function saveSynopsis() {
+          saveNovelData('synopsisVolumes', synopsisVolumes.value);
+          saveFateVolumes();
+          saveChaptersLocal();
           ElementPlus.ElMessage.success('大纲已保存');
         }
         
-        function getDefaultAiModel() {
-          const def = aiModels.value.find(m => m.isDefault);
+        function getDefaultAiModel(type = 'text') {
+          const typeKey = type === 'vector' ? 'supportsVector' : type === 'image' ? 'supportsImage' : 'supportsText';
+          const def = aiModels.value.find(m => m.isDefault && m[typeKey]);
           if (!def) {
+            const anyDef = aiModels.value.find(m => m.isDefault);
+            if (anyDef) return anyDef;
             ElementPlus.ElMessage.warning('未设置默认AI模型，请先在「设置-AI接入设置」中配置并设置默认模型');
             return null;
           }
           return def;
         }
 
-        function aiGenSynopsis() {
-          const model = getDefaultAiModel();
-          if (!model) return;
-          ElementPlus.ElMessage.info('正在使用默认模型 ' + model.name + ' 生成大纲...');
-          setTimeout(() => {
-            ElementPlus.ElMessage.success('大纲生成成功');
-          }, 1500);
+        function getCurrentAiModel() {
+          if (!currentAiModel.value) return getDefaultAiModel('text');
+          return aiModels.value.find(m => m.id === currentAiModel.value) || getDefaultAiModel('text');
         }
 
-        function aiGenSynopsisTitle() {
+        function getDefaultBaseUrl(providerType) {
+          const map = {
+            openai: 'https://api.openai.com/v1',
+            anthropic: 'https://api.anthropic.com',
+            deepseek: 'https://api.deepseek.com/v1',
+            moonshot: 'https://api.moonshot.cn/v1',
+            baidu: 'https://aip.baidubce.com/rpc/2.0/ai_custom/v1',
+            alibaba: 'https://dashscope.aliyuncs.com/compatible-mode/v1',
+            tencent: 'https://api.hunyuan.tencentcloudapi.com/v1',
+            zhipu: 'https://open.bigmodel.cn/api/paas/v4',
+          };
+          return map[providerType] || '';
+        }
+
+        async function callAiApi(model, messages, options = {}) {
+          if (!model) throw new Error('未选择 AI 模型');
+          if (!model.apiKey) throw new Error('模型未配置 API Key');
+          let baseUrl = model.baseUrl || getDefaultBaseUrl(model.providerType);
+          if (!baseUrl) throw new Error('模型未配置 API 地址');
+          if (!baseUrl.startsWith('http://') && !baseUrl.startsWith('https://')) throw new Error('API 地址格式错误');
+
+          const isAnthropic = model.providerType === 'anthropic';
+          const isBaidu = model.providerType === 'baidu';
+          const startTime = Date.now();
+
+          try {
+            if (isAnthropic) {
+              const systemMsg = messages.filter(m => m.role === 'system').map(m => m.content).join('\n');
+              const chatMessages = messages.filter(m => m.role !== 'system').map(m => ({ role: m.role, content: m.content }));
+              const url = baseUrl.replace(/\/$/, '') + '/v1/messages';
+              const body = {
+                model: model.modelName,
+                max_tokens: options.maxTokens || 4096,
+                messages: chatMessages,
+                system: systemMsg || undefined,
+              };
+              if (options.tools && options.tools.length > 0) {
+                body.tools = options.tools.map(t => ({ name: t.function.name, description: t.function.description, input_schema: t.function.parameters }));
+              }
+              const res = await fetch(url, {
+                method: 'POST',
+                headers: { 'x-api-key': model.apiKey, 'Content-Type': 'application/json', 'anthropic-version': '2023-06-01' },
+                body: JSON.stringify(body),
+              });
+              const latency = Date.now() - startTime;
+              if (!res.ok) {
+                const err = await res.json().catch(() => ({}));
+                throw new Error(`API 请求失败 (${res.status}, 延迟 ${latency}ms): ${err.error?.message || '未知错误'}`);
+              }
+              const data = await res.json();
+              return { data, latency, model: model.name };
+            }
+
+            // 默认 OpenAI 兼容格式（支持 DeepSeek / Moonshot / 阿里 / 腾讯 / 智谱 / 自定义）
+            const url = baseUrl.replace(/\/$/, '') + '/chat/completions';
+            const body = {
+              model: model.modelName,
+              messages: messages,
+              temperature: options.temperature ?? 0.7,
+              stream: false,
+            };
+            if (options.tools && options.tools.length > 0) {
+              body.tools = options.tools;
+              body.tool_choice = 'auto';
+            }
+            const res = await fetch(url, {
+              method: 'POST',
+              headers: { 'Authorization': 'Bearer ' + model.apiKey, 'Content-Type': 'application/json' },
+              body: JSON.stringify(body),
+            });
+            const latency = Date.now() - startTime;
+            if (!res.ok) {
+              const err = await res.json().catch(() => ({}));
+              throw new Error(`API 请求失败 (${res.status}, 延迟 ${latency}ms): ${err.error?.message || err.message || '未知错误'}`);
+            }
+            const data = await res.json();
+            return { data, latency, model: model.name };
+          } catch (err) {
+            throw err;
+          }
+        }
+
+        function extractAiText(response) {
+          if (!response || !response.data) return '';
+          const data = response.data;
+          if (data.content && Array.isArray(data.content)) {
+            // Anthropic format
+            return data.content.filter(c => c.type === 'text').map(c => c.text).join('\n');
+          }
+          if (data.choices && data.choices[0]) {
+            const choice = data.choices[0];
+            if (choice.message && choice.message.content) return choice.message.content;
+            if (choice.text) return choice.text;
+          }
+          return '';
+        }
+
+        function extractAiToolCalls(response) {
+          if (!response || !response.data) return [];
+          const data = response.data;
+          if (data.content && Array.isArray(data.content)) {
+            return data.content.filter(c => c.type === 'tool_use').map(c => ({ name: c.name, arguments: c.input }));
+          }
+          if (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.tool_calls) {
+            return data.choices[0].message.tool_calls.map(t => ({ name: t.function.name, arguments: JSON.parse(t.function.arguments || '{}') }));
+          }
+          return [];
+        }
+
+        async function aiGenSynopsis() {
+          const vol = currentVol.value;
+          if (!vol || !vol.chapters || vol.chapters.length === 0) {
+            ElementPlus.ElMessage.warning('当前卷没有章节，请先在命运线中创建章节');
+            return;
+          }
           const model = getDefaultAiModel();
           if (!model) return;
-          ElementPlus.ElMessage.info('正在使用默认模型 ' + model.name + ' 生成标题...');
-          setTimeout(() => {
-            const vol = synopsisVolumes.value[activeSynopsisVol.value];
-            if (vol) {
-              vol.title = '自动生成的卷名示例';
+
+          const thinking = [];
+          thinking.push({
+            content: `思考开始\n已选模型：${model.name}（${model.provider} · ${model.modelName}）\n是否调用 API：是\n调用目的：根据作品信息生成当前卷各章节的内容摘要`,
+            expanded: false
+          });
+
+          ElementPlus.ElMessage.info('正在调用默认模型生成章节大纲...');
+          const systemParts = [];
+          systemParts.push('你是一位专业的小说大纲助手。请根据用户提供的作品信息和当前卷已存在的章节目录，为每个已存在的章节生成一段简短的内容摘要。');
+          systemParts.push('要求：');
+          systemParts.push('1. 只输出每个章节的摘要，格式为：第N章：摘要内容');
+          systemParts.push('2. 不要新增章节，也不要删除章节。');
+          systemParts.push('3. 摘要控制在30-80字。');
+
+          const chapterList = vol.chapters.map((ch, idx) => `第${idx + 1}章：${ch.title || '未命名'}`).join('\n');
+          const novelTitle = currentNovel.value ? currentNovel.value.title : '';
+          const novelDesc = currentNovel.value ? currentNovel.value.description : '';
+          const messages = [
+            { role: 'system', content: systemParts.join('\n') },
+            { role: 'user', content: `作品名：${novelTitle}\n简介：${novelDesc}\n当前卷：${fateCurrentVol.value ? fateCurrentVol.value.title : ''}\n\n现有章节：\n${chapterList}\n\n请为以上每个章节生成内容摘要。` }
+          ];
+
+          thinking.push({ content: '正在调用 API 生成章节摘要...', expanded: false });
+
+          try {
+            const response = await callAiApi(model, messages, { temperature: 0.8, maxTokens: 2048 });
+            const text = extractAiText(response) || '';
+            thinking.push({
+              content: `API 调用完成\n模型：${response.model}\n延迟：${response.latency}ms\n返回字数：${text.length}字`,
+              expanded: false
+            });
+
+            // 解析返回文本并写入各章节摘要
+            const lines = text.split('\n').filter(l => l.trim());
+            let applied = 0;
+            for (const line of lines) {
+              const match = line.match(/^第\s*(\d+)\s*章[：:：]\s*(.+)$/);
+              if (match) {
+                const idx = parseInt(match[1], 10) - 1;
+                if (idx >= 0 && idx < vol.chapters.length) {
+                  vol.chapters[idx].summary = match[2].trim();
+                  applied++;
+                }
+              }
             }
-            ElementPlus.ElMessage.success('标题生成成功');
-          }, 1500);
+            saveNovelData('synopsisVolumes', synopsisVolumes.value);
+            ElementPlus.ElMessage.success(`已生成 ${applied} 个章节摘要`);
+          } catch (err) {
+            thinking.push({ content: `API 调用失败：${err.message}`, expanded: false });
+            ElementPlus.ElMessage.error('AI 生成失败：' + err.message);
+          }
         }
-        
+
+        async function aiGenSynopsisTitle() {
+          const vol = currentVol.value;
+          if (!vol || !vol.chapters || vol.chapters.length === 0) {
+            ElementPlus.ElMessage.warning('当前卷没有章节，请先在命运线中创建章节');
+            return;
+          }
+          const model = getDefaultAiModel();
+          if (!model) return;
+
+          const thinking = [];
+          thinking.push({
+            content: `思考开始\n已选模型：${model.name}（${model.provider} · ${model.modelName}）\n是否调用 API：是\n调用目的：根据作品内容为当前卷各章节生成章节标题`,
+            expanded: false
+          });
+
+          ElementPlus.ElMessage.info('正在调用默认模型生成章节标题...');
+          const systemParts = [];
+          systemParts.push('你是一位专业的小说标题助手。请根据用户提供的作品信息和当前卷已存在的章节占位符，为每个已存在的章节生成一个吸引人的章节标题。');
+          systemParts.push('要求：');
+          systemParts.push('1. 只输出每个章节的标题，格式为：第N章：标题');
+          systemParts.push('2. 不要新增章节，也不要删除章节。');
+          systemParts.push('3. 标题控制在8-20字。');
+
+          const chapterList = vol.chapters.map((ch, idx) => `第${idx + 1}章：${ch.summary || '（暂无摘要）'}`).join('\n');
+          const novelTitle = currentNovel.value ? currentNovel.value.title : '';
+          const novelDesc = currentNovel.value ? currentNovel.value.description : '';
+          const messages = [
+            { role: 'system', content: systemParts.join('\n') },
+            { role: 'user', content: `作品名：${novelTitle}\n简介：${novelDesc}\n当前卷：${fateCurrentVol.value ? fateCurrentVol.value.title : ''}\n\n现有章节摘要：\n${chapterList}\n\n请为以上每个章节生成标题。` }
+          ];
+
+          thinking.push({ content: '正在调用 API 生成章节标题...', expanded: false });
+
+          try {
+            const response = await callAiApi(model, messages, { temperature: 0.85, maxTokens: 1024 });
+            const text = extractAiText(response) || '';
+            thinking.push({
+              content: `API 调用完成\n模型：${response.model}\n延迟：${response.latency}ms\n返回字数：${text.length}字`,
+              expanded: false
+            });
+
+            const lines = text.split('\n').filter(l => l.trim());
+            let applied = 0;
+            for (const line of lines) {
+              const match = line.match(/^第\s*(\d+)\s*章[：:：]\s*(.+)$/);
+              if (match) {
+                const idx = parseInt(match[1], 10) - 1;
+                if (idx >= 0 && idx < vol.chapters.length) {
+                  const newTitle = match[2].trim();
+                  vol.chapters[idx].title = newTitle;
+                  syncChapterTitleFromSynopsis(idx);
+                  applied++;
+                }
+              }
+            }
+            saveNovelData('synopsisVolumes', synopsisVolumes.value);
+            ElementPlus.ElMessage.success(`已生成 ${applied} 个章节标题`);
+          } catch (err) {
+            thinking.push({ content: `API 调用失败：${err.message}`, expanded: false });
+            ElementPlus.ElMessage.error('AI 生成失败：' + err.message);
+          }
+        }
+
+        function syncChapterTitleFromSynopsis(cidx) {
+          const svIdx = fateVolumes.value.findIndex(v => v.id === fateCurrentVolId.value);
+          if (svIdx > -1 && svIdx < synopsisVolumes.value.length) {
+            const vol = synopsisVolumes.value[svIdx];
+            const fateVol = fateVolumes.value[svIdx];
+            if (vol && vol.chapters && fateVol && fateVol.chapterIds[cidx] !== undefined) {
+              const chId = fateVol.chapterIds[cidx];
+              const ch = chapters.value.find(c => c.id === chId);
+              if (ch && vol.chapters[cidx]) {
+                ch.title = vol.chapters[cidx].title;
+                saveChaptersLocal();
+              }
+            }
+          }
+        }
+
+        function goToFateChapter(cidx) {
+          const svIdx = fateVolumes.value.findIndex(v => v.id === fateCurrentVolId.value);
+          if (svIdx > -1 && fateVolumes.value[svIdx] && fateVolumes.value[svIdx].chapterIds[cidx] !== undefined) {
+            const chId = fateVolumes.value[svIdx].chapterIds[cidx];
+            selectFateCh(chId);
+            editorSection.value = 'editor';
+          }
+        }
+
         function addSynopsisVolume() {
           synopsisVolumes.value.push({ title: '', summary: '', plots: [], chapters: [] });
           activeSynopsisVol.value = synopsisVolumes.value.length - 1;
         }
-        
+
         function addChapterNode() {
-          const vol = synopsisVolumes.value[activeSynopsisVol.value];
-          if (!vol) return;
-          if (!vol.chapters) vol.chapters = [];
-          vol.chapters.push({ title: '', summary: '' });
+          // 章节统一在命运线创建
+          ElementPlus.ElMessage.info('请前往「命运线」创建章节');
+          editorSection.value = 'fate-line';
         }
-        
+
         function removeChapterNode(idx) {
-          const vol = synopsisVolumes.value[activeSynopsisVol.value];
-          if (vol && vol.chapters) {
-            vol.chapters.splice(idx, 1);
+          // 从故事大纲移除章节时同步移除命运线和章节数据
+          const svIdx = fateVolumes.value.findIndex(v => v.id === fateCurrentVolId.value);
+          if (svIdx > -1 && svIdx < synopsisVolumes.value.length) {
+            const vol = synopsisVolumes.value[svIdx];
+            if (vol && vol.chapters) {
+              const removedCh = vol.chapters[idx];
+              vol.chapters.splice(idx, 1);
+              const fateVol = fateVolumes.value[svIdx];
+              if (fateVol) {
+                const chId = fateVol.chapterIds[idx];
+                if (chId) {
+                  fateVol.chapterIds.splice(idx, 1);
+                  chapters.value = chapters.value.filter(c => c.id !== chId);
+                }
+              }
+              saveFateVolumes();
+              saveChaptersLocal();
+              saveNovelData('synopsisVolumes', synopsisVolumes.value);
+            }
           }
         }
-        
+
         function aiGenChapters() {
-          const vol = synopsisVolumes.value[activeSynopsisVol.value];
-          if (!vol) return;
-          ElementPlus.ElMessage.info('AI 正在生成章节...');
-          setTimeout(() => {
-            if (!vol.chapters) vol.chapters = [];
-            vol.chapters.push(
-              { title: '初入边关', summary: '女主初到边关，隐瞒身份加入戍边军' },
-              { title: '第一战', summary: '敌军来袭，女主临危受命，首战告捷' },
-              { title: '身份疑云', summary: '男主（质子）注意到女主的与众不同，开始试探' },
-            );
-            ElementPlus.ElMessage.success('AI 已生成章节大纲');
-          }, 1500);
+          // 章节创建已统一到命运线，此功能保留但引导用户去命运线
+          ElementPlus.ElMessage.info('创建章节请前往「命运线」');
+          editorSection.value = 'fate-line';
         }
 
         // Fate Line functions
         function loadFateVolumes() {
           if (!currentNovel.value) return;
           try {
-            const data = localStorage.getItem('nb_fate_' + currentNovel.value.id);
+            const data = cloudStorage.get('nb_fate_' + currentNovel.value.id);
             if (data) {
               const parsed = JSON.parse(data);
               fateVolumes.value = parsed.volumes || [];
@@ -6042,19 +6174,22 @@
 
         function saveFateVolumes() {
           if (!currentNovel.value) return;
-          localStorage.setItem('nb_fate_' + currentNovel.value.id, JSON.stringify({
+          cloudStorage.set('nb_fate_' + currentNovel.value.id, {
             volumes: fateVolumes.value,
             currentVolId: fateCurrentVolId.value,
             currentChId: fateCurrentChId.value,
-          }));
+          });
         }
 
         function addFateVolume() {
           const maxId = fateVolumes.value.length ? Math.max(...fateVolumes.value.map(v => v.id)) : 0;
           const newVol = { id: maxId + 1, title: '第' + (fateVolumes.value.length + 1) + '卷', chapterIds: [] };
           fateVolumes.value.push(newVol);
+          synopsisVolumes.value.push({ title: newVol.title, summary: '', plots: [], chapters: [] });
           fateCurrentVolId.value = newVol.id;
+          activeSynopsisVol.value = synopsisVolumes.value.length - 1;
           saveFateVolumes();
+          saveNovelData('synopsisVolumes', synopsisVolumes.value);
         }
 
         function selectFateVol(volId) {
@@ -6094,8 +6229,15 @@
           chapters.value.push(newCh);
           vol.chapterIds.push(newCh.id);
           fateCurrentChId.value = newCh.id;
+          // 同步到故事大纲对应卷的章节列表
+          const svIdx = fateVolumes.value.findIndex(v => v.id === vol.id);
+          if (svIdx > -1 && svIdx < synopsisVolumes.value.length) {
+            if (!synopsisVolumes.value[svIdx].chapters) synopsisVolumes.value[svIdx].chapters = [];
+            synopsisVolumes.value[svIdx].chapters.push({ title: newCh.title, summary: '' });
+          }
           saveFateVolumes();
           saveChaptersLocal();
+          saveNovelData('synopsisVolumes', synopsisVolumes.value);
         }
 
         function selectFateCh(chId) {
@@ -6594,18 +6736,9 @@
         }
         
         function addChapter() {
-          if (!currentNovel.value) return;
-          const maxId = chapters.value.length ? Math.max(...chapters.value.map(c => c.id)) : 0;
-          const newChapter = {
-            id: maxId + 1,
-            title: '第' + (chapters.value.length + 1) + '章 新章节',
-            content: '',
-            wordCount: 0,
-          };
-          chapters.value.push(newChapter);
-          currentChapterId.value = newChapter.id;
-          saveChaptersLocal();
-          ElementPlus.ElMessage.success('已创建新章节');
+          // 章节统一在命运线创建
+          ElementPlus.ElMessage.info('创建章节请前往「命运线」');
+          editorSection.value = 'fate-line';
         }
         
         function saveChapter() {
@@ -6691,51 +6824,118 @@
           return writeTools.includes(toolName);
         }
         
-        function processAiMessage(content) {
-          const detectedTools = detectToolIntent(content);
-          const allowedTools = detectedTools.filter(t => isToolAllowed(t.name));
-          const blockedTools = detectedTools.filter(t => !isToolAllowed(t.name));
+        async function processAiMessage(content) {
+          const model = getCurrentAiModel();
+          const thinking = [];
           
-          let toolResults = [];
-          allowedTools.forEach(tool => {
-            try {
-              const result = executeTool(tool.name, tool.args);
-              toolResults.push({ name: tool.name, result });
-            } catch(e) {
-              toolResults.push({ name: tool.name, result: { success: false, error: String(e) } });
-            }
-          });
-          
-          let replyContent = '';
-          
-          if (aiRole.value === 'ask') {
-            if (blockedTools.length > 0) {
-              replyContent += '<div style="background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.3);border-radius:6px;padding:8px 12px;margin-bottom:10px;font-size:13px;color:#93c5fd;">';
-              replyContent += '<i class="fas fa-lock" style="margin-right:4px;"></i>';
-              replyContent += '<strong>提示</strong>：当前是 Ask 模式，以下操作需要切换到 Agent 模式才能执行：';
-              blockedTools.forEach(t => {
-                replyContent += '<br/>• ' + t.name;
-              });
-              replyContent += '</div>';
-            }
-            
-            if (toolResults.length > 0) {
-              replyContent += formatQueryResults(toolResults);
-            } else {
-              replyContent += generateAskReply(content);
-            }
-          } else {
-            if (toolResults.length > 0) {
-              replyContent += formatQueryResults(toolResults);
-            }
-            replyContent += '<br/><br/>' + generateAgentReply(content);
+          if (!model) {
+            aiMessages.value.push({
+              role: 'ai',
+              thinking: [{ content: '未配置可用 AI 模型。请先在「设置-AI接入设置」中添加 API 并设置默认/当前模型。', expanded: false }],
+              content: '未配置可用 AI 模型，请先配置。'
+            });
+            nextTick(() => {
+              const msgs = document.querySelector('.ai-messages');
+              if (msgs) msgs.scrollTop = msgs.scrollHeight;
+            });
+            return;
           }
           
-          aiMessages.value.push({ 
-            role: 'ai', 
-            content: replyContent,
-            toolCalls: allowedTools.length > 0 ? allowedTools : null
+          thinking.push({
+            content: `思考开始\n已选模型：${model.name}（${model.provider} · ${model.modelName}）\n当前模式：${aiRole.value === 'ask' ? 'Ask（只读）' : 'Agent（读写）'}\n是否调用 API：是`,
+            expanded: false
           });
+          
+          // 构建系统提示词
+          const systemParts = [];
+          if (aiRole.value === 'ask') {
+            systemParts.push('你是 not-book 的 Ask 询问助手。你只能帮助用户查询和分析项目内容，不能创建或修改数据。');
+          } else {
+            systemParts.push('你是 not-book 的 Agent 执行助手。你可以帮助用户查询、分析和修改项目内容。');
+          }
+          systemParts.push('请用中文回复。如果用户请求查询信息，请尽量简洁准确。');
+          
+          const messages = [
+            { role: 'system', content: systemParts.join('\n') },
+            { role: 'user', content }
+          ];
+          
+          // 提供工具定义
+          let tools = [];
+          if (aiRole.value === 'agent') {
+            tools = toolDefinitions.value;
+          } else {
+            tools = toolDefinitions.value.filter(t => askReadOnlyTools.includes(t.function.name));
+          }
+          
+          thinking.push({ content: '正在调用 API 分析用户请求...', expanded: false });
+          
+          try {
+            const response = await callAiApi(model, messages, { temperature: 0.7, maxTokens: 4096, tools });
+            let replyText = extractAiText(response);
+            const toolCalls = extractAiToolCalls(response);
+            
+            thinking.push({
+              content: `API 调用完成\n模型：${response.model}\n延迟：${response.latency}ms\n返回工具调用：${toolCalls.length > 0 ? toolCalls.map(t => t.name).join('、') : '无'}`,
+              expanded: false
+            });
+            
+            // 执行工具调用
+            const toolResults = [];
+            if (toolCalls.length > 0) {
+              thinking.push({
+                content: '执行工具调用：\n' + toolCalls.map(t => `• ${t.name}`).join('\n'),
+                expanded: false
+              });
+              
+              for (const tc of toolCalls) {
+                if (!isToolAllowed(tc.name)) {
+                  toolResults.push({ name: tc.name, result: { success: false, error: '当前模式不允许执行此工具' } });
+                  continue;
+                }
+                try {
+                  const result = executeTool(tc.name, tc.arguments || {});
+                  toolResults.push({ name: tc.name, result });
+                } catch(e) {
+                  toolResults.push({ name: tc.name, result: { success: false, error: String(e) } });
+                }
+              }
+            }
+            
+            // 如果有工具结果，再次调用 API 生成最终回复
+            if (toolResults.length > 0) {
+              messages.push({ role: 'assistant', content: replyText || '' });
+              for (let i = 0; i < toolResults.length; i++) {
+                messages.push({ role: 'user', content: `工具 ${toolResults[i].name} 返回结果：\n${JSON.stringify(toolResults[i].result)}` });
+              }
+              messages.push({ role: 'user', content: '请根据以上工具返回结果，给用户一个完整的中文回复。' });
+              
+              thinking.push({ content: '工具执行完成，再次调用 API 生成最终回复...', expanded: false });
+              
+              const finalResponse = await callAiApi(model, messages, { temperature: 0.7, maxTokens: 4096 });
+              replyText = extractAiText(finalResponse);
+              
+              thinking.push({
+                content: `最终 API 调用完成\n模型：${finalResponse.model}\n延迟：${finalResponse.latency}ms`,
+                expanded: false
+              });
+            }
+            
+            aiMessages.value.push({
+              role: 'ai',
+              content: replyText || '（AI 未返回内容）',
+              thinking,
+              toolCalls: toolCalls.length > 0 ? toolCalls : null
+            });
+            
+          } catch (err) {
+            thinking.push({ content: `API 调用失败：${err.message}`, expanded: false });
+            aiMessages.value.push({
+              role: 'ai',
+              content: 'AI 调用失败：' + err.message,
+              thinking
+            });
+          }
           
           nextTick(() => {
             const msgs = document.querySelector('.ai-messages');
@@ -6743,49 +6943,46 @@
           });
         }
         
-        function sendAi() {
+        async function sendAi() {
           if (!aiInput.value.trim()) return;
           const content = aiInput.value;
           aiMessages.value.push({ role: 'user', content });
           aiInput.value = '';
           aiCallCount.value++;
           
-          setTimeout(() => {
-            // Agent 模式下且权限为 ask，检查是否有修改类工具
-            if (aiRole.value === 'agent' && agentPermission.value === 'ask') {
-              const detectedTools = detectToolIntent(content);
-              const writeToolCalls = detectedTools.filter(t => isWriteTool(t.name));
-              
-              if (writeToolCalls.length > 0) {
-                // 显示确认提示
-                const toolNames = writeToolCalls.map(t => t.name).join('、');
-                ElementPlus.ElMessageBox.confirm(
-                  `AI 即将执行以下修改操作：<br/><br/><strong>${toolNames}</strong><br/><br/>是否同意执行？`,
-                  '执行确认',
-                  {
-                    confirmButtonText: '同意执行',
-                    cancelButtonText: '取消',
-                    type: 'warning',
-                    dangerouslyUseHTMLString: true,
-                  }
-                ).then(() => {
-                  processAiMessage(content);
-                }).catch(() => {
-                  aiMessages.value.push({ 
-                    role: 'ai', 
-                    content: '<div style="color:#f59e0b;"><i class="fas fa-hand" style="margin-right:4px;"></i>已取消执行操作。您可以切换为「直接执行」模式来跳过确认。</div>' 
-                  });
-                  nextTick(() => {
-                    const msgs = document.querySelector('.ai-messages');
-                    if (msgs) msgs.scrollTop = msgs.scrollHeight;
-                  });
-                });
-                return;
-              }
-            }
+          // Agent 模式下且权限为 ask，检查是否有修改类工具
+          if (aiRole.value === 'agent' && agentPermission.value === 'ask') {
+            const detectedTools = detectToolIntent(content);
+            const writeToolCalls = detectedTools.filter(t => isWriteTool(t.name));
             
-            processAiMessage(content);
-          }, 500);
+            if (writeToolCalls.length > 0) {
+              const toolNames = writeToolCalls.map(t => t.name).join('、');
+              ElementPlus.ElMessageBox.confirm(
+                `AI 即将执行以下修改操作：<br/><br/><strong>${toolNames}</strong><br/><br/>是否同意执行？`,
+                '执行确认',
+                {
+                  confirmButtonText: '同意执行',
+                  cancelButtonText: '取消',
+                  type: 'warning',
+                  dangerouslyUseHTMLString: true,
+                }
+              ).then(() => {
+                processAiMessage(content);
+              }).catch(() => {
+                aiMessages.value.push({ 
+                  role: 'ai', 
+                  content: '<div style="color:#f59e0b;"><i class="fas fa-hand" style="margin-right:4px;"></i>已取消执行操作。您可以切换为「直接执行」模式来跳过确认。</div>' 
+                });
+                nextTick(() => {
+                  const msgs = document.querySelector('.ai-messages');
+                  if (msgs) msgs.scrollTop = msgs.scrollHeight;
+                });
+              });
+              return;
+            }
+          }
+          
+          await processAiMessage(content);
         }
         
         function formatQueryResults(results) {
@@ -6879,24 +7076,6 @@
           return html;
         }
         
-        function generateAskReply(content) {
-          const replies = [
-            '好的，关于你的问题，我来帮你梳理一下：<br/><br/>基于当前的创作资料，我觉得可以从这几个角度来思考：<br/>1. 先明确你想要达成的目标<br/>2. 结合已有的角色设定和世界观<br/>3. 考虑对后续剧情的影响<br/><br/>需要我帮你查询具体的设定信息吗？',
-            '这是一个很有意思的问题！<br/><br/>让我想想... 根据你目前的故事设定，有几个方向可以考虑：<br/><br/>• 从角色性格出发，看看人物会如何选择<br/>• 结合世界观设定，考虑背景环境的影响<br/>• 联系已有的伏笔和剧情线，保持前后呼应<br/><br/>你想先了解哪方面的信息？我可以帮你查询具体的设定。',
-            '收到！关于「' + content.slice(0, 20) + '...」这个问题：<br/><br/>我建议可以分步骤来：<br/>1. 先盘点一下已有的设定和素材<br/>2. 明确核心需求和目标<br/>3. 再进行具体的设计和规划<br/><br/>需要我先帮你查询一下相关的角色、世界观或大纲信息吗？',
-          ];
-          return replies[Math.floor(Math.random() * replies.length)];
-        }
-        
-        function generateAgentReply(content) {
-          const replies = [
-            '好的，我来帮你执行这个任务！<br/><br/>根据你的需求，我已经开始处理了。基于当前项目的设定，我会：<br/>1. 先分析现有数据和设定<br/>2. 制定具体的执行方案<br/>3. 逐步完成并展示结果<br/><br/>你希望我先从哪个部分开始呢？',
-            '没问题，交给我来处理！<br/><br/>我理解你想要实现的目标。为了更好地完成任务，我会：<br/>• 结合已有的角色和世界观<br/>• 保持故事风格的一致性<br/>• 确保与现有剧情线衔接顺畅<br/><br/>有什么具体的偏好或要求随时告诉我！',
-            '收到！马上开始执行 ✨<br/><br/>我已经明白了你的需求。在执行过程中，我会：<br/>• 充分利用现有的故事设定<br/>• 保持前后逻辑一致<br/>• 注重细节和质量<br/><br/>你可以随时打断我，调整方向或补充需求～',
-          ];
-          return replies[Math.floor(Math.random() * replies.length)];
-        }
-        
         function quickAi(type) {
           const map = {
             continue: '帮我续写接下来的内容，保持当前风格和节奏',
@@ -6914,7 +7093,7 @@
           editorInputMode.value = modes[(idx + 1) % modes.length];
         }
         
-        function sendEditorChat() {
+        async function sendEditorChat() {
           const prompt = editorPromptInput.value.trim();
           const novelContent = editorNovelInput.value.trim();
           if (!prompt && !novelContent) return;
@@ -6934,51 +7113,97 @@
             saveChaptersLocal();
           }
           
-          setTimeout(() => {
-            const thinking = [];
-            const summaries = [];
-            let content = '';
-            
-            // 思考阶段
+          const thinking = [];
+          const summaries = [];
+          
+          // 选择模型
+          let model;
+          if (editorUseDefaultAi.value) {
+            model = getDefaultAiModel('text');
+          } else {
+            model = getCurrentAiModel();
+          }
+          
+          if (!model) {
+            thinking.push({ content: '未配置可用 AI 模型。请先在「设置-AI接入设置」中添加 API 并设置默认/当前模型。', expanded: false });
+            editorChatMessages.value.push({ role: 'ai', thinking, content: '', summaries, generatedContent: '' });
+            return;
+          }
+          
+          thinking.push({
+            content: `思考开始\n已选模型：${model.name}（${model.provider} · ${model.modelName}）\n是否调用 API：是\n调用目的：根据用户输入续写小说正文`,
+            expanded: false
+          });
+          
+          // 构建系统提示词
+          const systemParts = [];
+          systemParts.push('你是一位专业的小说写作助手。请根据用户提供的提示词、已写入的小说内容和上下文设定，生成高质量的小说续写内容。');
+          systemParts.push('要求：');
+          systemParts.push('1. 直接输出小说正文，不要输出"以下是续写"等说明性文字。');
+          systemParts.push('2. 保持与已有内容风格一致，延续前文情节。');
+          systemParts.push('3. 如果用户提供了提示词，请遵循提示词要求。');
+          systemParts.push('4. 如果用户写入了小说内容，请接着该内容后面继续写，不要重复用户已写的内容。');
+          systemParts.push('5. 注意人物设定和世界观的一致性。');
+          
+          // 调用本地只读工具查询上下文
+          const toolCalls = [];
+          try {
+            const charResult = executeTool('list_characters', {});
+            if (charResult.success) {
+              toolCalls.push({ name: 'list_characters', args: {}, result: charResult });
+              systemParts.push('角色列表：' + charResult.data.map(c => c.name + '（' + c.role + '）').join('、'));
+            }
+          } catch(e) {}
+          try {
+            const worldResult = executeTool('get_world_setting', { category: 'all' });
+            if (worldResult.success) {
+              toolCalls.push({ name: 'get_world_setting', args: { category: 'all' }, result: worldResult });
+              const worldKeys = Object.keys(worldResult.data);
+              if (worldKeys.length > 0) systemParts.push('世界观分类：' + worldKeys.join('、'));
+            }
+          } catch(e) {}
+          try {
+            const foreResult = executeTool('get_foreshadows', { status: 'unresolved' });
+            if (foreResult.success) {
+              toolCalls.push({ name: 'get_foreshadows', args: { status: 'unresolved' }, result: foreResult });
+              if (foreResult.data.length > 0) systemParts.push('未回收伏笔：' + foreResult.data.slice(0, 5).map(f => f.title).join('、'));
+            }
+          } catch(e) {}
+          
+          if (toolCalls.length > 0) {
             thinking.push({
-              content: `用户${prompt ? '提供了提示词：' + prompt : '没有提供提示词'}，${novelContent ? '写入了小说内容：' + novelContent.slice(0, 50) + '...' : '没有写入小说内容'}。\n\n基于当前章节上下文和设定，我需要：\n1. 理解用户意图\n2. 查询相关角色和设定\n3. 保持前后文一致性\n4. 生成符合风格的续写内容`,
+              content: '调用本地工具查询上下文：\n' + toolCalls.map(t => `• ${t.name}`).join('\n'),
+              expanded: false
+            });
+          }
+          
+          const messages = [{ role: 'system', content: systemParts.join('\n') }];
+          
+          const chapterContext = currentChapter.value ? `当前章节：《${currentChapter.value.title}》\n已有内容：\n${currentChapter.value.content || '（无）'}` : '当前未选择章节';
+          const userContent = [];
+          if (prompt) userContent.push('提示词：' + prompt);
+          if (novelContent) userContent.push('用户写入的小说内容（请接着后面写，不要重复）：\n' + novelContent);
+          userContent.push(chapterContext);
+          userContent.push('请直接生成续写的小说正文。');
+          messages.push({ role: 'user', content: userContent.join('\n\n') });
+          
+          thinking.push({ content: '正在调用 API 生成小说正文...', expanded: false });
+          
+          try {
+            const response = await callAiApi(model, messages, { temperature: 0.8, maxTokens: 4096 });
+            const content = extractAiText(response) || '';
+            
+            thinking.push({
+              content: `API 调用完成\n模型：${response.model}\n延迟：${response.latency}ms\n生成字数：${content.length}字`,
               expanded: false
             });
             
-            // 模拟工具调用查询
-            const toolResults = [];
-            if (currentChapter.value) {
-              const chapterContent = currentChapter.value.content || '';
-              thinking.push({
-                content: `当前章节《${currentChapter.value.title}》已有 ${chapterContent.length} 字内容。\n\n查询相关角色信息...\n查询世界观设定...\n检查伏笔状态...`,
-                expanded: false
-              });
-              
-              // 执行只读工具查询
-              try {
-                const charResult = executeTool('list_characters', {});
-                if (charResult.success) toolResults.push(charResult);
-              } catch(e) {}
-            }
-            
-            // 生成正文内容（编辑器直接拥有所有权，直接执行）
-            if (novelContent) {
-              content = generateContinuation(novelContent, prompt);
-            } else if (prompt) {
-              content = generateFromPrompt(prompt);
-            }
-            
-            // 将生成的内容追加到章节
             if (content && currentChapter.value) {
               currentChapter.value.content = (currentChapter.value.content || '') + '\n\n' + content;
               saveChaptersLocal();
-            }
-            
-            // 生成总结
-            if (content) {
               summaries.push({
-                label: '写入 → ' + (currentChapter.value ? currentChapter.value.title : '未知章节'),
-                content: `已将 ${content.length} 字续写内容追加到当前章节。\n\n涉及角色：根据上下文\n伏笔状态：保持一致\n世界观：遵循设定`,
+                label: '写入 → ' + currentChapter.value.title,
+                content: `已将 ${content.length} 字续写内容追加到当前章节。`,
                 expanded: false
               });
             }
@@ -6991,19 +7216,28 @@
               generatedContent: content,
             });
             
-            // 记录缓存
             editorAiCache.value.unshift({
               chapterTitle: currentChapter.value ? currentChapter.value.title : '未知',
               timestamp: nowStr(),
               messageCount: 2,
               generatedWordCount: content ? content.length : 0,
             });
-            
-            nextTick(() => {
-              const container = document.querySelector('[style*="overflow-y:auto"][style*="padding:16px"]');
-              if (container) container.scrollTop = container.scrollHeight;
+          } catch (err) {
+            thinking.push({ content: `API 调用失败：${err.message}`, expanded: false });
+            editorChatMessages.value.push({
+              role: 'ai',
+              thinking,
+              content: '',
+              summaries,
+              generatedContent: '',
             });
-          }, 800);
+            ElementPlus.ElMessage.error('AI 生成失败：' + err.message);
+          }
+          
+          nextTick(() => {
+            const container = document.querySelector('[style*="overflow-y:auto"][style*="padding:16px"]');
+            if (container) container.scrollTop = container.scrollHeight;
+          });
         }
         
         function rollbackEditorChat(aiMsgIndex) {
@@ -7046,27 +7280,14 @@
           }).catch(() => {});
         }
         
-        function generateContinuation(novelContent, prompt) {
-          const continuations = [
-            '风吹过城头，带着砂砾的触感。沈砚握紧了手中的断剑，目光穿过硝烟，落在远处那面缓缓升起的旗帜上。\n\n"传令——"她的声音在风中显得格外清冽，"全军戒备，敌军还有半个时辰到达。"\n\n身后的士兵们虽然疲惫，但没有人退缩。这些在边关守了数月的老兵们，早已将生死置之度外。',
-            '夜色如墨，只有零星的火把在城头上摇曳。沈砚靠在女墙边，听着远处隐约传来的马蹄声，眉心微蹙。\n\n"校尉，"一个声音从身后传来，"探马来报，敌军前锋已过白狼河。"\n\n沈砚点了点头，指尖无意识地摩挲着剑柄上那道深深的裂纹。这是兄长留下的最后一柄剑，也是她唯一的念想。',
-            '大雾弥漫的清晨，什么都看不清。沈砚站在城门楼上，感受着湿冷的雾气裹挟着铁甲的寒意渗入骨髓。\n\n"今日的雾，来得蹊跷。"身旁的副将低声道。\n\n沈砚没有应声，只是默默地将手按在了剑柄上。在将门长大的她比任何人都清楚——这种天象，最适合奇袭。',
-          ];
-          return continuations[Math.floor(Math.random() * continuations.length)];
-        }
-        
-        function generateFromPrompt(prompt) {
-          return `根据提示词「${prompt.slice(0, 30)}...」，生成以下内容：\n\n大漠孤烟直，长河落日圆。\n\n沈砚策马行走在苍茫的戈壁上，夕阳将她的影子拉得很长。她已经在路上走了三天三夜，从雁门关出发，沿着边境线一路向西。\n\n"再走一天，就能到黑水城了。"她低声自语，声音被北风吹散。\n\n身后，一支百人小队紧紧跟随，每个人的脸上都带着风霜的痕迹。`;
-        }
-        
         function clearAllAiCache() {
           ElementPlus.ElMessageBox.confirm('确定要清空所有 AI 缓存吗？', '提示', {
             type: 'warning',
           }).then(() => {
             editorAiCache.value = [];
             assistantAiCache.value = [];
-            localStorage.removeItem('nb_editorAiCache');
-            localStorage.removeItem('nb_assistantAiCache');
+            cloudStorage.remove('nb_editorAiCache');
+            cloudStorage.remove('nb_assistantAiCache');
             ElementPlus.ElMessage.success('缓存已清空');
           }).catch(() => {});
         }
@@ -7139,12 +7360,38 @@
         }
         
         // Settings
+        function loadProfile() {
+          try {
+            const data = cloudStorage.get('nb_profile');
+            if (data) Object.assign(profileForm, JSON.parse(data));
+          } catch (e) {}
+        }
+
         function saveProfile() {
-          ElementPlus.ElMessage.success('个人资料已保存');
+          cloudStorage.set('nb_profile', {
+            username: profileForm.username,
+            nickname: profileForm.nickname,
+            email: profileForm.email,
+            bio: profileForm.bio,
+          });
+          ElementPlus.ElMessage.success('个人资料已保存并已同步');
+        }
+
+        function loadPrefs() {
+          try {
+            const data = cloudStorage.get('nb_prefs');
+            if (data) Object.assign(prefsForm, JSON.parse(data));
+          } catch (e) {}
         }
         
         function savePrefs() {
-          ElementPlus.ElMessage.success('偏好设置已保存');
+          cloudStorage.set('nb_prefs', {
+            theme: prefsForm.theme,
+            fontSize: prefsForm.fontSize,
+            autoSave: prefsForm.autoSave,
+            showAiAssistant: prefsForm.showAiAssistant,
+          });
+          ElementPlus.ElMessage.success('偏好设置已保存并已同步');
         }
         
         // AI Models
@@ -7408,10 +7655,15 @@
         }
         
         // Init
-        onMounted(() => {
+        onMounted(async () => {
+          // 先尝试从云端同步平台数据（如果已配置云端）
+          await initCloudSync();
+
           novels.value = loadNovels();
           tasks.value = loadTasks();
           aiModels.value = loadAiModels();
+          loadProfile();
+          loadPrefs();
           
           if (localStorage.getItem('userLoggedIn') === '1') {
             isLoggedIn.value = true;
@@ -7484,6 +7736,10 @@
         }, { deep: true });
         
         return {
+          // Option lists
+          categoryGroups, categoryOptions, targetWordOptions, targetWordLabel,
+          providerTypeOptions, useCaseOptions, modelTypeOptions,
+
           // View
           view, isLoggedIn, username, showLogin, loggingIn, loginForm,
           currentYear, wsPage, editorSection, settingsTab,
@@ -7536,6 +7792,7 @@
           saveNovelInfo, saveSynopsis, aiGenSynopsis, aiGenSynopsisTitle, getDefaultAiModel,
           addSynopsisVolume, addPlotNode, removePlotNode,
           addChapterNode, removeChapterNode, aiGenChapters,
+          syncChapterTitleFromSynopsis, goToFateChapter,
           openAddForeshadow, saveForeshadow, removeForeshadow, toggleForeshadowStatus, aiGenForeshadows,
           openAddPlotline, savePlotline, openAddPlotNode, savePlotNode, removePlotlineNode, aiGenPlotlineNodes,
           openAddCharacter,
@@ -7572,6 +7829,8 @@
           
           // Storage
           onStorageTypeChange,
+          cloudConfig, initCloudSync, testCloudConnection, saveCloudConfig,
+          loadProfile, loadPrefs,
         };
       }
     });
