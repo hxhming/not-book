@@ -2189,7 +2189,7 @@
       <!-- Main -->
       <main class="ws-main">
         <div class="ws-topbar">
-          <div v-if="currentNovel" style="display:flex;align-items:center;gap:8px;margin-right:20px;">
+          <div v-if="currentNovel && wsPage === 'editor'" style="display:flex;align-items:center;gap:8px;margin-right:20px;">
             <el-button size="small" @click="manualSave()" :loading="saving">
               <i class="fas fa-save" style="margin-right:4px;"></i>保存
             </el-button>
@@ -2265,11 +2265,20 @@
                 <div class="project-new-icon"><i class="fas fa-plus"></i></div>
                 <div class="project-new-text">创建新项目</div>
               </div>
+              <div class="project-new-card" @click="triggerImportProject()" style="border-style:dashed;">
+                <div class="project-new-icon"><i class="fas fa-file-import"></i></div>
+                <div class="project-new-text">导入项目</div>
+              </div>
+              <input type="file" ref="importFileInput" style="display:none;" accept=".json" @change="importProject($event)" />
               <div 
                 v-for="novel in novels" 
                 :key="novel.id" 
                 class="project-card"
                 @click="openNovel(novel)"
+                @contextmenu.prevent="showProjectContextMenu($event, novel)"
+                @touchstart="startLongPress($event, novel)"
+                @touchend="cancelLongPress()"
+                @touchmove="cancelLongPress()"
               >
                 <span class="project-tag">{{ novel.category }}</span>
                 <div class="project-name">{{ novel.title }}</div>
@@ -3809,6 +3818,19 @@
       </div>
     </el-dialog>
     
+    <!-- Project Context Menu -->
+    <div v-if="projectContextMenu.visible" 
+         :style="{position:'fixed',left:projectContextMenu.x+'px',top:projectContextMenu.y+'px',zIndex:99999}"
+         @click.stop
+         style="background:#12121f;border:1px solid #1e1e30;border-radius:8px;padding:4px 0;box-shadow:0 8px 32px rgba(0,0,0,0.5);min-width:160px;">
+      <div @click="exportProject(projectContextMenu.novel); projectContextMenu.visible = false" style="padding:8px 16px;cursor:pointer;color:#e4e4ec;font-size:13px;display:flex;align-items:center;gap:8px;" @mouseenter="$event.target.style.background='rgba(139,92,246,0.1)'" @mouseleave="$event.target.style.background='none'">
+        <i class="fas fa-file-export"></i> 导出项目
+      </div>
+      <div @click="deleteProjectWithConfirm(projectContextMenu.novel); projectContextMenu.visible = false" style="padding:8px 16px;cursor:pointer;color:#ef4444;font-size:13px;display:flex;align-items:center;gap:8px;" @mouseenter="$event.target.style.background='rgba(239,68,68,0.1)'" @mouseleave="$event.target.style.background='none'">
+        <i class="fas fa-trash"></i> 删除项目
+      </div>
+    </div>
+    
     <!-- History Dialog -->
     <el-dialog v-model="historyDialogVisible" title="历史版本回溯" width="700px">
       <div v-if="historyVersions.length === 0" class="empty-state">
@@ -3840,8 +3862,32 @@
     </el-dialog>
     
     <!-- Create Novel Dialog -->
-    <el-dialog v-model="createNovelVisible" title="创建小说项目" width="500px" append-to-body>
-      <el-form :model="novelForm" label-width="100px">
+    <el-dialog v-model="createNovelVisible" title="创建小说项目" width="540px" append-to-body>
+      <!-- 创建方式选择 -->
+      <div v-if="!novelForm.createMode" style="display:flex;gap:16px;margin-bottom:20px;">
+        <div
+          @click="selectCreateMode('manual')"
+          style="flex:1;border:2px solid #1e1e30;border-radius:12px;padding:24px;cursor:pointer;text-align:center;background:rgba(14,14,24,0.6);transition:all 0.2s;"
+          @mouseenter="$event.target.style.borderColor='#8b7dd8'"
+          @mouseleave="$event.target.style.borderColor='#1e1e30'"
+        >
+          <i class="fas fa-pen-fancy" style="font-size:32px;margin-bottom:12px;display:block;color:#c4b5fd;"></i>
+          <div style="font-size:16px;color:#e4e4ec;font-weight:600;margin-bottom:6px;">手动创建</div>
+          <div style="font-size:12px;color:#6b6b85;line-height:1.6;">空白项目，从零开始<br/>自行填写所有内容</div>
+        </div>
+        <div
+          @click="selectCreateMode('ai')"
+          style="flex:1;border:2px solid #1e1e30;border-radius:12px;padding:24px;cursor:pointer;text-align:center;background:rgba(14,14,24,0.6);transition:all 0.2s;"
+          @mouseenter="$event.target.style.borderColor='#8b7dd8'"
+          @mouseleave="$event.target.style.borderColor='#1e1e30'"
+        >
+          <i class="fas fa-wand-magic-sparkles" style="font-size:32px;margin-bottom:12px;display:block;color:#60a5fa;"></i>
+          <div style="font-size:16px;color:#e4e4ec;font-weight:600;margin-bottom:6px;">AI 引导创作</div>
+          <div style="font-size:12px;color:#6b6b85;line-height:1.6;">输入一句话描述<br/>AI 自动生成设定和大纲</div>
+        </div>
+      </div>
+      <!-- 手动创建表单 -->
+      <el-form v-if="novelForm.createMode === 'manual'" :model="novelForm" label-width="100px">
         <el-form-item label="作品名称">
           <el-input v-model="novelForm.title" placeholder="请输入作品名称" />
         </el-form-item>
@@ -3886,9 +3932,59 @@
           </div>
         </el-form-item>
       </el-form>
+      <!-- AI引导创作表单 -->
+      <div v-if="novelForm.createMode === 'ai'">
+        <el-alert title="AI 引导创作" type="info" :closable="false" style="margin-bottom:16px;">
+          输入一句话描述你想写的故事，AI 将自动生成角色设定、世界观、故事大纲（默认5章）等内容。
+        </el-alert>
+        <el-form :model="novelForm" label-width="100px">
+          <el-form-item label="作品名称">
+            <el-input v-model="novelForm.title" placeholder="请输入作品名称（可选，留空由AI生成）" />
+          </el-form-item>
+          <el-form-item label="故事描述">
+            <el-input v-model="novelForm.aiPrompt" type="textarea" :rows="4" placeholder="用一句话描述你想写的故事，例如：一个普通少年意外获得修仙传承，在都市中逆天改命的故事..." />
+          </el-form-item>
+          <el-form-item label="分类">
+            <div>
+              <div class="option-button-group" style="margin-bottom:10px;">
+                <div v-for="g in Object.keys(categoryGroups)" :key="g" class="option-button" :class="{active: novelForm.categoryGroup === g}" @click="novelForm.categoryGroup = g">{{ g }}</div>
+              </div>
+              <div class="option-button-group category-button-group">
+                <div v-for="c in categoryGroups[novelForm.categoryGroup]" :key="c" class="option-button" :class="{active: novelForm.category === c}" @click="novelForm.category = c">{{ c }}</div>
+              </div>
+            </div>
+          </el-form-item>
+          <el-form-item label="存储位置">
+            <div style="display:flex;gap:10px;">
+              <div
+                @click="novelForm.storageType = 'local'"
+                :class="['storage-option', novelForm.storageType === 'local' ? 'active' : '']"
+                style="flex:1;border:1px solid #1e1e30;border-radius:8px;padding:12px;cursor:pointer;text-align:center;background:rgba(14,14,24,0.6);"
+              >
+                <i class="fas fa-desktop" style="font-size:20px;margin-bottom:6px;display:block;color:#9ca3af;"></i>
+                <div style="font-size:14px;color:#e4e4ec;font-weight:500;">本地存储</div>
+                <div style="font-size:12px;color:#6b6b85;margin-top:4px;">仅保存在本设备</div>
+              </div>
+              <div
+                @click="novelForm.storageType = 'cloud'"
+                :class="['storage-option', novelForm.storageType === 'cloud' ? 'active' : '']"
+                style="flex:1;border:1px solid #1e1e30;border-radius:8px;padding:12px;cursor:pointer;text-align:center;background:rgba(14,14,24,0.6);"
+              >
+                <i class="fas fa-cloud" style="font-size:20px;margin-bottom:6px;display:block;color:#8b7dd8;"></i>
+                <div style="font-size:14px;color:#e4e4ec;font-weight:500;">云端存储</div>
+                <div style="font-size:12px;color:#6b6b85;margin-top:4px;">换设备登录可同步</div>
+              </div>
+            </div>
+          </el-form-item>
+        </el-form>
+      </div>
       <template #footer>
         <el-button @click="createNovelVisible = false">取消</el-button>
-        <el-button type="primary" @click="createNovel()">创建项目</el-button>
+        <el-button v-if="novelForm.createMode" @click="novelForm.createMode = ''">返回</el-button>
+        <el-button v-if="novelForm.createMode === 'manual'" type="primary" @click="createNovel()">创建项目</el-button>
+        <el-button v-if="novelForm.createMode === 'ai'" type="primary" @click="createNovelWithAi()" :loading="aiCreating">
+          <i class="fas fa-wand-magic-sparkles" style="margin-right:4px;"></i>AI 创建
+        </el-button>
       </template>
     </el-dialog>
     
@@ -4509,7 +4605,15 @@
           description: '',
           targetWords: 500000,
           storageType: 'local',
+          createMode: '',
+          aiPrompt: '',
         });
+        const aiCreating = ref(false);
+        
+        // Project context menu & import/export
+        const projectContextMenu = reactive({ visible: false, x: 0, y: 0, novel: null });
+        const importFileInput = ref(null);
+        let longPressTimer = null;
         
         // Chapters / Editor
         const chapters = ref([]);
@@ -5616,9 +5720,267 @@
           novelForm.categoryGroup = '女频';
           novelForm.description = '';
           novelForm.targetWords = 500000;
+          novelForm.createMode = '';
+          novelForm.aiPrompt = '';
           createNovelVisible.value = true;
         }
-        
+
+        function selectCreateMode(mode) {
+          novelForm.createMode = mode;
+        }
+
+        async function createNovelWithAi() {
+          if (!novelForm.aiPrompt.trim()) {
+            ElementPlus.ElMessage.warning('请输入故事描述');
+            return;
+          }
+          const model = getDefaultAiModel();
+          if (!model) return;
+
+          aiCreating.value = true;
+          ElementPlus.ElMessage.info('AI 正在创作中，请稍候...');
+
+          try {
+            const messages = [
+              {
+                role: 'system',
+                content: '你是一位专业的小说策划编辑。请根据用户的故事描述，生成完整的小说项目设定。输出格式为JSON，包含以下字段：title（作品名）, description（一句话简介）, characters（角色数组，每个角色含name, role, personality, background）, worldSettings（世界观数组，每个含name, content）, synopsis（故事大纲数组，5个章节，每个含title, summary）。只输出JSON，不要输出其他内容。'
+              },
+              {
+                role: 'user',
+                content: `故事描述：${novelForm.aiPrompt}\n分类：${novelForm.category}\n请生成5章的故事大纲和基本设定。`
+              }
+            ];
+
+            const response = await callAiApi(model, messages, { temperature: 0.8, maxTokens: 4096 });
+            const text = extractAiText(response) || '';
+            const jsonStr = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+            let aiData;
+            try {
+              aiData = JSON.parse(jsonStr);
+            } catch (e) {
+              const match = jsonStr.match(/\{[\s\S]*\}/);
+              if (match) {
+                aiData = JSON.parse(match[0]);
+              } else {
+                throw new Error('AI返回格式异常，无法解析');
+              }
+            }
+
+            const newId = Date.now();
+            const newNovel = {
+              id: newId,
+              title: novelForm.title.trim() || aiData.title || 'AI创作小说',
+              category: novelForm.category,
+              categoryGroup: novelForm.categoryGroup,
+              description: aiData.description || novelForm.aiPrompt,
+              targetWords: 500000,
+              status: '连载',
+              storageType: novelForm.storageType,
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+            };
+            novels.value.push(newNovel);
+            saveNovels();
+
+            // 保存AI生成的角色
+            if (aiData.characters && Array.isArray(aiData.characters)) {
+              const charData = aiData.characters.map(c => ({
+                id: 'char_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6),
+                name: c.name || '未命名',
+                role: c.role || '',
+                personality: c.personality || '',
+                background: c.background || '',
+                relations: [],
+                arcs: [],
+                experiences: [],
+                memories: [],
+                attributes: [],
+              }));
+              localStorage.setItem(`nb_${newId}_characters`, JSON.stringify(charData));
+            }
+
+            // 保存AI生成的世界观
+            if (aiData.worldSettings && Array.isArray(aiData.worldSettings)) {
+              const worldData = aiData.worldSettings.map(w => ({
+                id: 'world_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6),
+                name: w.name || '未命名',
+                content: w.content || '',
+              }));
+              const worldCat = [{
+                id: 'cat_main',
+                name: '主设定',
+                icon: 'fas fa-globe-asia',
+                children: [],
+                expanded: true,
+              }];
+              localStorage.setItem(`nb_${newId}_worldCategories`, JSON.stringify(worldCat));
+              const worldSettings = {};
+              worldSettings['cat_main'] = worldData;
+              localStorage.setItem(`nb_${newId}_worldSettings`, JSON.stringify(worldSettings));
+            }
+
+            // 保存AI生成的故事大纲（5章）
+            if (aiData.synopsis && Array.isArray(aiData.synopsis)) {
+              const synopsisVol = [{
+                title: '第一卷',
+                summary: '',
+                plots: [],
+                chapters: aiData.synopsis.map((s, idx) => ({
+                  title: s.title || `第${idx + 1}章`,
+                  summary: s.summary || '',
+                })),
+              }];
+              localStorage.setItem(`nb_${newId}_synopsisVolumes`, JSON.stringify(synopsisVol));
+
+              // 同步创建命运线数据
+              const fateVols = [{
+                id: 'vol_' + Date.now(),
+                title: '第一卷',
+                chapterIds: [],
+              }];
+              const chapterData = aiData.synopsis.map((s, idx) => {
+                const chId = 'ch_' + Date.now() + '_' + idx;
+                fateVols[0].chapterIds.push(chId);
+                return {
+                  id: chId,
+                  title: s.title || `第${idx + 1}章`,
+                  content: '',
+                  editorChatMessages: [],
+                  summary: s.summary || '',
+                };
+              });
+              localStorage.setItem(`nb_${newId}_fateVolumes`, JSON.stringify(fateVols));
+              localStorage.setItem(`nb_${newId}_chapters`, JSON.stringify(chapterData));
+            }
+
+            createNovelVisible.value = false;
+            ElementPlus.ElMessage.success('AI 创作完成！项目已创建');
+            openNovel(newNovel);
+          } catch (err) {
+            ElementPlus.ElMessage.error('AI 创作失败：' + err.message);
+          } finally {
+            aiCreating.value = false;
+          }
+        }
+
+        function showProjectContextMenu(event, novel) {
+          projectContextMenu.x = event.clientX;
+          projectContextMenu.y = event.clientY;
+          projectContextMenu.novel = novel;
+          projectContextMenu.visible = true;
+        }
+
+        function startLongPress(event, novel) {
+          cancelLongPress();
+          longPressTimer = setTimeout(() => {
+            const touch = event.touches[0];
+            projectContextMenu.x = touch.clientX;
+            projectContextMenu.y = touch.clientY;
+            projectContextMenu.novel = novel;
+            projectContextMenu.visible = true;
+          }, 600);
+        }
+
+        function cancelLongPress() {
+          if (longPressTimer) {
+            clearTimeout(longPressTimer);
+            longPressTimer = null;
+          }
+        }
+
+        function deleteProjectWithConfirm(novel) {
+          ElementPlus.ElMessageBox.confirm(
+            `确定要删除项目「${novel.title}」吗？所有章节、设定、大纲等数据将被永久删除，此操作不可撤销。`,
+            '删除确认',
+            {
+              type: 'warning',
+              confirmButtonText: '确认删除',
+              cancelButtonText: '取消',
+            }
+          ).then(() => {
+            // 二次确认
+            ElementPlus.ElMessageBox.confirm('再次确认：删除后无法恢复，确定要删除吗？', '二次确认', {
+              type: 'error',
+              confirmButtonText: '确定删除',
+              cancelButtonText: '取消',
+            }).then(() => {
+              const idx = novels.value.findIndex(n => n.id === novel.id);
+              if (idx > -1) {
+                // 清除所有相关数据
+                const keys = ['characters', 'synopsisVolumes', 'foreshadows', 'plotlines', 'worldCategories', 'worldSettings', 'chapters', 'fateVolumes', 'perspectives', 'history'];
+                keys.forEach(k => localStorage.removeItem(`nb_${novel.id}_${k}`));
+                novels.value.splice(idx, 1);
+                saveNovels();
+                ElementPlus.ElMessage.success('项目已删除');
+              }
+            }).catch(() => {});
+          }).catch(() => {});
+        }
+
+        function exportProject(novel) {
+          const exportData = {
+            version: '1.0',
+            exportedAt: new Date().toISOString(),
+            novel: { ...novel },
+            data: {}
+          };
+          const keys = ['characters', 'synopsisVolumes', 'foreshadows', 'plotlines', 'worldCategories', 'worldSettings', 'chapters', 'fateVolumes', 'perspectives'];
+          keys.forEach(k => {
+            const val = localStorage.getItem(`nb_${novel.id}_${k}`);
+            if (val) exportData.data[k] = JSON.parse(val);
+          });
+          const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `${novel.title}_导出.json`;
+          a.click();
+          URL.revokeObjectURL(url);
+          ElementPlus.ElMessage.success('项目已导出');
+        }
+
+        function triggerImportProject() {
+          if (importFileInput.value) importFileInput.value.click();
+        }
+
+        function importProject(event) {
+          const file = event.target.files[0];
+          if (!file) return;
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            try {
+              const importData = JSON.parse(e.target.result);
+              if (!importData.novel) {
+                ElementPlus.ElMessage.error('导入失败：文件格式不正确');
+                return;
+              }
+              const newId = Date.now();
+              const newNovel = {
+                ...importData.novel,
+                id: newId,
+                title: importData.novel.title + ' (导入)',
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+              };
+              novels.value.push(newNovel);
+              saveNovels();
+              // 保存所有数据
+              if (importData.data) {
+                Object.keys(importData.data).forEach(k => {
+                  localStorage.setItem(`nb_${newId}_${k}`, JSON.stringify(importData.data[k]));
+                });
+              }
+              ElementPlus.ElMessage.success('项目导入成功');
+            } catch (err) {
+              ElementPlus.ElMessage.error('导入失败：' + err.message);
+            }
+            // 重置input以便重复导入同一文件
+            event.target.value = '';
+          };
+          reader.readAsText(file);
+        }
+
         function createNovel() {
           if (!novelForm.title.trim()) {
             ElementPlus.ElMessage.warning('请输入作品名称');
@@ -5970,6 +6332,114 @@
             }
             const data = await res.json();
             return { data, latency, model: model.name };
+          } catch (err) {
+            throw err;
+          }
+        }
+
+        async function callAiApiStream(model, messages, options = {}, onChunk) {
+          if (!model) throw new Error('未选择 AI 模型');
+          if (!model.apiKey) throw new Error('模型未配置 API Key');
+          let baseUrl = model.baseUrl || getDefaultBaseUrl(model.providerType);
+          if (!baseUrl) throw new Error('模型未配置 API 地址');
+          if (!baseUrl.startsWith('http://') && !baseUrl.startsWith('https://')) throw new Error('API 地址格式错误');
+
+          const isAnthropic = model.providerType === 'anthropic';
+          const startTime = Date.now();
+
+          try {
+            if (isAnthropic) {
+              const systemMsg = messages.filter(m => m.role === 'system').map(m => m.content).join('\n');
+              const chatMessages = messages.filter(m => m.role !== 'system').map(m => ({ role: m.role, content: m.content }));
+              const url = baseUrl.replace(/\/$/, '') + '/v1/messages';
+              const body = {
+                model: model.modelName,
+                max_tokens: options.maxTokens || 4096,
+                messages: chatMessages,
+                system: systemMsg || undefined,
+                stream: true,
+              };
+              const res = await fetch(url, {
+                method: 'POST',
+                headers: { 'x-api-key': model.apiKey, 'Content-Type': 'application/json', 'anthropic-version': '2023-06-01' },
+                body: JSON.stringify(body),
+              });
+              if (!res.ok) {
+                const err = await res.json().catch(() => ({}));
+                throw new Error(`API 请求失败 (${res.status}): ${err.error?.message || '未知错误'}`);
+              }
+              const reader = res.body.getReader();
+              const decoder = new TextDecoder();
+              let fullText = '';
+              let buffer = '';
+              while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                buffer += decoder.decode(value, { stream: true });
+                const lines = buffer.split('\n');
+                buffer = lines.pop() || '';
+                for (const line of lines) {
+                  if (line.startsWith('data: ')) {
+                    const dataStr = line.slice(6).trim();
+                    if (dataStr === '[DONE]') continue;
+                    try {
+                      const parsed = JSON.parse(dataStr);
+                      if (parsed.type === 'content_block_delta' && parsed.delta && parsed.delta.text) {
+                        fullText += parsed.delta.text;
+                        if (onChunk) onChunk(parsed.delta.text, fullText);
+                      }
+                    } catch (e) {}
+                  }
+                }
+              }
+              const latency = Date.now() - startTime;
+              return { text: fullText, latency, model: model.name };
+            }
+
+            // OpenAI 兼容格式流式
+            const url = baseUrl.replace(/\/$/, '') + '/chat/completions';
+            const body = {
+              model: model.modelName,
+              messages: messages,
+              temperature: options.temperature ?? 0.7,
+              stream: true,
+            };
+            const res = await fetch(url, {
+              method: 'POST',
+              headers: { 'Authorization': 'Bearer ' + model.apiKey, 'Content-Type': 'application/json' },
+              body: JSON.stringify(body),
+            });
+            if (!res.ok) {
+              const err = await res.json().catch(() => ({}));
+              throw new Error(`API 请求失败 (${res.status}): ${err.error?.message || err.message || '未知错误'}`);
+            }
+            const reader = res.body.getReader();
+            const decoder = new TextDecoder();
+            let fullText = '';
+            let buffer = '';
+            while (true) {
+              const { done, value } = await reader.read();
+              if (done) break;
+              buffer += decoder.decode(value, { stream: true });
+              const lines = buffer.split('\n');
+              buffer = lines.pop() || '';
+              for (const line of lines) {
+                if (line.startsWith('data: ')) {
+                  const dataStr = line.slice(6).trim();
+                  if (dataStr === '[DONE]') continue;
+                  try {
+                    const parsed = JSON.parse(dataStr);
+                    if (parsed.choices && parsed.choices[0] && parsed.choices[0].delta && parsed.choices[0].delta.content) {
+                      const chunk = parsed.choices[0].delta.content;
+                      fullText += chunk;
+                      if (onChunk) onChunk(chunk, fullText);
+                    }
+                  } catch (e) {}
+                }
+              }
+            }
+            const latency = Date.now() - startTime;
+            return { text: fullText, latency, model: model.name };
           } catch (err) {
             throw err;
           }
@@ -7120,7 +7590,7 @@
           
           thinking.push({
             content: `思考开始\n已选模型：${model.name}（${model.provider} · ${model.modelName}）\n当前模式：${aiRole.value === 'ask' ? 'Ask（只读）' : 'Agent（读写）'}\n是否调用 API：是`,
-            expanded: false
+            expanded: true
           });
           
           // 构建系统提示词
@@ -7145,7 +7615,21 @@
             tools = toolDefinitions.value.filter(t => askReadOnlyTools.includes(t.function.name));
           }
           
-          thinking.push({ content: '正在调用 API 分析用户请求...', expanded: false });
+          thinking.push({ content: '正在调用 API 分析用户请求...', expanded: true });
+          
+          // 创建AI消息占位，用于流式更新
+          const aiMsg = reactive({
+            role: 'ai',
+            content: '',
+            thinking,
+            toolCalls: null,
+            streaming: true,
+          });
+          aiMessages.value.push(aiMsg);
+          nextTick(() => {
+            const msgs = document.querySelector('.ai-messages');
+            if (msgs) msgs.scrollTop = msgs.scrollHeight;
+          });
           
           try {
             const response = await callAiApi(model, messages, { temperature: 0.7, maxTokens: 4096, tools });
@@ -7154,7 +7638,7 @@
             
             thinking.push({
               content: `API 调用完成\n模型：${response.model}\n延迟：${response.latency}ms\n返回工具调用：${toolCalls.length > 0 ? toolCalls.map(t => t.name).join('、') : '无'}`,
-              expanded: false
+              expanded: true
             });
             
             // 执行工具调用
@@ -7162,7 +7646,7 @@
             if (toolCalls.length > 0) {
               thinking.push({
                 content: '执行工具调用：\n' + toolCalls.map(t => `• ${t.name}`).join('\n'),
-                expanded: false
+                expanded: true
               });
               
               for (const tc of toolCalls) {
@@ -7173,13 +7657,17 @@
                 try {
                   const result = executeTool(tc.name, tc.arguments || {});
                   toolResults.push({ name: tc.name, result });
+                  thinking.push({
+                    content: `工具 ${tc.name} 执行完成：${result.success ? '成功' : '失败 - ' + result.error}`,
+                    expanded: true
+                  });
                 } catch(e) {
                   toolResults.push({ name: tc.name, result: { success: false, error: String(e) } });
                 }
               }
             }
             
-            // 如果有工具结果，再次调用 API 生成最终回复
+            // 如果有工具结果，使用流式API生成最终回复
             if (toolResults.length > 0) {
               messages.push({ role: 'assistant', content: replyText || '' });
               for (let i = 0; i < toolResults.length; i++) {
@@ -7187,31 +7675,47 @@
               }
               messages.push({ role: 'user', content: '请根据以上工具返回结果，给用户一个完整的中文回复。' });
               
-              thinking.push({ content: '工具执行完成，再次调用 API 生成最终回复...', expanded: false });
+              thinking.push({ content: '工具执行完成，正在调用 API 流式生成最终回复...', expanded: true });
               
-              const finalResponse = await callAiApi(model, messages, { temperature: 0.7, maxTokens: 4096 });
-              replyText = extractAiText(finalResponse);
+              const finalResult = await callAiApiStream(model, messages, { temperature: 0.7, maxTokens: 4096 }, (chunk, fullText) => {
+                aiMsg.content = fullText;
+                nextTick(() => {
+                  const msgs = document.querySelector('.ai-messages');
+                  if (msgs) msgs.scrollTop = msgs.scrollHeight;
+                });
+              });
+              replyText = finalResult.text;
               
               thinking.push({
-                content: `最终 API 调用完成\n模型：${finalResponse.model}\n延迟：${finalResponse.latency}ms`,
-                expanded: false
+                content: `最终 API 调用完成\n模型：${finalResult.model}\n延迟：${finalResult.latency}ms`,
+                expanded: true
+              });
+            } else {
+              // 没有工具调用时也用流式
+              const streamResult = await callAiApiStream(model, messages, { temperature: 0.7, maxTokens: 4096 }, (chunk, fullText) => {
+                aiMsg.content = fullText;
+                nextTick(() => {
+                  const msgs = document.querySelector('.ai-messages');
+                  if (msgs) msgs.scrollTop = msgs.scrollHeight;
+                });
+              });
+              replyText = streamResult.text;
+              thinking.push({
+                content: `API 调用完成\n模型：${streamResult.model}\n延迟：${streamResult.latency}ms`,
+                expanded: true
               });
             }
             
-            aiMessages.value.push({
-              role: 'ai',
-              content: replyText || '（AI 未返回内容）',
-              thinking,
-              toolCalls: toolCalls.length > 0 ? toolCalls : null
-            });
+            // 折叠所有思考
+            thinking.forEach(t => t.expanded = false);
+            aiMsg.content = replyText || '（AI 未返回内容）';
+            aiMsg.toolCalls = toolCalls.length > 0 ? toolCalls : null;
+            aiMsg.streaming = false;
             
           } catch (err) {
             thinking.push({ content: `API 调用失败：${err.message}`, expanded: false });
-            aiMessages.value.push({
-              role: 'ai',
-              content: 'AI 调用失败：' + err.message,
-              thinking
-            });
+            aiMsg.content = 'AI 调用失败：' + err.message;
+            aiMsg.streaming = false;
           }
           
           nextTick(() => {
@@ -7464,14 +7968,39 @@
           userContent.push('请直接生成续写的小说正文。');
           messages.push({ role: 'user', content: userContent.join('\n\n') });
           
-          thinking.push({ content: '正在调用 API 生成小说正文...', expanded: false });
+          thinking.push({ content: '正在调用 API 生成小说正文...', expanded: true });
+          
+          // 创建AI消息占位，用于流式更新
+          const aiMsg = reactive({
+            role: 'ai',
+            thinking,
+            content: '',
+            summaries,
+            generatedContent: '',
+            streaming: true,
+          });
+          editorChatMessages.value.push(aiMsg);
+          nextTick(() => {
+            const container = document.querySelector('[style*="overflow-y:auto"][style*="padding:16px"]');
+            if (container) container.scrollTop = container.scrollHeight;
+          });
           
           try {
-            const response = await callAiApi(model, messages, { temperature: 0.8, maxTokens: 4096 });
-            const content = extractAiText(response) || '';
+            const result = await callAiApiStream(model, messages, { temperature: 0.8, maxTokens: 4096 }, (chunk, fullText) => {
+              aiMsg.content = fullText;
+              aiMsg.generatedContent = fullText;
+              nextTick(() => {
+                const container = document.querySelector('[style*="overflow-y:auto"][style*="padding:16px"]');
+                if (container) container.scrollTop = container.scrollHeight;
+              });
+            });
             
+            const content = result.text || '';
+            
+            // 折叠思考过程
+            thinking.forEach(t => t.expanded = false);
             thinking.push({
-              content: `API 调用完成\n模型：${response.model}\n延迟：${response.latency}ms\n生成字数：${content.length}字`,
+              content: `API 调用完成\n模型：${result.model}\n延迟：${result.latency}ms\n生成字数：${content.length}字`,
               expanded: false
             });
             
@@ -7485,13 +8014,7 @@
               });
             }
             
-            editorChatMessages.value.push({
-              role: 'ai',
-              thinking,
-              content,
-              summaries,
-              generatedContent: content,
-            });
+            aiMsg.streaming = false;
             
             editorAiCache.value.unshift({
               chapterTitle: currentChapter.value ? currentChapter.value.title : '未知',
@@ -7501,13 +8024,7 @@
             });
           } catch (err) {
             thinking.push({ content: `API 调用失败：${err.message}`, expanded: false });
-            editorChatMessages.value.push({
-              role: 'ai',
-              thinking,
-              content: '',
-              summaries,
-              generatedContent: '',
-            });
+            aiMsg.streaming = false;
             ElementPlus.ElMessage.error('AI 生成失败：' + err.message);
           }
           
@@ -7941,6 +8458,11 @@
           aiModels.value = loadAiModels();
           loadProfile();
           loadPrefs();
+
+          // 点击其他地方关闭右键菜单
+          document.addEventListener('click', () => {
+            projectContextMenu.visible = false;
+          });
           
           if (localStorage.getItem('userLoggedIn') === '1') {
             isLoggedIn.value = true;
@@ -7948,15 +8470,7 @@
             profileForm.username = username.value;
             profileForm.nickname = username.value;
             
-            // 恢复之前打开的小说（必须在恢复 view/wsPage 之前）
-            const savedNovelId = localStorage.getItem('nb_currentNovelId');
-            if (savedNovelId) {
-              const novelId = parseInt(savedNovelId);
-              const novel = novels.value.find(n => n.id === novelId);
-              if (novel) openNovel(novel); // openNovel 会设置 view='workshop' 和 wsPage='editor'
-            }
-            
-            // 恢复界面状态（如果 openNovel 已恢复则优先使用 openNovel 的值）
+            // 恢复界面状态
             const savedView = localStorage.getItem('nb_view');
             if (savedView) view.value = savedView;
             const savedWsPage = localStorage.getItem('nb_wsPage');
@@ -8066,6 +8580,10 @@
           // Methods
           scrollTo, enterWorkshop, handleLogin, handleUserCmd,
           openCreateNovel, createNovel, openNovel,
+          selectCreateMode, createNovelWithAi, aiCreating,
+          showProjectContextMenu, startLongPress, cancelLongPress,
+          deleteProjectWithConfirm, exportProject, triggerImportProject, importProject,
+          projectContextMenu, importFileInput,
           saveNovelInfo, saveSynopsis, aiGenSynopsis, aiGenSynopsisTitle, getDefaultAiModel,
           openAiGenDialog, confirmAiGen, aiGenVolTitle, aiGenVolSummary, aiGenChTitle, aiGenChSummary, aiGenChapterTitle,
           aiGenPromptVisible, aiGenPromptInput, aiGenPromptTitle, aiGenPromptPlaceholder, aiGenLoading,
