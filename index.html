@@ -2434,15 +2434,21 @@
                   <span style="color:#c4b5fd;">{{ fateCurrentVol.title || '未命名卷' }}</span>
                   <span style="margin-left:8px;">共 {{ (currentVol && currentVol.chapters) ? currentVol.chapters.length : 0 }} 章</span>
                 </div>
-                <div style="display:flex;gap:8px;">
+                <div style="display:flex;gap:8px;flex-wrap:wrap;">
                   <el-button size="small" type="primary" @click="saveSynopsis()">
                     <i class="fas fa-save" style="margin-right:6px;"></i>保存
                   </el-button>
-                  <el-button size="small" @click="aiGenSynopsisTitle()">
-                    <i class="fas fa-heading" style="margin-right:6px;"></i>AI 生成标题
+                  <el-button size="small" @click="openAiGenDialog('volTitle')">
+                    <i class="fas fa-heading" style="margin-right:6px;"></i>AI 生成卷标题
                   </el-button>
-                  <el-button size="small" @click="aiGenSynopsis()">
-                    <i class="fas fa-wand-magic-sparkles" style="margin-right:6px;"></i>AI 生成大纲
+                  <el-button size="small" @click="openAiGenDialog('volSummary')">
+                    <i class="fas fa-book" style="margin-right:6px;"></i>AI 生成卷大纲
+                  </el-button>
+                  <el-button size="small" @click="openAiGenDialog('chTitle')">
+                    <i class="fas fa-font" style="margin-right:6px;"></i>AI 生成章标题
+                  </el-button>
+                  <el-button size="small" @click="openAiGenDialog('chSummary')">
+                    <i class="fas fa-wand-magic-sparkles" style="margin-right:6px;"></i>AI 生成章大纲
                   </el-button>
                   <el-button size="small" type="primary" @click="addChapterNode()">
                     <i class="fas fa-plus" style="margin-right:4px;"></i>新增章节
@@ -3199,11 +3205,12 @@
                   </el-checkbox>
                   <div style="display:flex;align-items:center;gap:6px;">
                     <span style="font-size:12px;color:#6b6b85;">模型：</span>
-                    <div class="option-button-group model-button-group" v-if="aiModels.length > 0">
-                      <div v-for="m in aiModels" :key="m.id" class="option-button" :class="{active: currentAiModel === m.id}" @click="currentAiModel = m.id" :title="m.name">{{ m.name }}</div>
-                    </div>
-                    <span v-else style="font-size:12px;color:#6b6b85;">未配置模型</span>
+                    <el-select v-model="currentAiModel" size="small" style="width:180px;" placeholder="选择模型" filterable>
+                      <el-option v-for="m in aiModels" :key="m.id" :label="m.name" :value="m.id" />
+                    </el-select>
+                    <span v-if="aiModels.length === 0" style="font-size:12px;color:#6b6b85;">未配置模型</span>
                   </div>
+                  <el-button size="small" @click="aiGenChapterTitle()"><i class="fas fa-magic" style="margin-right:4px;"></i>生成本章标题</el-button>
                   <el-button size="small" @click="saveChapter()"><i class="fas fa-save" style="margin-right:4px;"></i>保存</el-button>
                 </div>
               </div>
@@ -3322,10 +3329,10 @@
                       </div>
                       <div style="display:flex;gap:6px;align-items:center;">
                         <el-button size="small" @click="addChapter()"><i class="fas fa-plus" style="margin-right:4px;"></i>新章</el-button>
-                        <div class="option-button-group model-button-group" v-if="aiModels.length > 0">
-                          <div v-for="m in aiModels" :key="m.id" class="option-button" :class="{active: currentAiModel === m.id}" @click="currentAiModel = m.id" :title="m.name">{{ m.name }}</div>
-                        </div>
-                        <span v-else style="font-size:12px;color:#6b6b85;">未配置模型</span>
+                        <el-select v-model="currentAiModel" size="small" style="width:180px;" placeholder="选择模型" filterable>
+                          <el-option v-for="m in aiModels" :key="m.id" :label="m.name" :value="m.id" />
+                        </el-select>
+                        <span v-if="aiModels.length === 0" style="font-size:12px;color:#6b6b85;">未配置模型</span>
                         <el-checkbox v-model="editorUseDefaultAi" size="small">
                           <span style="font-size:12px;">默认AI总结</span>
                         </el-checkbox>
@@ -3496,10 +3503,10 @@
                       style="min-height:60px;flex:1;"
                       @keydown.enter.exact="sendAi()"
                     ></textarea>
-                    <div class="option-button-group model-button-group" v-if="aiModels.length > 0">
-                      <div v-for="m in aiModels" :key="m.id" class="option-button" :class="{active: currentAiModel === m.id}" @click="currentAiModel = m.id" :title="m.name">{{ m.name }}</div>
-                    </div>
-                    <span v-else style="font-size:12px;color:#6b6b85;margin-right:6px;">未配置模型</span>
+                    <el-select v-model="currentAiModel" size="small" style="width:180px;flex-shrink:0;" placeholder="选择模型" filterable>
+                      <el-option v-for="m in aiModels" :key="m.id" :label="m.name" :value="m.id" />
+                    </el-select>
+                    <span v-if="aiModels.length === 0" style="font-size:12px;color:#6b6b85;margin-right:6px;">未配置模型</span>
                     <button class="ai-send-btn" @click="sendAi()" style="flex-shrink:0;">
                       <i class="fas fa-paper-plane"></i>
                     </button>
@@ -3882,6 +3889,25 @@
       <template #footer>
         <el-button @click="createNovelVisible = false">取消</el-button>
         <el-button type="primary" @click="createNovel()">创建项目</el-button>
+      </template>
+    </el-dialog>
+    
+    <!-- AI Generate Prompt Dialog -->
+    <el-dialog v-model="aiGenPromptVisible" :title="aiGenPromptTitle" width="500px" append-to-body>
+      <div style="margin-bottom:12px;font-size:13px;color:#6b6b85;">
+        请输入提示词（可选），不输入则由 AI 根据小说设定自动生成
+      </div>
+      <el-input
+        v-model="aiGenPromptInput"
+        type="textarea"
+        :rows="4"
+        :placeholder="aiGenPromptPlaceholder"
+      />
+      <template #footer>
+        <el-button @click="aiGenPromptVisible = false">取消</el-button>
+        <el-button type="primary" @click="confirmAiGen()" :loading="aiGenLoading">
+          <i class="fas fa-wand-magic-sparkles" style="margin-right:4px;"></i>开始生成
+        </el-button>
       </template>
     </el-dialog>
     
@@ -4503,6 +4529,14 @@
         const editorUseDefaultAi = ref(false);
         const editorAiCache = ref([]);
         const assistantAiCache = ref([]);
+        
+        // AI Generate Prompt Dialog
+        const aiGenPromptVisible = ref(false);
+        const aiGenPromptInput = ref('');
+        const aiGenPromptTitle = ref('AI 生成');
+        const aiGenPromptPlaceholder = ref('请输入你想让 AI 如何生成的提示词...');
+        const aiGenLoading = ref(false);
+        const aiGenType = ref(''); // volTitle, volSummary, chTitle, chSummary
         
         const currentChapterContentWordCount = computed(() => {
           const chapter = chapters.value.find(c => c.id === currentChapterId.value);
@@ -5966,6 +6000,249 @@
             return data.choices[0].message.tool_calls.map(t => ({ name: t.function.name, arguments: JSON.parse(t.function.arguments || '{}') }));
           }
           return [];
+        }
+
+        function openAiGenDialog(type) {
+          aiGenType.value = type;
+          aiGenPromptInput.value = '';
+          aiGenLoading.value = false;
+          const titleMap = {
+            volTitle: 'AI 生成卷标题',
+            volSummary: 'AI 生成卷大纲',
+            chTitle: 'AI 生成章标题',
+            chSummary: 'AI 生成章大纲',
+          };
+          const placeholderMap = {
+            volTitle: '如：根据本卷的主题和已有章节，生成一个有吸引力的卷名...',
+            volSummary: '如：概括本卷的主要剧情走向，突出核心冲突...',
+            chTitle: '如：根据本章的内容和前文，生成一个引人入胜的章节标题...',
+            chSummary: '如：简要概括本章的核心内容和关键情节...',
+          };
+          aiGenPromptTitle.value = titleMap[type] || 'AI 生成';
+          aiGenPromptPlaceholder.value = placeholderMap[type] || '请输入提示词...';
+          aiGenPromptVisible.value = true;
+        }
+
+        async function confirmAiGen() {
+          const type = aiGenType.value;
+          const userPrompt = aiGenPromptInput.value.trim();
+          aiGenPromptVisible.value = false;
+          if (type === 'volTitle') {
+            await aiGenVolTitle(userPrompt);
+          } else if (type === 'volSummary') {
+            await aiGenVolSummary(userPrompt);
+          } else if (type === 'chTitle') {
+            await aiGenChTitle(userPrompt);
+          } else if (type === 'chSummary') {
+            await aiGenChSummary(userPrompt);
+          }
+        }
+
+        async function aiGenVolTitle(userPrompt) {
+          const vol = currentVol.value;
+          if (!vol) {
+            ElementPlus.ElMessage.warning('请先在命运线中选择一卷');
+            return;
+          }
+          const model = getDefaultAiModel();
+          if (!model) return;
+
+          ElementPlus.ElMessage.info('正在调用默认模型生成卷标题...');
+          const chapterList = (vol.chapters || []).map((ch, idx) => `第${idx + 1}章：${ch.title || '未命名'} - ${ch.summary || '暂无摘要'}`).join('\n');
+          const novelTitle = currentNovel.value ? currentNovel.value.title : '';
+          const novelDesc = currentNovel.value ? currentNovel.value.description : '';
+          const systemContent = '你是一位专业的小说标题助手。请根据作品信息、已有章节的标题和摘要内容，为当前卷生成一个吸引人的卷标题。标题控制在4-15字。只输出标题文本，不要输出其他内容。';
+          const userContent = `作品名：${novelTitle}\n简介：${novelDesc}\n\n已有章节：\n${chapterList}\n\n${userPrompt ? '用户要求：' + userPrompt : '请根据以上信息自动生成卷标题。'}`;
+          const messages = [
+            { role: 'system', content: systemContent },
+            { role: 'user', content: userContent }
+          ];
+
+          try {
+            const response = await callAiApi(model, messages, { temperature: 0.85, maxTokens: 256 });
+            const text = extractAiText(response) || '';
+            const title = text.trim().replace(/^["'""]|["'""]$/g, '');
+            if (title) {
+              fateCurrentVol.value.title = title;
+              saveFateVolumes();
+              saveNovelData('synopsisVolumes', synopsisVolumes.value);
+              ElementPlus.ElMessage.success(`卷标题已生成：${title}`);
+            }
+          } catch (err) {
+            ElementPlus.ElMessage.error('AI 生成失败：' + err.message);
+          }
+        }
+
+        async function aiGenVolSummary(userPrompt) {
+          const vol = currentVol.value;
+          if (!vol) {
+            ElementPlus.ElMessage.warning('请先在命运线中选择一卷');
+            return;
+          }
+          const model = getDefaultAiModel();
+          if (!model) return;
+
+          ElementPlus.ElMessage.info('正在调用默认模型生成卷大纲...');
+          const chapterList = (vol.chapters || []).map((ch, idx) => `第${idx + 1}章：${ch.title || '未命名'} - ${ch.summary || '暂无摘要'}`).join('\n');
+          const novelTitle = currentNovel.value ? currentNovel.value.title : '';
+          const novelDesc = currentNovel.value ? currentNovel.value.description : '';
+          const systemContent = '你是一位专业的小说大纲助手。请根据作品信息、已有章节的标题和摘要，为当前卷生成一段卷大纲。大纲应概括本卷的主要剧情走向、核心冲突和关键转折点。控制在100-300字。只输出大纲文本。';
+          const userContent = `作品名：${novelTitle}\n简介：${novelDesc}\n当前卷：${fateCurrentVol.value ? fateCurrentVol.value.title : ''}\n\n已有章节：\n${chapterList}\n\n${userPrompt ? '用户要求：' + userPrompt : '请根据以上信息自动生成卷大纲。'}`;
+          const messages = [
+            { role: 'system', content: systemContent },
+            { role: 'user', content: userContent }
+          ];
+
+          try {
+            const response = await callAiApi(model, messages, { temperature: 0.8, maxTokens: 1024 });
+            const text = extractAiText(response) || '';
+            if (text.trim()) {
+              if (!vol.summary) vol.summary = '';
+              vol.summary = text.trim();
+              saveNovelData('synopsisVolumes', synopsisVolumes.value);
+              ElementPlus.ElMessage.success('卷大纲已生成');
+            }
+          } catch (err) {
+            ElementPlus.ElMessage.error('AI 生成失败：' + err.message);
+          }
+        }
+
+        async function aiGenChTitle(userPrompt) {
+          const vol = currentVol.value;
+          if (!vol || !vol.chapters || vol.chapters.length === 0) {
+            ElementPlus.ElMessage.warning('当前卷没有章节，请先在命运线中创建章节');
+            return;
+          }
+          const model = getDefaultAiModel();
+          if (!model) return;
+
+          ElementPlus.ElMessage.info('正在调用默认模型生成章节标题...');
+          const chapterList = vol.chapters.map((ch, idx) => `第${idx + 1}章：${ch.summary || '（暂无摘要）'}`).join('\n');
+          const novelTitle = currentNovel.value ? currentNovel.value.title : '';
+          const novelDesc = currentNovel.value ? currentNovel.value.description : '';
+          const systemContent = '你是一位专业的小说标题助手。请根据作品信息和当前卷已存在的章节摘要，为每个已存在的章节生成一个吸引人的章节标题。要求：1. 只输出每个章节的标题，格式为：第N章：标题 2. 不要新增或删除章节 3. 标题控制在8-20字。';
+          const userContent = `作品名：${novelTitle}\n简介：${novelDesc}\n当前卷：${fateCurrentVol.value ? fateCurrentVol.value.title : ''}\n\n现有章节摘要：\n${chapterList}\n\n${userPrompt ? '用户要求：' + userPrompt : '请为以上每个章节生成标题。'}`;
+          const messages = [
+            { role: 'system', content: systemContent },
+            { role: 'user', content: userContent }
+          ];
+
+          try {
+            const response = await callAiApi(model, messages, { temperature: 0.85, maxTokens: 1024 });
+            const text = extractAiText(response) || '';
+            const lines = text.split('\n').filter(l => l.trim());
+            let applied = 0;
+            for (const line of lines) {
+              const match = line.match(/^第\s*(\d+)\s*章[：:：]\s*(.+)$/);
+              if (match) {
+                const idx = parseInt(match[1], 10) - 1;
+                if (idx >= 0 && idx < vol.chapters.length) {
+                  vol.chapters[idx].title = match[2].trim();
+                  syncChapterTitleFromSynopsis(idx);
+                  applied++;
+                }
+              }
+            }
+            saveNovelData('synopsisVolumes', synopsisVolumes.value);
+            ElementPlus.ElMessage.success(`已生成 ${applied} 个章节标题`);
+          } catch (err) {
+            ElementPlus.ElMessage.error('AI 生成失败：' + err.message);
+          }
+        }
+
+        async function aiGenChSummary(userPrompt) {
+          const vol = currentVol.value;
+          if (!vol || !vol.chapters || vol.chapters.length === 0) {
+            ElementPlus.ElMessage.warning('当前卷没有章节，请先在命运线中创建章节');
+            return;
+          }
+          const model = getDefaultAiModel();
+          if (!model) return;
+
+          ElementPlus.ElMessage.info('正在调用默认模型生成章节大纲...');
+          const chapterList = vol.chapters.map((ch, idx) => `第${idx + 1}章：${ch.title || '未命名'}`).join('\n');
+          const novelTitle = currentNovel.value ? currentNovel.value.title : '';
+          const novelDesc = currentNovel.value ? currentNovel.value.description : '';
+          const systemContent = '你是一位专业的小说大纲助手。请根据作品信息和当前卷已存在的章节目录，为每个已存在的章节生成一段简短的内容摘要。要求：1. 只输出每个章节的摘要，格式为：第N章：摘要内容 2. 不要新增或删除章节 3. 摘要控制在30-80字。';
+          const userContent = `作品名：${novelTitle}\n简介：${novelDesc}\n当前卷：${fateCurrentVol.value ? fateCurrentVol.value.title : ''}\n\n现有章节：\n${chapterList}\n\n${userPrompt ? '用户要求：' + userPrompt : '请为以上每个章节生成内容摘要。'}`;
+          const messages = [
+            { role: 'system', content: systemContent },
+            { role: 'user', content: userContent }
+          ];
+
+          try {
+            const response = await callAiApi(model, messages, { temperature: 0.8, maxTokens: 2048 });
+            const text = extractAiText(response) || '';
+            const lines = text.split('\n').filter(l => l.trim());
+            let applied = 0;
+            for (const line of lines) {
+              const match = line.match(/^第\s*(\d+)\s*章[：:：]\s*(.+)$/);
+              if (match) {
+                const idx = parseInt(match[1], 10) - 1;
+                if (idx >= 0 && idx < vol.chapters.length) {
+                  vol.chapters[idx].summary = match[2].trim();
+                  applied++;
+                }
+              }
+            }
+            saveNovelData('synopsisVolumes', synopsisVolumes.value);
+            ElementPlus.ElMessage.success(`已生成 ${applied} 个章节摘要`);
+          } catch (err) {
+            ElementPlus.ElMessage.error('AI 生成失败：' + err.message);
+          }
+        }
+
+        async function aiGenChapterTitle() {
+          if (!currentChapter.value) {
+            ElementPlus.ElMessage.warning('请先选择一个章节');
+            return;
+          }
+          const model = getCurrentAiModel();
+          if (!model) return;
+
+          ElementPlus.ElMessage.info('正在生成本章标题...');
+          const chatContent = editorChatMessages.value.map(m => `${m.role === 'user' ? '用户' : 'AI'}：${m.content || ''}`).join('\n');
+          const novelTitle = currentNovel.value ? currentNovel.value.title : '';
+          const novelDesc = currentNovel.value ? currentNovel.value.description : '';
+          let outlineInfo = '';
+          const vol = currentVol.value;
+          if (vol && vol.chapters) {
+            const chIdx = vol.chapters.findIndex(ch => ch.title === currentChapter.value.title);
+            if (chIdx > -1 && vol.chapters[chIdx].summary) {
+              outlineInfo = `本章大纲：${vol.chapters[chIdx].summary}`;
+            }
+          }
+          const systemContent = '你是一位专业的小说标题助手。请根据已有聊天内容和大纲信息，为当前章节生成一个吸引人的标题。标题控制在8-20字。只输出标题文本，不要输出其他内容。';
+          const userContent = `作品名：${novelTitle}\n简介：${novelDesc}\n${outlineInfo ? outlineInfo + '\n' : ''}\n已有聊天内容：\n${chatContent || '暂无内容'}\n\n请根据以上信息生成本章标题。`;
+          const messages = [
+            { role: 'system', content: systemContent },
+            { role: 'user', content: userContent }
+          ];
+
+          try {
+            const response = await callAiApi(model, messages, { temperature: 0.85, maxTokens: 256 });
+            const text = extractAiText(response) || '';
+            const title = text.trim().replace(/^["'""]|["'""]$/g, '');
+            if (title) {
+              currentChapter.value.title = title;
+              saveChaptersLocal();
+              const vol = currentVol.value;
+              if (vol && vol.chapters) {
+                const chIdx = vol.chapters.findIndex(ch => ch.title === currentChapter.value.title);
+                if (chIdx === -1) {
+                  const fateCh = fateCurrentCh.value;
+                  if (fateCh) {
+                    const synChIdx = vol.chapters.findIndex(ch => ch.id === fateCh.id || ch.title === fateCh.title);
+                    if (synChIdx > -1) vol.chapters[synChIdx].title = title;
+                  }
+                }
+              }
+              saveNovelData('synopsisVolumes', synopsisVolumes.value);
+              ElementPlus.ElMessage.success(`章节标题已生成：${title}`);
+            }
+          } catch (err) {
+            ElementPlus.ElMessage.error('AI 生成失败：' + err.message);
+          }
         }
 
         async function aiGenSynopsis() {
@@ -7790,6 +8067,8 @@
           scrollTo, enterWorkshop, handleLogin, handleUserCmd,
           openCreateNovel, createNovel, openNovel,
           saveNovelInfo, saveSynopsis, aiGenSynopsis, aiGenSynopsisTitle, getDefaultAiModel,
+          openAiGenDialog, confirmAiGen, aiGenVolTitle, aiGenVolSummary, aiGenChTitle, aiGenChSummary, aiGenChapterTitle,
+          aiGenPromptVisible, aiGenPromptInput, aiGenPromptTitle, aiGenPromptPlaceholder, aiGenLoading,
           addSynopsisVolume, addPlotNode, removePlotNode,
           addChapterNode, removeChapterNode, aiGenChapters,
           syncChapterTitleFromSynopsis, goToFateChapter,
