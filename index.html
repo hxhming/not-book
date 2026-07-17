@@ -2438,28 +2438,33 @@
             <div v-if="editorSection === 'synopsis'">
               <div class="ws-section-header">
                 <div class="ws-section-title"><i class="fas fa-scroll" style="margin-right:8px;color:#c4b5fd;"></i>故事大纲</div>
-                <div v-if="fateCurrentVol" style="display:flex;align-items:center;gap:8px;font-size:13px;color:#6b6b85;">
+                <div v-if="fateCurrentVol && !fateCurrentChId" style="display:flex;align-items:center;gap:8px;font-size:13px;color:#6b6b85;">
                   <span>当前卷：</span>
                   <span style="color:#c4b5fd;">{{ fateCurrentVol.title || '未命名卷' }}</span>
                   <span style="margin-left:8px;">共 {{ (currentVol && currentVol.chapters) ? currentVol.chapters.length : 0 }} 章</span>
+                </div>
+                <div v-if="fateCurrentChId && currentChapter" style="display:flex;align-items:center;gap:8px;font-size:13px;color:#6b6b85;">
+                  <span>当前章：</span>
+                  <span style="color:#3b82f6;">{{ currentChapter.title || '未命名章' }}</span>
+                  <span style="margin-left:8px;color:#6b6b85;">本章字数：<span style="color:#4ade80;">{{ currentChapterContentWordCount }}</span></span>
                 </div>
                 <div style="display:flex;gap:8px;flex-wrap:wrap;">
                   <el-button size="small" type="primary" @click="saveSynopsis()">
                     <i class="fas fa-save" style="margin-right:6px;"></i>保存
                   </el-button>
-                  <el-button size="small" @click="openAiGenDialog('volTitle')">
+                  <el-button size="small" v-if="!fateCurrentChId" @click="openAiGenDialog('volTitle')">
                     <i class="fas fa-heading" style="margin-right:6px;"></i>AI 生成卷标题
                   </el-button>
-                  <el-button size="small" @click="openAiGenDialog('volSummary')">
+                  <el-button size="small" v-if="!fateCurrentChId" @click="openAiGenDialog('volSummary')">
                     <i class="fas fa-book" style="margin-right:6px;"></i>AI 生成卷大纲
                   </el-button>
-                  <el-button size="small" @click="openAiGenDialog('chTitle')">
+                  <el-button size="small" v-if="fateCurrentChId" @click="openAiGenDialog('chTitle')">
                     <i class="fas fa-font" style="margin-right:6px;"></i>AI 生成章标题
                   </el-button>
-                  <el-button size="small" @click="openAiGenDialog('chSummary')">
+                  <el-button size="small" v-if="fateCurrentChId" @click="openAiGenDialog('chSummary')">
                     <i class="fas fa-wand-magic-sparkles" style="margin-right:6px;"></i>AI 生成章大纲
                   </el-button>
-                  <el-button size="small" type="primary" @click="addChapterNode()">
+                  <el-button size="small" type="primary" v-if="!fateCurrentChId" @click="addChapterNode()">
                     <i class="fas fa-plus" style="margin-right:4px;"></i>新增章节
                   </el-button>
                 </div>
@@ -2467,37 +2472,58 @@
               <div class="synopsis-layout" style="grid-template-columns:1fr;">
                 <div class="synopsis-detail">
                   <div v-if="currentVol && fateCurrentVol" style="height:100%;display:flex;flex-direction:column;">
-                    <div class="synopsis-sub-header" style="flex-shrink:0;">
-                      <span><i class="fas fa-list" style="margin-right:6px;"></i>章节列表</span>
-                      <span style="font-size:12px;color:#6b6b85;">卷/章请在「命运线」中创建与管理</span>
-                    </div>
-                    <div class="chapter-outline-list" style="flex:1;overflow-y:auto;">
-                      <div 
-                        v-for="(ch, cidx) in (currentVol.chapters || [])" 
-                        :key="cidx"
-                        class="chapter-outline-item"
-                      >
-                        <div class="chapter-num">第{{ cidx + 1 }}章</div>
-                        <div class="chapter-outline-content">
-                          <el-input v-model="ch.title" placeholder="章节标题" size="small" style="margin-bottom:6px;" @blur="syncChapterTitleFromSynopsis(cidx)"></el-input>
-                          <el-input v-model="ch.summary" type="textarea" :rows="3" placeholder="本章内容摘要..." size="small"></el-input>
+                    <div v-if="!fateCurrentChId">
+                      <div class="synopsis-sub-header" style="flex-shrink:0;">
+                        <span><i class="fas fa-book-open" style="margin-right:6px;"></i>{{ fateCurrentVol.title || '未命名卷' }}</span>
+                      </div>
+                      <div style="padding:16px;">
+                        <el-input v-model="currentVol.summary" type="textarea" :rows="8" placeholder="卷大纲内容..." style="margin-bottom:16px;" class="synopsis-textarea"></el-input>
+                        <div v-if="currentVol.plots && currentVol.plots.length > 0">
+                          <div style="font-size:13px;color:#8b8ba5;margin-bottom:8px;">剧情要点</div>
+                          <div v-for="(plot, idx) in currentVol.plots" :key="idx" class="synopsis-plot-item">
+                            <el-input v-model="plot.content" placeholder="剧情要点内容..." size="small" @blur="saveSynopsis()"></el-input>
+                          </div>
                         </div>
-                        <div class="chapter-outline-actions">
-                          <el-button size="small" type="primary" link @click="goToFateChapter(cidx)">
-                            <i class="fas fa-pen"></i>
-                          </el-button>
-                          <el-button size="small" type="danger" link @click="removeChapterNode(cidx)">
-                            <i class="fas fa-trash"></i>
+                      </div>
+                      <div class="chapter-outline-list" style="flex:1;overflow-y:auto;border-top:1px solid #1e1e30;">
+                        <div 
+                          v-for="(ch, cidx) in (currentVol.chapters || [])" 
+                          :key="cidx"
+                          class="chapter-outline-item"
+                          :style="fateCurrentChId === ch.id ? 'border-left:3px solid #3b82f6;' : ''"
+                          @click="selectFateCh(ch.id)"
+                        >
+                          <div class="chapter-num">第{{ cidx + 1 }}章</div>
+                          <div class="chapter-outline-content">
+                            <el-input v-model="ch.title" placeholder="章节标题" size="small" style="margin-bottom:6px;" @blur="syncChapterTitleFromSynopsis(cidx)"></el-input>
+                            <el-input v-model="ch.summary" type="textarea" :rows="2" placeholder="本章内容摘要..." size="small"></el-input>
+                          </div>
+                          <div class="chapter-outline-actions">
+                            <el-button size="small" type="primary" link @click.stop="goToFateChapter(cidx)">
+                              <i class="fas fa-pen"></i>
+                            </el-button>
+                            <el-button size="small" type="danger" link @click.stop="removeChapterNode(cidx)">
+                              <i class="fas fa-trash"></i>
+                            </el-button>
+                          </div>
+                        </div>
+                        <div v-if="!(currentVol.chapters || []).length" class="empty-state" style="padding:30px 20px;">
+                          <i class="fas fa-file-alt" style="font-size:32px;margin-bottom:8px;"></i>
+                          <div class="text">暂无章节</div>
+                          <div style="font-size:12px;color:#4a4a6a;margin-top:4px;">请先在「命运线」中创建章节</div>
+                          <el-button size="small" type="primary" style="margin-top:12px;" @click="editorSection='fate-line'">
+                            <i class="fas fa-stream" style="margin-right:6px;"></i>前往命运线
                           </el-button>
                         </div>
                       </div>
-                      <div v-if="!(currentVol.chapters || []).length" class="empty-state" style="padding:30px 20px;">
-                        <i class="fas fa-file-alt" style="font-size:32px;margin-bottom:8px;"></i>
-                        <div class="text">暂无章节</div>
-                        <div style="font-size:12px;color:#4a4a6a;margin-top:4px;">请先在「命运线」中创建章节</div>
-                        <el-button size="small" type="primary" style="margin-top:12px;" @click="editorSection='fate-line'">
-                          <i class="fas fa-stream" style="margin-right:6px;"></i>前往命运线
-                        </el-button>
+                    </div>
+                    <div v-else-if="fateCurrentChId && currentChapter">
+                      <div class="synopsis-sub-header" style="flex-shrink:0;">
+                        <span><i class="fas fa-file-alt" style="margin-right:6px;"></i>{{ currentChapter.title || '未命名章' }}</span>
+                        <span style="font-size:12px;color:#6b6b85;">（{{ fateCurrentVol.title || '未命名卷' }}）</span>
+                      </div>
+                      <div style="padding:16px;height:calc(100% - 48px);">
+                        <el-input v-model="currentChapter.summary" type="textarea" :rows="20" placeholder="本章大纲内容..." class="synopsis-textarea" style="height:100%;"></el-input>
                       </div>
                     </div>
                   </div>
@@ -3826,6 +3852,9 @@
       <div @click="exportProject(projectContextMenu.novel); projectContextMenu.visible = false" style="padding:8px 16px;cursor:pointer;color:#e4e4ec;font-size:13px;display:flex;align-items:center;gap:8px;" @mouseenter="$event.target.style.background='rgba(139,92,246,0.1)'" @mouseleave="$event.target.style.background='none'">
         <i class="fas fa-file-export"></i> 导出项目
       </div>
+      <div @click="editProject(projectContextMenu.novel); projectContextMenu.visible = false" style="padding:8px 16px;cursor:pointer;color:#e4e4ec;font-size:13px;display:flex;align-items:center;gap:8px;" @mouseenter="$event.target.style.background='rgba(139,92,246,0.1)'" @mouseleave="$event.target.style.background='none'">
+        <i class="fas fa-edit"></i> 编辑项目
+      </div>
       <div @click="deleteProjectWithConfirm(projectContextMenu.novel); projectContextMenu.visible = false" style="padding:8px 16px;cursor:pointer;color:#ef4444;font-size:13px;display:flex;align-items:center;gap:8px;" @mouseenter="$event.target.style.background='rgba(239,68,68,0.1)'" @mouseleave="$event.target.style.background='none'">
         <i class="fas fa-trash"></i> 删除项目
       </div>
@@ -3985,6 +4014,59 @@
         <el-button v-if="novelForm.createMode === 'ai'" type="primary" @click="createNovelWithAi()" :loading="aiCreating">
           <i class="fas fa-wand-magic-sparkles" style="margin-right:4px;"></i>AI 创建
         </el-button>
+      </template>
+    </el-dialog>
+    
+    <!-- 编辑项目对话框 -->
+    <el-dialog v-model="editNovelVisible" title="编辑项目" width="540px" append-to-body>
+      <el-form :model="editNovelForm" label-width="100px">
+        <el-form-item label="作品名称">
+          <el-input v-model="editNovelForm.title" placeholder="请输入作品名称" />
+        </el-form-item>
+        <el-form-item label="分类">
+          <div>
+            <div class="option-button-group" style="margin-bottom:10px;">
+              <div v-for="g in Object.keys(categoryGroups)" :key="g" class="option-button" :class="{active: editNovelForm.categoryGroup === g}" @click="editNovelForm.categoryGroup = g">{{ g }}</div>
+            </div>
+            <div class="option-button-group category-button-group">
+              <div v-for="c in categoryGroups[editNovelForm.categoryGroup]" :key="c" class="option-button" :class="{active: editNovelForm.category === c}" @click="editNovelForm.category = c">{{ c }}</div>
+            </div>
+          </div>
+        </el-form-item>
+        <el-form-item label="一句话简介">
+          <el-input v-model="editNovelForm.description" type="textarea" :rows="3" placeholder="用一句话描述你的作品..." />
+        </el-form-item>
+        <el-form-item label="目标字数">
+          <div class="option-button-group category-button-group">
+            <div v-for="v in targetWordOptions" :key="v" class="option-button" :class="{active: editNovelForm.targetWords === v}" @click="editNovelForm.targetWords = v">{{ targetWordLabel(v) }}</div>
+          </div>
+        </el-form-item>
+        <el-form-item label="存储位置">
+          <div style="display:flex;gap:10px;">
+            <div
+              @click="editNovelForm.storageType = 'local'"
+              :class="['storage-option', editNovelForm.storageType === 'local' ? 'active' : '']"
+              style="flex:1;border:1px solid #1e1e30;border-radius:8px;padding:12px;cursor:pointer;text-align:center;background:rgba(14,14,24,0.6);"
+            >
+              <i class="fas fa-desktop" style="font-size:20px;margin-bottom:6px;display:block;color:#9ca3af;"></i>
+              <div style="font-size:14px;color:#e4e4ec;font-weight:500;">本地存储</div>
+              <div style="font-size:12px;color:#6b6b85;margin-top:4px;">仅保存在本设备</div>
+            </div>
+            <div
+              @click="editNovelForm.storageType = 'cloud'"
+              :class="['storage-option', editNovelForm.storageType === 'cloud' ? 'active' : '']"
+              style="flex:1;border:1px solid #1e1e30;border-radius:8px;padding:12px;cursor:pointer;text-align:center;background:rgba(14,14,24,0.6);"
+            >
+              <i class="fas fa-cloud" style="font-size:20px;margin-bottom:6px;display:block;color:#8b7dd8;"></i>
+              <div style="font-size:14px;color:#e4e4ec;font-weight:500;">云端存储</div>
+              <div style="font-size:12px;color:#6b6b85;margin-top:4px;">换设备登录可同步</div>
+            </div>
+          </div>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="editNovelVisible = false">取消</el-button>
+        <el-button type="primary" @click="saveEditNovel()">保存修改</el-button>
       </template>
     </el-dialog>
     
@@ -4609,6 +4691,18 @@
           aiPrompt: '',
         });
         const aiCreating = ref(false);
+        
+        // Edit novel
+        const editNovelVisible = ref(false);
+        const editNovelForm = reactive({
+          id: null,
+          title: '',
+          category: '',
+          categoryGroup: '女频',
+          description: '',
+          targetWords: 500000,
+          storageType: 'local',
+        });
         
         // Project context menu & import/export
         const projectContextMenu = reactive({ visible: false, x: 0, y: 0, novel: null });
@@ -5940,6 +6034,38 @@
           ElementPlus.ElMessage.success('项目已导出');
         }
 
+        function editProject(novel) {
+          editNovelForm.id = novel.id;
+          editNovelForm.title = novel.title;
+          editNovelForm.category = novel.category;
+          editNovelForm.categoryGroup = categoryOptions.find(opt => opt.value === novel.category)?.group || '女频';
+          editNovelForm.description = novel.description || '';
+          editNovelForm.targetWords = novel.targetWords || 500000;
+          editNovelForm.storageType = novel.storageType || 'local';
+          editNovelVisible.value = true;
+        }
+
+        function saveEditNovel() {
+          if (!editNovelForm.title.trim()) {
+            ElementPlus.ElMessage.warning('请输入作品名称');
+            return;
+          }
+          const novelIndex = novels.value.findIndex(n => n.id === editNovelForm.id);
+          if (novelIndex !== -1) {
+            novels.value[novelIndex] = {
+              ...novels.value[novelIndex],
+              title: editNovelForm.title,
+              category: editNovelForm.category,
+              description: editNovelForm.description,
+              targetWords: editNovelForm.targetWords,
+              storageType: editNovelForm.storageType,
+            };
+            saveNovels();
+            editNovelVisible.value = false;
+            ElementPlus.ElMessage.success('项目修改成功');
+          }
+        }
+
         function triggerImportProject() {
           if (importFileInput.value) importFileInput.value.click();
         }
@@ -6039,97 +6165,19 @@
           novelInfoForm.targetWords = novel.targetWords || 500000;
           
           synopsisVolumes.value = loadNovelData('synopsisVolumes', []);
-          if (synopsisVolumes.value.length === 0) {
-            synopsisVolumes.value = [
-              { 
-                title: '孤身赴边', 
-                summary: '', 
-                plots: [{ content: '女主初到边关' }, { content: '第一战告捷' }],
-                chapters: [
-                  { title: '初入边关', summary: '女主沈砚顶替亡兄之名，初到边关戍城' },
-                  { title: '城中风波', summary: '边军内部派系林立，沈砚处境艰难' },
-                ]
-              },
-              { 
-                title: '身份疑云', 
-                summary: '', 
-                plots: [{ content: '质子试探' }],
-                chapters: []
-              },
-            ];
-          }
-          
           characters.value = loadNovelData('characters', []);
-          if (characters.value.length === 0) {
-            const char1 = createEmptyCharacter(1, '沈砚', '女主 / 校尉', 'linear-gradient(135deg,#8b5cf6,#6366f1)');
-            char1.age = '17';
-            char1.gender = 'female';
-            char1.personality = '外冷内热，坚韧聪慧';
-            char1.appearance = '身形瘦削，眉目清冷';
-            char1.background = '将门嫡女，顶替亡兄之名从军';
-            char1.catchphrase = '退无可退，便战。';
-            char1.hobbies = '读书、练剑';
-            char1.weakness = '过于隐忍，不善表达情感';
-            char1.arcs.push({ stage: '前期', title: '蛰伏边关', description: '初到边关，隐藏身份只求存活', volume: 1, chapter: null, source: 'manual', createdAt: nowStr() });
-            char1.memories.push({ content: '亲眼看着兄长战死在面前，立誓要替他守住家国', volume: 1, chapter: 1, importance: 'high', source: 'manual', createdAt: nowStr() });
-            char1.attributes.push({ name: '身高', value: '168cm' });
-            char1.attributes.push({ name: '武器', value: '一柄断剑，是兄长的遗物' });
-            
-            const char2 = createEmptyCharacter(2, '萧景琰', '男主 / 质子', 'linear-gradient(135deg,#f97316,#ef4444)');
-            char2.age = '22';
-            char2.gender = 'male';
-            char2.personality = '深沉隐忍，谋略过人';
-            char2.appearance = '俊美如玉，气质高贵';
-            char2.background = '敌国皇子，被派来当质子';
-            char2.catchphrase = '棋局未定，你我皆为棋子。';
-            char2.hobbies = '下棋、听琴';
-            char2.weakness = '表面无情实则心软';
-            char2.relations.push({ targetId: 1, targetName: '沈砚', relationType: '亦敌亦友', description: '最初互相试探，后逐渐产生信任', source: 'manual', createdAt: nowStr() });
-            
-            characters.value = [char1, char2];
-            activeCharacter.value = 1;
-          } else if (activeCharacter.value && !characters.value.find(c => c.id === activeCharacter.value)) {
-            activeCharacter.value = characters.value[0].id;
+          if (activeCharacter.value && !characters.value.find(c => c.id === activeCharacter.value)) {
+            activeCharacter.value = characters.value.length > 0 ? characters.value[0].id : null;
           }
           
           plotlines.value = loadNovelData('plotlines', []);
-          if (plotlines.value.length === 0) {
-            plotlines.value = [
-              {
-                id: 1,
-                name: '主线',
-                color: '#8b5cf6',
-                description: '女主从边关小卒成长为一代名将的故事',
-                nodes: [
-                  { title: '初入边关', description: '女主顶替亡兄之名从军', volume: 1, chapter: 1, source: 'manual', createdAt: nowStr() },
-                  { title: '首战告捷', description: '女主在战斗中崭露头角', volume: 1, chapter: 3, source: 'manual', createdAt: nowStr() },
-                ],
-              },
-              {
-                id: 2,
-                name: '感情线',
-                color: '#ec4899',
-                description: '男女主从敌对到相爱',
-                nodes: [],
-              },
-            ];
-            activePlotline.value = 1;
+          if (activePlotline.value && !plotlines.value.find(p => p.id === activePlotline.value)) {
+            activePlotline.value = plotlines.value.length > 0 ? plotlines.value[0].id : null;
           }
           
           foreshadows.value = loadNovelData('foreshadows', []);
           worldCategories.value = loadNovelData('worldCategories', []);
-          if (worldCategories.value.length === 0) {
-            worldCategories.value = [
-              { id: 'geography', name: '地理环境', icon: 'fas fa-mountain', content: '', children: [], expanded: true },
-              { id: 'history', name: '历史背景', icon: 'fas fa-landmark', content: '', children: [], expanded: true },
-              { id: 'culture', name: '文化风俗', icon: 'fas fa-theater-masks', content: '', children: [], expanded: true },
-              { id: 'power', name: '力量体系', icon: 'fas fa-fire', content: '', children: [], expanded: true },
-              { id: 'politics', name: '政治势力', icon: 'fas fa-crown', content: '', children: [], expanded: true },
-              { id: 'economy', name: '经济体系', icon: 'fas fa-coins', content: '', children: [], expanded: true },
-              { id: 'religion', name: '宗教信仰', icon: 'fas fa-pray', content: '', children: [], expanded: true },
-              { id: 'technology', name: '科技水平', icon: 'fas fa-microchip', content: '', children: [], expanded: true },
-            ];
-          } else {
+          if (worldCategories.value.length > 0) {
             worldCategories.value = worldCategories.value.map(cat => ({
               ...cat,
               content: cat.content || '',
@@ -7632,6 +7680,7 @@
           });
           
           try {
+            // 第一次调用：分析请求，可能返回工具调用
             const response = await callAiApi(model, messages, { temperature: 0.7, maxTokens: 4096, tools });
             let replyText = extractAiText(response);
             const toolCalls = extractAiToolCalls(response);
@@ -7688,20 +7737,6 @@
               
               thinking.push({
                 content: `最终 API 调用完成\n模型：${finalResult.model}\n延迟：${finalResult.latency}ms`,
-                expanded: true
-              });
-            } else {
-              // 没有工具调用时也用流式
-              const streamResult = await callAiApiStream(model, messages, { temperature: 0.7, maxTokens: 4096 }, (chunk, fullText) => {
-                aiMsg.content = fullText;
-                nextTick(() => {
-                  const msgs = document.querySelector('.ai-messages');
-                  if (msgs) msgs.scrollTop = msgs.scrollHeight;
-                });
-              });
-              replyText = streamResult.text;
-              thinking.push({
-                content: `API 调用完成\n模型：${streamResult.model}\n延迟：${streamResult.latency}ms`,
                 expanded: true
               });
             }
